@@ -200,7 +200,45 @@ class TuringPPL {
 
 
     SampleBlock ({SAMPLES, PROBABILITY}) {
-        return "Under construction"
+        const distUrl = "http://127.0.0.1:8080/api/turing/v1/getSamples"; //TODO make relevant to project  
+        if (PROBABILITY < 0 || PROBABILITY > 1)
+            return "Your probability should be between 0 and 1"
+
+        const newPayload = {
+            method: 'POST', // Specify the HTTP method as POST
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                samples: SAMPLES, //TODO fix this
+                probability: PROBABILITY
+            })
+        };
+
+        return fetch(distUrl, newPayload)
+            .then(function (response) {
+                // Clone the response so that it can be used in the catch block
+                responseCopy = response.clone();
+                console.log("Got response! " );
+                return  response.text(); // Note: invoking text() to get the text content
+            })
+            .catch(function (err) {
+                if (err instanceof SyntaxError) {
+                    // If there's a SyntaxError, attempt to fix JSON and return the fixed data
+                    return responseCopy.json()
+                        .then(function (data) {
+                            return fixJson(data); // Assuming you have a function fixJson to handle fixing JSON - TODO
+                        });
+                } else {
+                    // If it's not a SyntaxError, re-throw the error
+                    throw err;
+                }
+            })
+            .then((greeting) => {
+                // Use the 'greeting' variable here, which contains the text of the response
+                console.log("Sample:", greeting);
+                return greeting;
+            });
     }
     
         // const distUrl = "http://127.0.0.1:8080/api/turing/v1/getsamples"; //TODO make relevant to project  
