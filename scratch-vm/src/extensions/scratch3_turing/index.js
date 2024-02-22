@@ -52,7 +52,6 @@ class TuringPPL {
          * @type {Array}
          * @private
          */
-        this._responseCode = ['Response 1', 'Response 2', 'Response 3'];
     }
 
     /**
@@ -296,11 +295,10 @@ class TuringPPL {
      */
     getSamples () {
         // Send request to Turing
-        // response = this._createModelinTuring(this._getModelDict())
-        // return response
-        return `fetched ${this.N} samples from ${this._modelTypefromCode[this.modelType]} using ${this._samplingMethodFromCode[this.samplingMethod] }`;
+        response = this._createModelinTuring(this._getModelDict())
+        return `Server responded: ${response.text}`
+        // return `fetched ${this.N} samples from ${this._modelTypefromCode[this.modelType]} using ${this._samplingMethodFromCode[this.samplingMethod] }`;
     }
-
 
     /**
      * Create a model of a particular type.
@@ -352,6 +350,7 @@ class TuringPPL {
         return  {'type': this.modelType, 'N': this.N, 'sampler': this.samplingMethod};
     }
 
+        
     /**
      * Get Turing.jl to create a model of a particular type on the server-side
      * @param {object} model - utility object provided by the runtime.
