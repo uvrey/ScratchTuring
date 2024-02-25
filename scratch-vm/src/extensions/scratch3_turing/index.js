@@ -19,6 +19,7 @@ class TuringPPL {
          * @private
          */
         this._samples = []
+        this.sampleIndex = 0
 
         /**
          * Defines the API route and port, as well as API key - TODO
@@ -34,12 +35,14 @@ class TuringPPL {
          */
         this._models = {};
         this.N = 10;
+        this.samples = "none fetched yet"
 
         // set default methods
         this.samplingMethod = 1;
         this.modelType = 1;
         this.sampleMax = 100;
-
+        this.response = "none fetched yet"
+        this.sampled = false
         /**
          * An array of model names, where indexes correspond to the model code - 1
          * @type {Array}
@@ -184,11 +187,64 @@ class TuringPPL {
             // your Scratch blocks
             blocks: [
                 {
+                    opcode: 'mapPToX',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.mapPToX',
+                        default: 'x-coord for sample [SAMPLE]',
+                        description: 'get the x-coord for sample'
+                    }),
+                    arguments: {
+                        SAMPLE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                {
+                    opcode: 'mapPtoY',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.mapPtoY',
+                        default: 'y-coord for sample [SAMPLE]',
+                        description: 'get the y-coord for sample '
+                    }),
+                    arguments: {
+                        SAMPLE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                {
+                    opcode: 'mapPtoSize',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.mapPtoSize',
+                        default: 'size for sample [SAMPLE] ([SIZE_MIN], [SIZE_MAX])',
+                        description: 'map a probability to a size'
+                    }),
+                    arguments: {
+                        SIZE_MIN: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1
+                        },
+                        SIZE_MAX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 5
+                        },
+                        SAMPLE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                {
                     opcode: 'getModel',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.getModel',
-                        default: 'MODEL',
+                        default: 'model',
                         description: 'get the probabilistic model'
                     }),
                 },
@@ -197,8 +253,26 @@ class TuringPPL {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.getSamplingMethod',
-                        default: 'SAMPLING METHOD',
+                        default: 'sampling method',
                         description: 'get the sampling method'
+                    }),
+                },
+                {
+                    opcode: 'getNextSample',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.getNextSample',
+                        default: 'next sample',
+                        description: 'gets the next sample in list of samples'
+                    }),
+                },
+                {
+                    opcode: 'getFirstSample',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.getFirstSample',
+                        default: 'first sample',
+                        description: 'gets the first sample in list of samples'
                     }),
                 },
                 {
@@ -206,7 +280,16 @@ class TuringPPL {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.getSamples',
-                        default: 'SAMPLES',
+                        default: 'samples',
+                        description: 'gets the next sample in list of samples'
+                    }),
+                },
+                {
+                    opcode: 'fetchSamples',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.fetchSamples',
+                        default: 'fetch samples',
                         description: 'fetches samples for your model from Turing'
                     }),
                 },
@@ -293,11 +376,81 @@ class TuringPPL {
     /**
      * Fetches samples
      */
+    fetchSamples () {
+        // Send request to Turing  TODO only fetches once
+        if  (!this.sampled) {
+            this._createModelinTuring(this._getModelDict()) // this sets this.response to a list of samples 
+            this.sampled = true
+            return `fetched samples :)`
+            // return `fetched ${this.N} samples from ${this._modelTypefromCode[this.modelType]} using ${this._samplingMethodFromCode[this.samplingMethod] }`;
+        } else {
+            return `already fetched samples :)` // assumed fetched only if model is not changed
+        }
+    }
+
+    /**
+     * Fetches samples
+     */
     getSamples () {
         // Send request to Turing
-        response = this._createModelinTuring(this._getModelDict())
-        return `Server responded: ${response.text}`
-        // return `fetched ${this.N} samples from ${this._modelTypefromCode[this.modelType]} using ${this._samplingMethodFromCode[this.samplingMethod] }`;
+        if (this.sampled) {
+            return JSON.stringify(this.samples)
+        } else {
+            return "haven't fetched samples yet :)"
+        }
+    }
+
+    // Get list of samples and convert to a number array
+    _processSampleList(samples) {
+        listString = samples.trim().slice(1, -1);
+
+        // Split the string into an array of strings
+        const stringArray = listString.split(',');
+    
+        // Convert each string element into a number
+        const numberArray = stringArray.map(str => parseFloat(str.trim()));
+        this.samples = numberArray
+        console.log("Processed sample list!")
+    }
+
+    getNextSample () {
+        if (this.sampled) { 
+            sampleToReturn = this.samples[this.sampleIndex]
+            // increment sample index
+            this.sampleIndex = (this.sampleIndex + 1) % this.samples.length
+            return sampleToReturn
+        } else {
+            return "no samples fetched yet!"
+        }
+    }
+
+    getFirstSample () {
+        if (this.sampled) { 
+            sampleToReturn = this.samples[0]
+            // resets the sample index
+            this.sampleIndex = 0 % this.samples.length
+            return sampleToReturn
+        } else {
+            return "no samples fetched yet!"
+        }
+    }
+
+    mapPToY(args) { // -180;180
+        return this.mapNumberToSize(args.SAMPLE, -150,  150);
+    }
+
+    mapPToX(args) { // -150;150
+        return this.mapNumberToSize(args.SAMPLE, -220,  220);
+    }
+
+    mapPtoSize(args) {
+        return this.mapNumberToSize(parseFloat(args.SAMPLE), parseInt(args.SIZE_MIN), parseInt(args.SIZE_MAX));
+    }
+
+    mapNumberToSize(s, min, max) {
+        // Ensure sample is within the range [0, 1]
+        sample = Math.max(0, Math.min(1, s));
+        return (min + sample * (max - min))
     }
 
     /**
@@ -308,6 +461,7 @@ class TuringPPL {
      */
     setModel (args, util) {
         // reduces model code by 1 to correspond to the _modelTypeFromArray 
+        this.sampled = false // something has changed so we can now fetch more samples
         this.modelType = args.MODEL - 1
         return `set to ${this._modelTypefromCode[this.modelType]}` 
     }
@@ -319,6 +473,7 @@ class TuringPPL {
      * @property {int} MODEL - the number of the drum to play.
      */
     setSampler (args) {
+        this.sampled = false // something has changed so we can now fetch more samples
         this.samplingMethod = args.SAMPLING_METHOD - 1
         return `set to method <${this._samplingMethodFromCode[this.samplingMethod]}>`
     }
@@ -329,8 +484,9 @@ class TuringPPL {
      * @param {object} util - utility object provided by the runtime.
      * @property {int} MODEL - the number of the drum to play.
      */
-    setSampleNumber (args) {
+    setSampleNumber (args) {        
         if (args.N >= 0 && args.N <= this.sampleMax) {
+            this.sampled = false // something has changed so we should fetch more samples
             this.N = args.N;
             return `set to ${this.N} samples`;
         } else {
@@ -368,7 +524,7 @@ class TuringPPL {
             },
             body: JSON.stringify(modelDict)
         };
-        return this._sendRequesttoServer(url, payload)
+        this._sendRequesttoServer(url, payload)
     }
 
     /**
@@ -378,7 +534,7 @@ class TuringPPL {
      * @returns response code from the server
      */
     _sendRequesttoServer(url, payload) {
-        return fetch(url, payload)
+        this.response = fetch(url, payload)
         .then(function (response) {
             copy = response.clone();
             console.log("Got response" );
@@ -398,6 +554,7 @@ class TuringPPL {
         })
         .then((message) => {
             console.log("Server responded: ", message);
+            this._processSampleList(message) // get number array for our sample list
             return message;
         });
     }
