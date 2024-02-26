@@ -28,6 +28,10 @@ import cnBackdrop from './steps/cn-backdrop.en.png';
 // Add sprite
 import addSprite from './steps/add-sprite.LTR.gif';
 
+// UseTuring
+import useTuring from './steps/use-turing.LTR.gif';
+import loadTuring from './steps/load-turing.LTR.gif';
+
 // Animate a name
 import namePickLetter from './steps/name-pick-letter.LTR.gif';
 import namePlaySound from './steps/name-play-sound.en.png';
@@ -229,6 +233,10 @@ const enImages = {
 
     // Add sprite
     addSprite: addSprite,
+
+    // Use Turing
+    loadTuring: loadTuring,
+    useTuring: useTuring,
 
     // Animate a name
     namePickLetter: namePickLetter,

@@ -54,6 +54,9 @@ import libraryCodeCartoon from './thumbnails/code-a-cartoon.jpg';
 // Talking Tales
 import libraryTalking from './thumbnails/talking.png';
 
+// Talking Tales
+import libraryUseTuring from './thumbnails/use-turing.png';
+
 // Videos
 import recordASound from './thumbnails/record-a-sound.jpg';
 import glideAroundThumb from './thumbnails/glide-around.jpg';
@@ -66,6 +69,47 @@ import moveArrowKeysThumb from './thumbnails/move-arrow-keys.jpg';
 import spinThumb from './thumbnails/spin.jpg';
 
 export default {
+    'use-turing': {
+        name: (
+            <FormattedMessage
+                defaultMessage="Use Turing"
+                description="Name for the 'Use ScratchTuring' how-to"
+                id="gui.howtos.use-turing.name"
+            />
+        ),
+        img: libraryUseTuring,
+        tags: ['art', 'games', 'stories', 'character'],
+        steps: [
+            {
+                title: (
+                    <FormattedMessage
+                        defaultMessage="Load Turing from extension menu"
+                        description="Step name for 'Use ScratchTuring' step"
+                        id="gui.howtos.use-turing.step_loadTuring"
+                    />
+                ),
+                image: 'loadTuring'
+            },
+            {
+                title: (
+                    <FormattedMessage
+                        defaultMessage="Use Turing"
+                        description="Step name for 'Use ScratchTuring' step"
+                        id="gui.howtos.use-turing.step_useTuring"
+                    />
+                ),
+                image: 'useTuring'
+            },
+            {
+                deckIds: [
+                    'add-a-backdrop',
+                    'switch-costume'
+                ]
+            }
+        ],
+        urlId: 'use-turing'
+    },
+
 
     'intro-move-sayhello': {
         name: (

@@ -7,11 +7,22 @@ const {fetchWithTimeout} = require('../../util/fetch-with-timeout');
 const languageNames = require('scratch-translate-extension-languages');
 const formatMessage = require('format-message');
 
+const Looks = require('../../blocks/scratch3_looks.js');
+const Runtime = require('../../engine/runtime');
+const Sprite = require('../../sprites/sprite.js');
+const RenderedTarget = require('../../sprites/rendered-target.js');
+
+
+// import StageSelector from '../../containers/stage-selector.jsx'; --> how to access this from the VM? 
+
 class TuringPPL {
 
     constructor (runtime) {
         // put any setup for your extension here
         this.runtime = runtime
+
+        // get reference to the stage
+        this.stage = runtime.getTargetForStage ()
 
          /**
          * The samples collected from a call to Turing
@@ -187,10 +198,20 @@ class TuringPPL {
             // your Scratch blocks
             blocks: [
                 {
-                    opcode: 'mapPToX',
+                    opcode: 'testStuff',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
-                        id: 'turing.mapPToX',
+                        id: 'turing.testStuff',
+                        default: 'test some stuff!',
+                        description: 'test some stuff'
+                    })
+                },
+
+                {
+                    opcode: 'mapPtoX',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.mapPtoX',
                         default: 'x-coord for sample [SAMPLE]',
                         description: 'get the x-coord for sample'
                     }),
@@ -358,6 +379,94 @@ class TuringPPL {
         };
     }
 
+
+    // const util = {
+    //     target: {
+    //         currentCostume: 0, // Internally, current costume is 0 indexed
+    //         getCostumes: function () {
+    //             return this.sprite.costumes;
+    //         },
+    //         sprite: {
+    //             costumes: [
+    //                 {name: 'first name'},
+    //                 {name: 'second name'},
+    //                 {name: 'third name'}
+    //             ]
+    //         },
+    //         _customState: {},
+    //         getCustomState: () => util.target._customState
+    //     }
+    // };
+
+    /**
+     * Test which costume index the `switch costume`
+     * block will jump to given an argument and array
+     * of costume names. Works for backdrops if isStage is set.
+     *
+     * @param {string[]} costumes List of costume names as strings
+     * @param {string|number|boolean} arg The argument to provide to the block.
+     * @param {number} [currentCostume=1] The 1-indexed default costume for the sprite to start at.
+     * @param {boolean} [isStage=false] Whether the sprite is the stage
+     * @return {number} The 1-indexed costume index on which the sprite lands.
+     */
+    // testCostume = (costumes, arg, currentCostume = 1, isStage = false) => {
+    //     const rt = new Runtime();
+    //     const looks = new Looks(rt);
+
+    //     const sprite = new Sprite(null, rt);
+    //     const target = new RenderedTarget(sprite, rt);
+
+    //     sprite.costumes = costumes.map(name => ({name: name}));
+    //     target.currentCostume = currentCostume - 1; // Convert to 0-indexed.
+
+    //     if (isStage) {
+    //         target.isStage = true;
+    //         rt.addTarget(target);
+    //         looks.switchBackdrop({BACKDROP: arg}, {target});
+    //     } else {
+    //         looks.switchCostume({COSTUME: arg}, {target});
+    //     }
+
+    //     return target.currentCostume + 1; // Convert to 1-indexed.
+    // };
+
+
+    testStuff() {
+        // console.log("Getting extension blocks in the current panel as a JSON!") // TODO get this for the editor?
+        // console.log(this.runtime.getBlocksJSON ())
+        try {
+            rt = this.runtime
+            const looks = new Looks(rt);
+
+            const sprite = new Sprite(null, rt);
+            const target = new RenderedTarget(sprite, rt);
+        
+            // sprite.costumes = costumes.map(name => ({name: name}));
+            target.currentCostume = 0; // Convert to 0-indexed.
+        
+            if (isStage) {
+                target.isStage = true;
+                rt.addTarget(target);
+                looks.switchBackdrop({BACKDROP: arg}, {target});
+            } else {
+                looks.switchCostume({COSTUME: arg}, {target});
+            }
+        
+            return target.currentCostume + 1; // Convert to 1-indexed.
+
+            console.log("Trying to get stage dimensions...");
+            console.log(this.stage);
+            console.log("Trying to get current costume...");
+            console.log(this.stage.currentCostume);
+            // Always set to the zeroth costume even when it is changed manually
+            this.stage.setCostume(0) // can we just do this to LOAD the backdrop associated? 
+            // this.stage.setCostume('random backdrop') // set to random backdrop like this doesn't work
+            
+        } catch (error) {
+            console.log(`error encountered: ${error}`);
+        }
+
+    }
     /**
      * Get the current model type.
      */
@@ -415,9 +524,9 @@ class TuringPPL {
 
     getNextSample () {
         if (this.sampled) { 
+            this.sampleIndex = (this.sampleIndex + 1) % this.samples.length
             sampleToReturn = this.samples[this.sampleIndex]
             // increment sample index
-            this.sampleIndex = (this.sampleIndex + 1) % this.samples.length
             return sampleToReturn
         } else {
             return "no samples fetched yet!"
@@ -435,11 +544,11 @@ class TuringPPL {
         }
     }
 
-    mapPToY(args) { // -180;180
+    mapPtoY(args) { // -180;180
         return this.mapNumberToSize(args.SAMPLE, -150,  150);
     }
 
-    mapPToX(args) { // -150;150
+    mapPtoX(args) { // -150;150
         return this.mapNumberToSize(args.SAMPLE, -220,  220);
     }
 

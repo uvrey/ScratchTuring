@@ -33,7 +33,7 @@ const messages = defineMessages({
     addBackdropFromFile: {
         id: 'gui.stageSelector.addBackdropFromFile',
         description: 'Button to add a stage in the target pane from file',
-        defaultMessage: 'Upload Backdrop'
+        defaultMessage: 'Upload Backdrop here'
     }
 });
 
