@@ -997,6 +997,15 @@ class VirtualMachine extends EventEmitter {
         });
     }
 
+    // my function
+    tryAddBackdrop (md5ext, backdropObject, runtime, stage) {
+        return loadCostume(md5ext, backdropObject, runtime).then(() => {
+            stage.addCostume(backdropObject);
+            stage.setCostume(stage.getCostumes().length - 1);
+            this.runtime.emitProjectChanged();
+        });
+    }
+
     /**
      * Rename a sprite.
      * @param {string} targetId ID of a target whose sprite to rename.

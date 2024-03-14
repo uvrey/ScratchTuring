@@ -13,6 +13,14 @@ const Sprite = require('../../sprites/sprite.js');
 const RenderedTarget = require('../../sprites/rendered-target.js');
 
 
+
+const makeTestStorage = require('../../../test/fixtures/make-test-storage');
+
+
+const VirtualMachine = require('../../../src/virtual-machine');
+
+// import backdropLibraryContent from '../lib/libraries/backdrops.json';
+
 // import StageSelector from '../../containers/stage-selector.jsx'; --> how to access this from the VM? 
 
 class TuringPPL {
@@ -48,12 +56,16 @@ class TuringPPL {
         this.N = 10;
         this.samples = "none fetched yet"
 
+        this.lists = {};
+
         // set default methods
         this.samplingMethod = 1;
         this.modelType = 1;
         this.sampleMax = 100;
         this.response = "none fetched yet"
         this.sampled = false
+        this.fetching = false
+
         /**
          * An array of model names, where indexes correspond to the model code - 1
          * @type {Array}
@@ -61,6 +73,10 @@ class TuringPPL {
          */
         this._modelTypefromCode = ['bernoulli', 'binomial', 'gaussian'];
         this._samplingMethodFromCode = ['Monte-Carlo', 'Hamiltonian Monte-Carlo', 'Metropolis-Hastings'];
+        this._fieldFromCode = ['summary', 'quantiles', 'chain'];
+        this._quantileFromCode = ['2.5%', '25.0%', '50.0%', '75.0%', '97.5%'];
+        this._listFromCode = ['p', 'data']
+        this._summaryFromCode = ['mean', 'std', 'mcse', 'rhat']
         /**
          * An array of responses based on response codes
          * @type {Array}
@@ -129,7 +145,7 @@ class TuringPPL {
             {
                 name: formatMessage({
                     id: 'turing.models.bernoulli',
-                    default: '(1) Bernoulli',
+                    default: 'bernoulli',
                     description: 'Success or failure in a single trial'
                 }),
                 // fileName: '1-snare'
@@ -137,15 +153,34 @@ class TuringPPL {
             {
                 name: formatMessage({
                     id: 'turing.models.binomial',
-                    default: '(2) Binomial',
+                    default: 'binomial',
                     description: 'Discrete data, # successes in fixed number of independent trials.'
                 }),
             },
             {
                 name: formatMessage({
                     id: 'turing.models.gaussian',
-                    default: '(3) Gaussian',
+                    default: 'gaussian',
                     description: 'Cts data, characterised by a bell-shaped curve and mean-variance parameters.'
+                }),
+            },
+        ]
+    }
+
+    get FIRST_IN_LIST_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'turing.list.p',
+                    default: 'probability',
+                    description: 'probability'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.list.data',
+                    default: 'data',
+                    description: 'data'
                 }),
             },
         ]
@@ -162,7 +197,7 @@ class TuringPPL {
             {
                 name: formatMessage({
                     id: 'turing.sampling.mc',
-                    default: '(1) Monte Carlo Simulation',
+                    default: 'monte carlo',
                     description: 'Uses random sampling, gives numerical estimates and risk assessments.'
                 }),
                 // fileName: '1-snare'
@@ -170,19 +205,131 @@ class TuringPPL {
             {
                 name: formatMessage({
                     id: 'turing.sampling.hmc',
-                    default: '(2) Hamiltonian Monte Carlo',
+                    default: 'hamiltonian monte carlo',
                     description: 'Sophisticated Markov chain Monte Carlo (MCMC) for high dimensional spaces.'
                 }),
             },
             {
                 name: formatMessage({
                     id: 'turing.sampling.mh',
-                    default: '(3) Metropolis-Hastings',
+                    default: 'metropolis-hastings',
                     description: 'MCMC algorithm sampling from target distribution for parameter exploration.'
                 }),
             },
         ]
     }
+
+       /**
+     * An array of info about each sampling method.
+     * @type {object[]}
+     * @param {string} name - the translatable name to display in the drums menu.
+     * @param {string} fileName - the name of the audio file containing the drum sound.
+    */
+    get FIELD_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'turing.field.summary',
+                    default: '(1) Summary',
+                    description: 'Summary.'
+                }),
+                // fileName: '1-snare'
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.parameters',
+                    default: '(2) Quantiles',
+                    description: 'Quantiles.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.quantiles',
+                    default: '(3) Chain Info',
+                    description: 'Chain Info.'
+                }),
+            },
+        ]
+    }
+
+    get SUMMARY_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'turing.field.summary.mean',
+                    default: 'mean',
+                    description: 'mean'
+                }),
+                // fileName: '1-snare'
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.summary.std',
+                    default: 'std',
+                    description: 'std deviation'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.summary.mcse',
+                    default: 'mcse',
+                    description: 'mcse'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.summary.rhat',
+                    default: 'rhat',
+                    description: 'rhat'
+                }),
+            },
+        ]
+    }
+
+
+
+    get QUANTILES_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'turing.field.quantile.2.5',
+                default: 'q0 - 2.5%',
+                    description: 'q0'
+                }),
+                // fileName: '1-snare'
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.quantile.25',
+                default: 'q1 - 25%',
+                    description: 'q1'
+                }),
+                // fileName: '1-snare'
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.quantile.50',
+                    default: 'q2 - 50%',
+                    description: 'q2'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.quantile.75',
+                    default: 'q3 - 75%',
+                    description: 'q3'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.field.quantile.97.5',
+                    default: 'q4 - 97.5%',
+                    description: 'q4'
+                }),
+            }    
+        ]
+    }
+
 
     /**
      * @returns {object} metadata for this extension and its blocks.
@@ -197,12 +344,14 @@ class TuringPPL {
 
             // your Scratch blocks
             blocks: [
+
+                // FAMILY OF FUNCTIONS FOR REPRESENTING IN SCRATCH
                 {
                     opcode: 'testStuff',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.testStuff',
-                        default: 'test some stuff!',
+                        default: '🎨 load our backdrop',
                         description: 'test some stuff'
                     })
                 },
@@ -212,7 +361,7 @@ class TuringPPL {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.mapPtoX',
-                        default: 'x-coord for sample [SAMPLE]',
+                        default: '🎨 x-coord for sample [SAMPLE]',
                         description: 'get the x-coord for sample'
                     }),
                     arguments: {
@@ -227,7 +376,7 @@ class TuringPPL {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.mapPtoY',
-                        default: 'y-coord for sample [SAMPLE]',
+                        default: '🎨 y-coord for sample [SAMPLE]',
                         description: 'get the y-coord for sample '
                     }),
                     arguments: {
@@ -242,7 +391,7 @@ class TuringPPL {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.mapPtoSize',
-                        default: 'size for sample [SAMPLE] ([SIZE_MIN], [SIZE_MAX])',
+                        default: '🎨 get size [SAMPLE] ([SIZE_MIN], [SIZE_MAX])',
                         description: 'map a probability to a size'
                     }),
                     arguments: {
@@ -260,12 +409,14 @@ class TuringPPL {
                         }
                     }
                 },
+
+                // FAMILY OF FUNCTIONS TO GET CONFIG INFORMATION
                 {
                     opcode: 'getModel',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.getModel',
-                        default: 'model',
+                        default: '🚩 model',
                         description: 'get the probabilistic model'
                     }),
                 },
@@ -274,44 +425,60 @@ class TuringPPL {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.getSamplingMethod',
-                        default: 'sampling method',
+                        default: '🚩 sampling method',
                         description: 'get the sampling method'
                     }),
                 },
                 {
-                    opcode: 'getNextSample',
+                    opcode: 'getChainSize',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
-                        id: 'turing.getNextSample',
-                        default: 'next sample',
-                        description: 'gets the next sample in list of samples'
+                        id: 'turing.getChainSize',
+                        default: '🚩 chain size',
+                        description: 'get chain size'
                     }),
                 },
                 {
-                    opcode: 'getFirstSample',
+                    opcode: 'getQuantile',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
-                        id: 'turing.getFirstSample',
-                        default: 'first sample',
-                        description: 'gets the first sample in list of samples'
+                        id: 'turing.quantile',
+                        default: '🚩 quantile [Q]',
+                        description: 'get quantile info from chain'
                     }),
+                    arguments: {
+                        Q: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'QUANTILES',
+                            defaultValue: 1
+                        }
+                    }
                 },
                 {
-                    opcode: 'getSamples',
+                    opcode: 'getSummaryInfo',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
-                        id: 'turing.getSamples',
-                        default: 'samples',
-                        description: 'gets the next sample in list of samples'
+                        id: 'turing.getSummaryInfo',
+                        default: '🚩 [INFO]',
+                        description: 'get summary information'
                     }),
+                    arguments: {
+                        INFO: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'SUMMARY_INFO',
+                            defaultValue: 1
+                        }
+                    }
                 },
+
+                // FAMILY OF GENERAL PURPOSE TURING.JL FUNCTIONS
                 {
-                    opcode: 'fetchSamples',
+                    opcode: 'fetchChain',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.fetchSamples',
-                        default: 'fetch samples',
-                        description: 'fetches samples for your model from Turing'
+                        id: 'turing.fetchChain',
+                        default: '⚙️ fetch chain',
+                        description: 'fetches chain for your model from Turing'
                     }),
                 },
                 {
@@ -319,7 +486,7 @@ class TuringPPL {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.setModel',
-                        default: 'Create [MODEL] model',
+                        default: '⚙️ create [MODEL] model',
                         description: 'create a probabilistic model'
                     }),
                     arguments: {
@@ -335,7 +502,7 @@ class TuringPPL {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.setSampler',
-                        default: 'set sampler to [SAMPLING_METHOD]',
+                        default: '⚙️ set sampler to [SAMPLING_METHOD]',
                         description: 'set sampling method'
                     }),
                     arguments: {
@@ -347,11 +514,11 @@ class TuringPPL {
                     }
                 },
                 {
-                    opcode: 'setSampleNumber',
+                    opcode: 'setChainSize',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.setSampleNumber',
-                        default: 'set to [N] samples',
+                        id: 'turing.setChainSize',
+                        default: '⚙️ set chain size to [N]',
                         description: 'set number of samples'
                     }),
                     arguments: {
@@ -360,7 +527,58 @@ class TuringPPL {
                             defaultValue: 10
                         }
                     }
-                }
+                },
+
+                    // FAMILY OF FUNCTIONS TO INSPECT PROGRAM STATE
+                {
+                    opcode: 'inspectList',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.inspectList',
+                        default: '👀 look at [LIST]',
+                        description: 'shows the list'
+                    }),
+                    arguments: {
+                        LIST: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'FIRST_IN_LIST',
+                            defaultValue: 1
+                        }
+                    }
+                },
+                {
+                    opcode: 'getFirstInList',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.getFirstInList',
+                        default: '👀 first [LIST]',
+                        description: 'gets the first sample in list of specified type'
+                    }),
+                    arguments: {
+                        LIST: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'FIRST_IN_LIST',
+                            defaultValue: 1
+                        }
+                    }
+                },
+                {
+                    opcode: 'getNextInList',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.getNextInList',
+                        default: '👀 next [LIST]',
+                        description: 'gets the next item in the list'
+                    }),
+                    arguments: {
+                        LIST: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'FIRST_IN_LIST',
+                            defaultValue: 1
+                        }
+                    }
+                },
+           
             ],
             menus: {
                 MODELS: {
@@ -374,29 +592,68 @@ class TuringPPL {
                 USER_MODELS: { //TODO adjust based on user-created model options
                     acceptReporters: true,
                     items: this._buildModelMenu(this._models)  
-                }
+                },
+                FIELD_INFO: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.FIELD_INFO)
+                },
+                QUANTILES: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.QUANTILES_INFO)
+                },
+                FIRST_IN_LIST: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.FIRST_IN_LIST_INFO)
+                },
+                SUMMARY_INFO: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.SUMMARY_INFO)
+                },
             }
         };
     }
 
+    getChainSize () {
+        return this.N
+    }
 
-    // const util = {
-    //     target: {
-    //         currentCostume: 0, // Internally, current costume is 0 indexed
-    //         getCostumes: function () {
-    //             return this.sprite.costumes;
-    //         },
-    //         sprite: {
-    //             costumes: [
-    //                 {name: 'first name'},
-    //                 {name: 'second name'},
-    //                 {name: 'third name'}
-    //             ]
-    //         },
-    //         _customState: {},
-    //         getCustomState: () => util.target._customState
-    //     }
-    // };
+    getSummaryInfo(args) {
+        infoCode = this._summaryFromCode[args.INFO - 1]
+        if (typeof this.messageObject != "undefined"){
+            return this.messageObject["summary"][infoCode][0]
+        } else {
+            return "no chain fetched"
+        }
+    }
+    // Inspect a particular type of list
+    inspectList(args) {
+        listCode = this._listFromCode[args.LIST - 1]
+        if (typeof this.messageObject != "undefined"){
+            var roundedList = this.messageObject["chain"][listCode][0].map(function(element) {
+                return Math.round(element * 100) / 100;
+            });
+            return roundedList
+        } else {
+            return "no chain fetched"
+        }
+    }
+
+    // Fetch the quantile from code
+    getQuantile(args) {
+        if (typeof this.messageObject != "undefined"){
+            quantileCode = this._quantileFromCode[args.Q - 1]
+            console.log("quantile code? " + quantileCode)
+            return this.messageObject["quantiles"][quantileCode]
+        } else {
+            return "no chain fetched"
+        }
+    }
+
+    getInfoFromChain(args) {
+        fieldCode = args.FIELD - 1
+        fieldName = this._fieldFromCode[args.FIELD]
+        return this.getFieldfromChain(fieldName)
+    }
 
     /**
      * Test which costume index the `switch costume`
@@ -430,29 +687,55 @@ class TuringPPL {
     //     return target.currentCostume + 1; // Convert to 1-indexed.
     // };
 
-
     testStuff() {
         // console.log("Getting extension blocks in the current panel as a JSON!") // TODO get this for the editor?
         // console.log(this.runtime.getBlocksJSON ())
         try {
+
+            const vm = new VirtualMachine();
+            vm.attachStorage(makeTestStorage());
+
             rt = this.runtime
             const looks = new Looks(rt);
-
+        
             const sprite = new Sprite(null, rt);
             const target = new RenderedTarget(sprite, rt);
+
+            // parameters for testing
+            costumes = ['a', 'b', 'c', 'd']
+            backdrop = 'random backdrop'
+            currentCostume = 3
         
-            // sprite.costumes = costumes.map(name => ({name: name}));
-            target.currentCostume = 0; // Convert to 0-indexed.
+            sprite.costumes = costumes.map(name => ({name: name}));
+            target.currentCostume = currentCostume - 1; // Convert to 0-indexed.
+
+            // Add backdrop
+            vm.tryAddBackdrop(
+                '6b3d87ba2a7f89be703163b6c1d4c964.png',
+                {
+                    name: 'baseball-field',
+                    baseLayerID: 26,
+                    baseLayerMD5: '6b3d87ba2a7f89be703163b6c1d4c964.png',
+                    bitmapResolution: 2,
+                    rotationCenterX: 480,
+                    rotationCenterY: 360
+                },
+                rt,
+                this.stage
+            );
+
+
+         //   this.handleSurpriseBackdrop()
+            // this.handleBackdropUpload()
+            // THIS STUFF SWITCHES BACKDROPS BETWEEN WHAT WAS ALREADY LOADED
+            // target.isStage = true;
+            // rt.addTarget(target);
+            // looks.switchBackdrop({BACKDROP: backdrop}, {target});
         
-            if (isStage) {
-                target.isStage = true;
-                rt.addTarget(target);
-                looks.switchBackdrop({BACKDROP: arg}, {target});
-            } else {
-                looks.switchCostume({COSTUME: arg}, {target});
-            }
+            // target.currentCostume + 1; // Convert to 1-indexed.
+            return "did something happen?"
         
-            return target.currentCostume + 1; // Convert to 1-indexed.
+            // return target.currentCostume + 1; // Convert to 1-indexed.
 
             console.log("Trying to get stage dimensions...");
             console.log(this.stage);
@@ -479,21 +762,24 @@ class TuringPPL {
      * Get the current sampling method.
      */
     getSamplingMethod () {
-        return this._samplingMethodFromCode[this.samplingMethod]
+        return this._samplingMethodFromCode[this.samplingMethod].toLowerCase()
     }
 
     /**
-     * Fetches samples
+     * Fetches a chain from a particular sampler
      */
-    fetchSamples () {
+    fetchChain () {
         // Send request to Turing  TODO only fetches once
-        if  (!this.sampled) {
+        if  (!this.sampled && !this.fetching) {
+            this.fetching = true
             this._createModelinTuring(this._getModelDict()) // this sets this.response to a list of samples 
             this.sampled = true
-            return `fetched samples :)`
+            return `fetched chain`
             // return `fetched ${this.N} samples from ${this._modelTypefromCode[this.modelType]} using ${this._samplingMethodFromCode[this.samplingMethod] }`;
+        } else if (this.fetching) {
+            return `currently fetching chain...` // assumed fetched only if model is not changed
         } else {
-            return `already fetched samples :)` // assumed fetched only if model is not changed
+            return `already fetched chain :)`
         }
     }
 
@@ -509,6 +795,7 @@ class TuringPPL {
         }
     }
 
+    
     // Get list of samples and convert to a number array
     _processSampleList(samples) {
         listString = samples.trim().slice(1, -1);
@@ -522,14 +809,54 @@ class TuringPPL {
         console.log("Processed sample list!")
     }
 
-    getNextSample () {
-        if (this.sampled) { 
-            this.sampleIndex = (this.sampleIndex + 1) % this.samples.length
-            sampleToReturn = this.samples[this.sampleIndex]
-            // increment sample index
-            return sampleToReturn
+    // Get list of samples and convert to a number array
+    _processSampleList(samples) {
+        listString = samples.trim().slice(1, -1);
+
+        // Split the string into an array of strings
+        const stringArray = listString.split(',');
+    
+        // Convert each string element into a number
+        const numberArray = stringArray.map(str => parseFloat(str.trim()));
+        this.samples = numberArray
+        console.log("Processed sample list!")
+    }
+
+    getFirstInList(args) {
+        if (typeof this.messageObject != "undefined") {
+            listCode = this._listFromCode[args.LIST - 1]
+            this.lists[listCode] = {} // set up dictionary to store list data
+            this.lists[listCode]["list"] = this.messageObject["chain"][listCode][0] // json is list of lists, so we get the list at zeroth index
+            this.lists[listCode]["index"] = 0
+            return this.lists[listCode]["list"][this.lists[listCode]["index"]]  // return the first element of the list in focus 
         } else {
-            return "no samples fetched yet!"
+            return "No chain fetched yet"
+        }
+    }
+    
+    getNextInList (args) {
+
+        if (typeof this.messageObject != "undefined") {
+            // get code for list of interest
+            listCode = this._listFromCode[args.LIST - 1]
+
+            // define if the list hasn't been defined yet
+            if (typeof this.lists[listCode] == "undefined") {
+                this.lists[listCode] = {}
+                this.lists[listCode]["list"] = this.messageObject["chain"][listCode][0]
+                this.lists[listCode]["index"] = 0
+            }
+
+            // increase the index and wrap around if we exceed list length
+            console.log("Trying to increment this? --> " +  this.lists[listCode]["index"])
+            this.lists[listCode]["index"] = (this.lists[listCode]["index"] + 1) % this.lists[listCode]["list"].length; // wrap around 
+
+            console.log("We now get --> " +  this.lists[listCode]["index"])
+            console.log("zeroth Item in list? --> " +  this.lists[listCode]["list"][0])
+            // fetch the next item at the new index 
+            return this.lists[listCode]["list"][this.lists[listCode]["index"]] // return the first element of the list in focus 
+        } else {
+            return "No chain fetched yet"
         }
     }
 
@@ -593,7 +920,7 @@ class TuringPPL {
      * @param {object} util - utility object provided by the runtime.
      * @property {int} MODEL - the number of the drum to play.
      */
-    setSampleNumber (args) {        
+    setChainSize (args) {        
         if (args.N >= 0 && args.N <= this.sampleMax) {
             this.sampled = false // something has changed so we should fetch more samples
             this.N = args.N;
@@ -602,6 +929,8 @@ class TuringPPL {
             return "too many/few samples!";
         }
     }
+
+    
 
     /**
      * Internal code to create a model of a particular type
@@ -663,11 +992,42 @@ class TuringPPL {
         })
         .then((message) => {
             console.log("Server responded: ", message);
-            this._processSampleList(message) // get number array for our sample list
+            // TODO write handling function for message here
+            this._processChainMessage(message) // get number array for our sample list
+            this.fetching = false // set flag to false
             return message;
         });
     }
 
+    _processChainMessage(message) {
+        try {        
+            this.messageObject = JSON.parse(JSON.parse(message)); // parse twice, first to remove escapes and second time to read into a JSON
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+        }
+    }
+
+    getFieldfromChain(fieldName) {
+        if (typeof this.messageObject !== 'undefined') {
+            var summaryObject = this.messageObject["summary"];
+            console.log(this.messageObject)
+            console.log("Type of this object is a ")
+            console.log(typeof this.messageObject)
+            // 'this.messageObject' is not undefined, do something here
+            // For example:
+            console.log("ATTEMPTING TO RETURN object." + fieldName)
+            console.log(this.messageObject["summary"])
+            console.log("VS")
+            console.log(this.messageObject["quantiles"])
+            console.log("----")
+            console.log(this.messageObject.fieldName)
+            return this.messageObject.fieldName;
+        } else {
+            // 'this.messageObject' is undefined
+            // Optionally, you can do something else here
+            console.log("this.messageObject is undefined. Not doing anything.");
+        }
+    }
     /**
      * Utility to repair damaged JSON data
      * @param {object} data - damaged JSON data 
