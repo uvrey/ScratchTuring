@@ -53,14 +53,14 @@ class TuringPPL {
          * @private
          */
         this._models = {};
-        this.N = 10;
+        this.N = '10'; // TODO check this is ok
         this.samples = "none fetched yet"
 
         this.lists = {};
 
         // set default methods
-        this.samplingMethod = 1;
-        this.modelType = 1;
+        this.samplingMethod = 0; 
+        this.modelType = 0;
         this.sampleMax = 100;
         this.response = "none fetched yet"
         this.sampled = false
@@ -169,13 +169,13 @@ class TuringPPL {
 
     get FIRST_IN_LIST_INFO () {
         return [
-            {
-                name: formatMessage({
-                    id: 'turing.list.p',
-                    default: 'probability',
-                    description: 'probability'
-                }),
-            },
+            // {
+            //     name: formatMessage({
+            //         id: 'turing.list.p',
+            //         default: 'probability',
+            //         description: 'probability'
+            //     }),
+            // },
             {
                 name: formatMessage({
                     id: 'turing.list.data',
@@ -528,7 +528,6 @@ class TuringPPL {
                         }
                     }
                 },
-
                     // FAMILY OF FUNCTIONS TO INSPECT PROGRAM STATE
                 {
                     opcode: 'inspectList',
@@ -543,8 +542,8 @@ class TuringPPL {
                             type: ArgumentType.NUMBER,
                             menu: 'FIRST_IN_LIST',
                             defaultValue: 1
-                        }
-                    }
+                        },
+                    },
                 },
                 {
                     opcode: 'getFirstInList',
@@ -627,8 +626,26 @@ class TuringPPL {
     }
     // Inspect a particular type of list
     inspectList(args) {
-        listCode = this._listFromCode[args.LIST - 1]
-        if (typeof this.messageObject != "undefined"){
+        // listCode = this._listFromCode[args.LIST - 1]
+        listCode = "data"
+
+        if (typeof this.messageObject != "undefined") {
+
+            // define if the list hasn't been defined yet
+            if (typeof this.lists[listCode] == "undefined") {
+
+                console.log("list code is?")
+                console.log(listCode)
+                this.lists[listCode] = {}
+                console.log("TRYING TO GET THIS>")
+                console.log(this.messageObject)
+                console.log("type?")
+                console.log(typeof this.messageObject)
+                // this.lists[listCode]["list"] = this.messageObject["chain"][listCode]
+                // this.lists[listCode]["index"] = 0
+            }
+            
+            // Round list values to 2 decimal points for display 
             var roundedList = this.messageObject["chain"][listCode][0].map(function(element) {
                 return Math.round(element * 100) / 100;
             });
@@ -643,7 +660,7 @@ class TuringPPL {
         if (typeof this.messageObject != "undefined"){
             quantileCode = this._quantileFromCode[args.Q - 1]
             console.log("quantile code? " + quantileCode)
-            return this.messageObject["quantiles"][quantileCode]
+            return this.messageObject["quantiles"][quantileCode][0] // Get first element in list of size 2 (TODO what does this correspond to?)
         } else {
             return "no chain fetched"
         }
@@ -757,7 +774,6 @@ class TuringPPL {
         // reduces model code by 1 to correspond to the _modelTypeFromArray 
         return this._modelTypefromCode[this.modelType]
     }
-
     /**
      * Get the current sampling method.
      */
@@ -774,10 +790,10 @@ class TuringPPL {
             this.fetching = true
             this._createModelinTuring(this._getModelDict()) // this sets this.response to a list of samples 
             this.sampled = true
-            return `fetched chain`
+            return `fetching chain: ` + this.getSamplingMethod() + ", " + this.getModel() + ", " + this.N
             // return `fetched ${this.N} samples from ${this._modelTypefromCode[this.modelType]} using ${this._samplingMethodFromCode[this.samplingMethod] }`;
         } else if (this.fetching) {
-            return `currently fetching chain...` // assumed fetched only if model is not changed
+            return `still fetching chain...` // assumed fetched only if model is not changed
         } else {
             return `already fetched chain :)`
         }
@@ -824,10 +840,20 @@ class TuringPPL {
 
     getFirstInList(args) {
         if (typeof this.messageObject != "undefined") {
-            listCode = this._listFromCode[args.LIST - 1]
+
+            listCode = "data"
+
             this.lists[listCode] = {} // set up dictionary to store list data
+            this.lists[listCode]["index"] = 0
             this.lists[listCode]["list"] = this.messageObject["chain"][listCode][0] // json is list of lists, so we get the list at zeroth index
             this.lists[listCode]["index"] = 0
+
+            console.log("Is there a list yet?")
+            console.log(this.lists[listCode]["list"])
+            console.log("does something exist at index here?")
+            console.log(this.lists[listCode]["index"])
+
+            console.log("Trying to return this otherwise")
             return this.lists[listCode]["list"][this.lists[listCode]["index"]]  // return the first element of the list in focus 
         } else {
             return "No chain fetched yet"
@@ -835,24 +861,20 @@ class TuringPPL {
     }
     
     getNextInList (args) {
-
         if (typeof this.messageObject != "undefined") {
             // get code for list of interest
-            listCode = this._listFromCode[args.LIST - 1]
+            listCode = "data"
+            // listCode = this._listFromCode[args.LIST - 1]
 
             // define if the list hasn't been defined yet
             if (typeof this.lists[listCode] == "undefined") {
                 this.lists[listCode] = {}
                 this.lists[listCode]["list"] = this.messageObject["chain"][listCode][0]
-                this.lists[listCode]["index"] = 0
             }
 
             // increase the index and wrap around if we exceed list length
-            console.log("Trying to increment this? --> " +  this.lists[listCode]["index"])
             this.lists[listCode]["index"] = (this.lists[listCode]["index"] + 1) % this.lists[listCode]["list"].length; // wrap around 
 
-            console.log("We now get --> " +  this.lists[listCode]["index"])
-            console.log("zeroth Item in list? --> " +  this.lists[listCode]["list"][0])
             // fetch the next item at the new index 
             return this.lists[listCode]["list"][this.lists[listCode]["index"]] // return the first element of the list in focus 
         } else {
@@ -1009,18 +1031,17 @@ class TuringPPL {
 
     getFieldfromChain(fieldName) {
         if (typeof this.messageObject !== 'undefined') {
-            var summaryObject = this.messageObject["summary"];
-            console.log(this.messageObject)
-            console.log("Type of this object is a ")
-            console.log(typeof this.messageObject)
+            // var summaryObject = this.messageObject["summary"];
+            // console.log(this.messageObject)
+            // console.log("Type of this object is a ")
+            // console.log(typeof this.messageObject)
             // 'this.messageObject' is not undefined, do something here
             // For example:
-            console.log("ATTEMPTING TO RETURN object." + fieldName)
-            console.log(this.messageObject["summary"])
-            console.log("VS")
-            console.log(this.messageObject["quantiles"])
-            console.log("----")
-            console.log(this.messageObject.fieldName)
+            // console.log(this.messageObject["summary"])
+            // console.log("VS")
+            // console.log(this.messageObject["quantiles"])
+            // console.log("----")
+            // console.log(this.messageObject.fieldName)
             return this.messageObject.fieldName;
         } else {
             // 'this.messageObject' is undefined
@@ -1040,185 +1061,3 @@ class TuringPPL {
 }
 
 module.exports = TuringPPL;
-
-//     /**
-//      * Get the current model type.
-//      * @param {object} args - the block arguments.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @property {int} MODEL - the number of the drum to play.
-//      */
-//     getModel (args, util) {
-//         // reduces model code by 1 to correspond to the _modelTypeFromArray 
-//         if (this.model != -1){
-//             return this.model.type
-//         } else{
-//             return "not yet set"
-//         }
-//     }
-
-//     /**
-//      * Get the current sampling method.
-//      * @param {object} args - the block arguments.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @property {int} MODEL - the number of the drum to play.
-//      */
-//     getSamplingMethod (args, util) {
-//         if (this.samplingMethod != -1){
-//             return "method (" + this.samplingMethod + ")"
-//         } else{
-//             return "default - method (1)"
-//         }
-//     }
-
-//     /**
-//      * Get the current number of samples.
-//      * @param {object} args - the block arguments.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @property {int} MODEL - the number of the drum to play.
-//      */
-//     getSamples (args, util) {
-//         // reduces model code by 1 to correspond to the _modelTypeFromArray 
-//         if (this.model == -1) {
-//             return "set your model first :)"
-//         } else {
-//             return "sending to turing!: " + this.model.type + ", " + this.samplingMethod + ", " + this.N
-//             // return this._createModelinTuring(this.model)
-//         }
-//     }
-
-
-//     /**
-//      * Create a model of a particular type.
-//      * @param {object} args - the block arguments.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @property {int} MODEL - the number of the drum to play.
-//      */
-//     setModel (args, util) {
-//         // reduces model code by 1 to correspond to the _modelTypeFromArray 
-//         return this._createModel(args.MODEL - 1, util);
-//     }
-
-//     /**
-//      * Sample from a particular model
-//      * @param {object} args - the block arguments.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @property {int} MODEL - the number of the drum to play.
-//      */
-//     setSampler (args, util) {
-//         this.samplingMethod = args.SAMPLING_METHOD
-//         return "set to method (" + this.samplingMethod + ")"
-//     }
-
-//     /**
-//      * Sample from a particular model
-//      * @param {object} args - the block arguments.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @property {int} MODEL - the number of the drum to play.
-//      */
-//     setSampleNumber (args, util) {
-//         if (args.N >= 0 & args.N <= 100) {
-//             this.N = args.N
-//             return "set to " + this.N + " samples"
-//         } else {
-//             return "Too many/ few samples!"
-//         }
-//     }
-
-//     /**
-//      * Internal code to create a model of a particular type
-//      * @param {number} modelCode - the model code.
-//      * @param {string} modelVar - variable name of the model.
-//      * @param {object} util - utility object provided by the runtime.
-//      * @returns message to the end user about their attempted action
-//      */
-//     _createModel (modelCode, modelVar, util) {
-//         // Check if a model already exists with this configuration
-//         this.model = {'params': [], 'type': this._modelTypefromCode[modelCode]};
-//         return "Created a " + this.model.type + " model";
-//     }
-//      // _createModel (modelCode, modelVar, util) {
-//     //     // Check if a model already exists with this configuration
-//     //     if (this._models.hasOwnProperty(modelVar) && this._models[modelVar] !== null && this._models[modelVar] !== undefined) {
-//     //         console.log('Model has a value for key ' + modelVar + ':', this._models[modelVar]);
-            
-//     //         // Overwrite if the distribution is different
-//     //         existingModel = this._models[modelVar] 
-//     //         if (existingModel.code != modelCode) {
-//     //             this._models[modelVar] = {'id': this._getModelID(), 'type': this._modelTypefromCode[modelCode], 'code': modelCode} // creates new model so overwrites it
-//     //             code = this._createModelinTuring(this._models[modelVar])
-//     //             return modelVar + " is now " + this._models[modelVar].type
-//     //         } else {
-//     //             return modelVar + " already exists"
-//     //         }
-//     //       } else {
-//     //         // Create a new model with this variable name
-//     //         console.log('Model does not have a value for key ' + modelVar);
-//     //         this._models[modelVar] = {'id': this._getModelID(), 'type': this._modelTypefromCode[modelCode], 'code': modelCode}
-//     //         code = this._createModelinTuring(this._models[modelVar])
-//     //         return "Created a " + this._models[modelVar].type + " model"
-//     //       }
-//     // }
-
-//     /**
-//      * Get Turing.jl to create a model of a particular type on the server-side
-//      * @param {object} model - utility object provided by the runtime.
-//      * @returns response code 
-//      */
-//     _createModelinTuring(model) {
-//         console.log("Sending model information to Turing to create it :)")
-
-//         // build request to Turing
-//         const url = this.api_host + "/api/turing/v1/createModel"; 
-//         const payload = {
-//             method: 'POST', 
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(model)
-//         };
-//         return this._sendRequesttoServer(url, payload)
-//     }
-
-//     /**
-//      * Send a request to the Turing API of a particular type
-//      * @param {string} url - API destination
-//      * @param {object} payload - body of information to be sent
-//      * @returns response code from the server
-//      */
-//     _sendRequesttoServer(url, payload) {
-//         return fetch(url, payload)
-//         .then(function (response) {
-//             copy = response.clone();
-//             console.log("Got response" );
-//             return response.text(); 
-//         })
-//         .catch(function (err) {
-//             if (err instanceof SyntaxError) {
-//                 // Handle syntax errors
-//                 return copy.json()
-//                     .then(function (data) {
-//                         return _fixJson(data); 
-//                     });
-//             } else {
-//                 // Throw error if not SyntaxError
-//                 throw err;
-//             }
-//         })
-//         .then((message) => {
-//             console.log("Server responded: ", message);
-//             return message;
-//         });
-//     }
-
-//     /**
-//      * Utility to repair damaged JSON data
-//      * @param {object} data - damaged JSON data 
-//      */
-//     fixJson({data}) {
-//         console.log("Something is broken with this data...")
-//         console.log(data)
-//         console.log("**")
-//     }
-// }
-
-// module.exports = TuringPPL;
