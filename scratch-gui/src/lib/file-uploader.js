@@ -54,7 +54,7 @@ const handleFileUpload = function (fileInput, onload, onerror) {
  * @param {Function} onload The function that handles loading the file
  * @param {Function} onerror The function that handles any error loading the file
  */
-const handleFileUploadFromAPI = async function fetchImageBufferFromAPI(imageUrl, onload, onerror) {
+const handleMapFromAPI = async function(imageUrl) {
     try {
       const response = await fetch(imageUrl);
   
@@ -62,20 +62,15 @@ const handleFileUploadFromAPI = async function fetchImageBufferFromAPI(imageUrl,
       if (!response.ok) {
         throw new Error(`Image download failed: ${response.status}`);
       }
-  
+
       const buffer = await response.arrayBuffer();
-  
-      // Infer file type from response header
       const fileType = response.headers.get("Content-Type");
   
-      // Extract filename from URL
-      const fileName = extractFileNameFromUrl(imageUrl);
-  
-      onload(buffer, fileType, fileName); // Invoke onload with buffer data
+      return { buffer, fileType }; // Return an object with both values
     } catch (error) {
-      onerror(error); // Handle any fetch or processing errors
+      throw error; // Re-throw the error to be handled by the caller
     }
-  }
+  };
 
 /**
  * @typedef VMAsset
@@ -287,6 +282,7 @@ const spriteUpload = function (fileData, fileType, spriteName, storage, handleSp
 };
 
 export {
+    handleMapFromAPI,
     handleFileUpload,
     costumeUpload,
     soundUpload,

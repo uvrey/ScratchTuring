@@ -142,9 +142,10 @@ class ActionMenu extends React.Component {
                 <div className={styles.moreButtonsOuter}>
                     <div className={styles.moreButtons}>
                         {(moreButtons || []).map(({img, title, onClick: handleClick,
-                            fileAccept, fileChange, fileInput, fileMultiple}, keyId) => {
+                            fileAccept, fileChange, fileInput, fileMultiple, mapInput}, keyId) => {
                             const isComingSoon = !handleClick;
                             const hasFileInput = fileInput;
+                            const hasMapInput = mapInput;
                             const tooltipId = `${this.mainTooltipId}-${title}`;
                             return (
                                 <div key={`${tooltipId}-${keyId}`}>

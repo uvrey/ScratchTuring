@@ -13,6 +13,7 @@ import fileUploadIcon from '../action-menu/icon--file-upload.svg';
 import paintIcon from '../action-menu/icon--paint.svg';
 import surpriseIcon from '../action-menu/icon--surprise.svg';
 import searchIcon from '../action-menu/icon--search.svg';
+import mapIcon from '../action-menu/icon--globe.svg';
 
 const messages = defineMessages({
     addBackdropFromLibrary: {
@@ -34,6 +35,11 @@ const messages = defineMessages({
         id: 'gui.stageSelector.addBackdropFromFile',
         description: 'Button to add a stage in the target pane from file',
         defaultMessage: 'Upload Backdrop'
+    },
+    addMapFromAPI: {
+        id: 'gui.stageSelector.addMapFromAPI',
+        description: 'Button to add a map in the target pane from MapBox API',
+        defaultMessage: 'Choose Map'
     }
 });
 
@@ -56,6 +62,7 @@ const StageSelector = props => {
         onNewBackdropClick,
         onSurpriseBackdropClick,
         onEmptyBackdropClick,
+        onMapClick,
         ...componentProps
     } = props;
     return (
@@ -116,10 +123,15 @@ const StageSelector = props => {
                         img: paintIcon,
                         onClick: onEmptyBackdropClick
                     }, {
+                        title: intl.formatMessage(messages.addMapFromAPI),
+                        img: mapIcon,
+                        onClick: onMapClick,
+                        mapInput: true
+                    }, {
                         title: intl.formatMessage(messages.addBackdropFromLibrary),
                         img: searchIcon,
                         onClick: onNewBackdropClick
-                    }, 
+                    }
                 ]}
                 title={intl.formatMessage(messages.addBackdropFromLibrary)}
                 tooltipPlace={isRtl(intl.locale) ? 'right' : 'left'}
@@ -137,6 +149,7 @@ StageSelector.propTypes = {
     intl: intlShape.isRequired,
     onBackdropFileUpload: PropTypes.func,
     onBackdropFileUploadClick: PropTypes.func,
+    onMapClick: PropTypes.func,
     onClick: PropTypes.func,
     onEmptyBackdropClick: PropTypes.func,
     onMouseEnter: PropTypes.func,

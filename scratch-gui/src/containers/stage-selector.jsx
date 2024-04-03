@@ -20,7 +20,7 @@ import {getEventXY} from '../lib/touch-utils';
 import StageSelectorComponent from '../components/stage-selector/stage-selector.jsx';
 
 import backdropLibraryContent from '../lib/libraries/backdrops.json';
-import {handleFileUpload, handleFileUploadFromAPI, costumeUpload} from '../lib/file-uploader.js';
+import {handleFileUpload, costumeUpload, handleMapFromAPI} from '../lib/file-uploader.js';
 
 const dragTypes = [
     DragConstants.COSTUME,
@@ -43,6 +43,7 @@ class StageSelector extends React.Component {
             'handleSurpriseBackdrop',
             'handleEmptyBackdrop',
             'addBackdropFromLibraryItem',
+            'handleMap',
             'handleFileUploadClick',
             'handleBackdropUpload',
             'handleMouseEnter',
@@ -90,18 +91,55 @@ class StageSelector extends React.Component {
             }
         });
     }
-    handleSurpriseBackdrop (e) {
-        e.stopPropagation(); // Prevent click from falling through to selecting stage.
-        // @todo should this not add a backdrop you already have?
-        const item = backdropLibraryContent[Math.floor(Math.random() * backdropLibraryContent.length)];
-        this.addBackdropFromLibraryItem(item, false);
-    }
-    handleEmptyBackdrop (e) {
-        e.stopPropagation(); // Prevent click from falling through to stage selector, select it manually below
-        this.props.vm.setEditingTarget(this.props.id);
-        this.handleNewBackdrop(emptyCostume(this.props.intl.formatMessage(sharedMessages.backdrop, {index: 1})));
-    }
-    
+    handleMap(e) {
+        e.stopPropagation();
+        console.log("We will do something with a map here!");
+
+        const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
+
+        // Define desired map properties
+        var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
+        var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
+
+
+        console.log("Longitude and latitude:")
+        console.log(long +", " + lat)
+
+        // var lat = 12.1299
+        // var long = 21.12455
+        const styleId = 'satellite-streets-v12';
+        const zoom = 1;
+        const width = 960;
+        const height = 720;
+
+        // Build the Static Images API URL
+        const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},14.25,0,60/${width}x${height}?access_token=${accessToken}`;
+
+        handleMapFromAPI(imageUrl)
+        .then((data) => { // data will be the entire object returned by handleMapFromAPI
+          const { buffer, fileType } = data;
+          console.log("Got something...");
+        //   console.log(data.fileType); // Access fileType property directly
+        //   const mapBuffer = data.buffer; // Access buffer property directly
+          // Use buffer and fileType for map processing here
+          const storage = this.props.vm.runtime.storage;
+          var fileName = "newMap.jpeg"
+        //   this.props.onShowImporting();
+              costumeUpload(buffer, fileType, storage, vmCostumes => {
+                  this.props.vm.setEditingTarget(this.props.id);
+                  vmCostumes.forEach((costume, i) => {
+                      costume.name = `${fileName}${i ? i + 1 : ''}`;
+                  });
+                  this.handleNewBackdrop(vmCostumes).then(() => {
+                        console.log("Success")
+                  });
+              }, this.props.onCloseImporting);  
+        })
+        .catch((error) => {
+          console.error("Error fetching map:", error);
+          // Handle any errors during the API call or processing
+        });
+      }
     handleBackdropUpload (e) {
         const storage = this.props.vm.runtime.storage;
         this.props.onShowImporting();
@@ -118,6 +156,17 @@ class StageSelector extends React.Component {
                 });
             }, this.props.onCloseImporting);
         }, this.props.onCloseImporting);
+    }
+    handleSurpriseBackdrop (e) {
+        e.stopPropagation(); // Prevent click from falling through to selecting stage.
+        // @todo should this not add a backdrop you already have?
+        const item = backdropLibraryContent[Math.floor(Math.random() * backdropLibraryContent.length)];
+        this.addBackdropFromLibraryItem(item, false);
+    }
+    handleEmptyBackdrop (e) {
+        e.stopPropagation(); // Prevent click from falling through to stage selector, select it manually below
+        this.props.vm.setEditingTarget(this.props.id);
+        this.handleNewBackdrop(emptyCostume(this.props.intl.formatMessage(sharedMessages.backdrop, {index: 1})));
     }
     handleFileUploadClick (e) {
         e.stopPropagation(); // Prevent click from selecting the stage, that is handled manually in backdrop upload
@@ -165,6 +214,7 @@ class StageSelector extends React.Component {
             <DroppableThrottledStage
                 componentRef={this.setRef}
                 fileInputRef={this.setFileInput}
+                onMapClick = {this.handleMap}
                 onBackdropFileUpload={this.handleBackdropUpload}
                 onBackdropFileUploadClick={this.handleFileUploadClick}
                 onClick={this.handleClick}
