@@ -119,7 +119,7 @@ const StageSelector = props => {
                         title: intl.formatMessage(messages.addBackdropFromLibrary),
                         img: searchIcon,
                         onClick: onNewBackdropClick
-                    }
+                    }, 
                 ]}
                 title={intl.formatMessage(messages.addBackdropFromLibrary)}
                 tooltipPlace={isRtl(intl.locale) ? 'right' : 'left'}

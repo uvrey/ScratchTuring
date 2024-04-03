@@ -194,6 +194,7 @@ class CostumeTab extends React.Component {
     handleCostumeUpload (e) {
         const storage = this.props.vm.runtime.storage;
         const targetId = this.props.vm.editingTarget.id;
+        
         this.props.onShowImporting();
         handleFileUpload(e.target, (buffer, fileType, fileName, fileIndex, fileCount) => {
             costumeUpload(buffer, fileType, storage, vmCostumes => {

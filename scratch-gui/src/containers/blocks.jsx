@@ -104,6 +104,8 @@ class Blocks extends React.Component {
             this.props.options,
             {rtl: this.props.isRtl, toolbox: this.props.toolboxXML, colours: getColorsForTheme(this.props.theme)}
         );
+        console.log("WORKSPACE CONFIG")
+        console.log(workspaceConfig)
         this.workspace = this.ScratchBlocks.inject(this.blocks, workspaceConfig);
 
         // Register buttons under new callback keys for creating variables,

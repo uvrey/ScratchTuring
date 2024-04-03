@@ -10,6 +10,7 @@ const BlocksComponent = props => {
         dragOver,
         ...componentProps
     } = props;
+
     return (
         <Box
             className={classNames(styles.blocks, {

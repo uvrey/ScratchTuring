@@ -20,7 +20,7 @@ import {getEventXY} from '../lib/touch-utils';
 import StageSelectorComponent from '../components/stage-selector/stage-selector.jsx';
 
 import backdropLibraryContent from '../lib/libraries/backdrops.json';
-import {handleFileUpload, costumeUpload} from '../lib/file-uploader.js';
+import {handleFileUpload, handleFileUploadFromAPI, costumeUpload} from '../lib/file-uploader.js';
 
 const dragTypes = [
     DragConstants.COSTUME,
@@ -101,6 +101,7 @@ class StageSelector extends React.Component {
         this.props.vm.setEditingTarget(this.props.id);
         this.handleNewBackdrop(emptyCostume(this.props.intl.formatMessage(sharedMessages.backdrop, {index: 1})));
     }
+    
     handleBackdropUpload (e) {
         const storage = this.props.vm.runtime.storage;
         this.props.onShowImporting();

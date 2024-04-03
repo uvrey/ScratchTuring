@@ -33,6 +33,7 @@ const handleFileUpload = function (fileInput, onload, onerror) {
         }
         const file = files[i];
         const reader = new FileReader();
+
         reader.onload = () => {
             const fileType = file.type;
             const fileName = extractFileName(file.name);
@@ -44,6 +45,37 @@ const handleFileUpload = function (fileInput, onload, onerror) {
     };
     readFile(0, fileInput.files);
 };
+
+
+/**
+ * Handle a file upload given the API URL that hosts the file,
+ * and a function to handle loading the file.
+ * @param {Input} fileInput The <input/> element that contains the file being loaded
+ * @param {Function} onload The function that handles loading the file
+ * @param {Function} onerror The function that handles any error loading the file
+ */
+const handleFileUploadFromAPI = async function fetchImageBufferFromAPI(imageUrl, onload, onerror) {
+    try {
+      const response = await fetch(imageUrl);
+  
+      // Check for successful response
+      if (!response.ok) {
+        throw new Error(`Image download failed: ${response.status}`);
+      }
+  
+      const buffer = await response.arrayBuffer();
+  
+      // Infer file type from response header
+      const fileType = response.headers.get("Content-Type");
+  
+      // Extract filename from URL
+      const fileName = extractFileNameFromUrl(imageUrl);
+  
+      onload(buffer, fileType, fileName); // Invoke onload with buffer data
+    } catch (error) {
+      onerror(error); // Handle any fetch or processing errors
+    }
+  }
 
 /**
  * @typedef VMAsset
