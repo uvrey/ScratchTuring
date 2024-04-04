@@ -1,28 +1,23 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import keyMirror from 'keymirror';
-
+import classNames from 'classnames';
 import Box from '../box/box.jsx';
 import Modal from '../../containers/modal.jsx';
-// import ScanningStep from '../../containers/scanning-step.jsx';
-// import AutoScanningStep from '../../containers/auto-scanning-step.jsx';
-// import ConnectingStep from './connecting-step.jsx';
-// import ConnectedStep from './connected-step.jsx';
-// import ErrorStep from './error-step.jsx';
-// import UnavailableStep from './unavailable-step.jsx';
-// import UpdatePeripheralStep from './update-peripheral-step.jsx';
+
+import styles from './map-modal.css';
+import TargetPane from '../../containers/target-pane.jsx';
+import AssetPanel from '../asset-panel/asset-panel.jsx';
+import ActionMenu from '../action-menu/action-menu.jsx';
+import {defineMessages, intlShape, injectIntl, FormattedMessage} from 'react-intl';
+import CoordinatesStep from './coords-step.jsx';
+import MenuStep from './menu-step.jsx';
 
 import surpriseIcon from '../action-menu/icon--surprise.svg'
 import searchIcon from '../action-menu/icon--search.svg';
 import globeIcon from '../action-menu/icon--globe.svg';
 import compassIcon from '../action-menu/icon--compass.svg';
 import mapUploadIcon from '../action-menu/icon--map-upload.svg';
-
-import styles from './map-modal.css';
-import TargetPane from '../../containers/target-pane.jsx';
-import AssetPanel from '../asset-panel/asset-panel.jsx';
-import ActionMenu from '../action-menu/action-menu.jsx';
-import {defineMessages, intlShape, injectIntl} from 'react-intl';
 
 const messages = defineMessages({
     fileUploadSound: {
@@ -52,6 +47,11 @@ const messages = defineMessages({
     }
 });
 
+const PHASES = keyMirror({
+    menu: null,
+    coordinates: null,
+});
+
 const MapModalComponent = props => (
     <Modal
         className={styles.modalContent}
@@ -63,41 +63,60 @@ const MapModalComponent = props => (
         onRequestClose={props.onCancel}
      >
         <Box className={styles.body}>
-        <ActionMenu
-                buttons={[{
-                    title: messages.addMap,
-                    img: mapUploadIcon,
-                    onClick: null
-                }, {
-                    title: messages.surpriseMap,
-                    img: compassIcon,
-                    onClick: null
-                }, {
-                    title: messages.addSound,
-                    img: searchIcon,
-                    onClick: null
-                }]}
-                // dragType={DragConstants.SOUND}
-            ></ActionMenu>
-        </Box>
+            <Box className={styles.buttonRow}>
+                <button
+                    className={styles.mapOptionsButton}
+                    onClick={props.onCoords}
+                >
+                    <FormattedMessage
+                        defaultMessage="Get Coordinates"
+                        description="Button in prompt for starting a search"
+                        id="gui.mapModal.getCoords"
+                    />
+                    <img
+                    className={styles.buttonIconRight}
+                        src={compassIcon}
+                    />
+                </button>
+
+                <button
+                    className={styles.mapOptionsButton}
+                    onClick={props.onSurprise}
+                >
+                    <FormattedMessage
+                        defaultMessage="Surprise Me"
+                        description="Button in prompt for starting a search"
+                        id="gui.mapModal.surprise"
+                    />
+                    <img
+                        className={styles.buttonIconRight}
+                        src={surpriseIcon}
+                    />
+                </button>
+            </Box>
+         </Box>
+        {/* <MenuStep {...props} />
+        {/* {props.phase === PHASES.menu}
+        Hello */}
+        {/* {props.phase === PHASES.menu && <MenuStep {...props} />}
+        {props.phase === PHASES.coordinates && <CoordinatesStep {...props} />} */} 
     </Modal>
 );
 
 MapModalComponent.propTypes = {
-    // connectingMessage: PropTypes.node.isRequired,
-    connectionSmallIconURL: PropTypes.string,
-    connectionTipIconURL: PropTypes.string,
     name: PropTypes.node,
-    // onCancel: PropTypes.func.isRequired,
-    // onHelp: PropTypes.func.isRequired,
+    onSurprise: PropTypes.func.isRequired,
+    onCoords: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
     title: PropTypes.string.isRequired,
-    // intl: intlShape.isRequired
+    phase: PropTypes.oneOf(Object.keys(PHASES)).isRequired,
 };
-
+    // onHelp: PropTypes.func.isRequired,
 MapModalComponent.defaultProps = {
     connectingMessage: 'Loading'
 };
 
 export {
     MapModalComponent as default,
+    PHASES
 };

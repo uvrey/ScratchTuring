@@ -6,7 +6,7 @@ import {intlShape, injectIntl} from 'react-intl';
 
 import {connect} from 'react-redux';
 import {openBackdropLibrary, openMapModal} from '../reducers/modals';
-import {activateTab, COSTUMES_TAB_INDEX, MAP_TAB_INDEX} from '../reducers/editor-tab';
+import {activateTab, COSTUMES_TAB_INDEX} from '../reducers/editor-tab';
 import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
 import {setHoveredSprite} from '../reducers/hovered-target';
 import DragConstants from '../lib/drag-constants';
@@ -20,7 +20,7 @@ import {getEventXY} from '../lib/touch-utils';
 import StageSelectorComponent from '../components/stage-selector/stage-selector.jsx';
 
 import backdropLibraryContent from '../lib/libraries/backdrops.json';
-import {handleFileUpload, costumeUpload, handleMapFromAPI} from '../lib/file-uploader.js';
+import {handleFileUpload, costumeUpload} from '../lib/file-uploader.js';
 
 const dragTypes = [
     DragConstants.COSTUME,
@@ -43,7 +43,7 @@ class StageSelector extends React.Component {
             'handleSurpriseBackdrop',
             'handleEmptyBackdrop',
             'addBackdropFromLibraryItem',
-            'handleMap',
+            'handleMapOptions',
             'handleFileUploadClick',
             'handleBackdropUpload',
             'handleMouseEnter',
@@ -92,57 +92,9 @@ class StageSelector extends React.Component {
         });
     }
     // handleTuringData() {} TODO build fetching from Turing that has a loading screen?
-    handleMap(e) {
+    handleMapOptions(e) {
         e.stopPropagation();
-
         dispatch(openMapModal());
-
-        // this.props.onActivateTab(MAP_TAB_INDEX);
-        return
-
-        const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
-
-        // Define desired map properties
-        var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
-        var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
-
-        console.log("Lat, long:")
-        console.log(lat +", " + long)
-
-        // var lat = 12.1299
-        // var long = 21.12455
-        const styleId = 'satellite-streets-v12';
-        const zoom = 1;
-        const width = 960;
-        const height = 720;
-
-        // Build the Static Images API URL
-        const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},14.25,0,60/${width}x${height}?access_token=${accessToken}`;
-
-        handleMapFromAPI(imageUrl)
-        .then((data) => { // data will be the entire object returned by handleMapFromAPI
-          const { buffer, fileType } = data;
-
-          // Use buffer and fileType for map processing here
-          const storage = this.props.vm.runtime.storage;
-          var fileName = "Map "
-          this.props.onShowMapLoad();
-              costumeUpload(buffer, fileType, storage, vmCostumes => {
-                  this.props.vm.setEditingTarget(this.props.id);
-                  vmCostumes.forEach((costume, i) => {
-                      costume.name = `${fileName}${i ? i + 1 : ''}`;
-                  });
-                  this.handleNewBackdrop(vmCostumes).then(() => {
-                        this.props.onCloseMapLoad();
-                        console.log("Successfully loaded map.")
-                  });
-              }, this.props.onCloseImporting);  
-        })
-        .catch((error) => {
-          this.props.onCloseMapLoad();
-          this.props.onShowMapError();
-          console.error("Error fetching map:", error);
-        });
       }
     handleBackdropUpload (e) {
         const storage = this.props.vm.runtime.storage;
@@ -219,9 +171,10 @@ class StageSelector extends React.Component {
             <DroppableThrottledStage
                 componentRef={this.setRef}
                 fileInputRef={this.setFileInput}
-                onMapClick = {this.handleMap}
+                onMapClick = {this.handleMapOptions}
                 onBackdropFileUpload={this.handleBackdropUpload}
                 onBackdropFileUploadClick={this.handleFileUploadClick}
+                onNewBackdropClick={this.handleNewBackdrop}
                 onClick={this.handleClick}
                 onDrop={this.handleDrop}
                 onEmptyBackdropClick={this.handleEmptyBackdrop}
@@ -270,12 +223,15 @@ const mapDispatchToProps = dispatch => ({
     },
     onCloseImporting: () => dispatch(closeAlertWithId('importingAsset')),
     onShowImporting: () => dispatch(showStandardAlert('importingAsset')),
-    onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
-    onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
-    onShowMapError: () => dispatch(showStandardAlert('loadingMapError')),
+    // onNewMapBackdrop: (b, f) => dispatch(StageSelector.handleNewMapBackdrop(b, f)),
+    // onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
+    // onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
+    // onShowMapError: () => dispatch(showStandardAlert('loadingMapError'))
 });
 
 export default injectIntl(connect(
     mapStateToProps,
     mapDispatchToProps
 )(StageSelector));
+
+export { StageSelector };

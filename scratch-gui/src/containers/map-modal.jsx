@@ -1,14 +1,15 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import bindAll from 'lodash.bindall';
-import MapModalComponent from '../components/map-modal/map-modal.jsx';
+import MapModalComponent, {PHASES} from '../components/map-modal/map-modal.jsx';
 import VM from 'scratch-vm';
 import analytics from '../lib/analytics.js';
 import extensionData from '../lib/libraries/extensions/index.jsx';
 import {connect} from 'react-redux';
-
+import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
 import {closeMapModal} from '../reducers/modals.js';
-import {isMicroBitUpdateSupported, selectAndUpdateMicroBit} from '../lib/microbit-update.js';
+import {costumeUpload, handleMapFromAPI} from '../lib/file-uploader.js';
+import {StageSelector, onNewMapBackdrop} from './stage-selector.jsx';
 
 class MapModal extends React.Component {
     constructor (props) {
@@ -16,126 +17,94 @@ class MapModal extends React.Component {
         bindAll(this, [
             'handleSurprise',
             'handleCancel',
-            // 'handleConnected',
-            // 'handleConnecting',
-            // 'handleDisconnect',
-            // 'handleError',
-            // 'handleHelp',
-            // 'handleSendUpdate',
-            // 'handleUpdatePeripheral'
+            'handleCoordinates',
+            'handleNewMapBackdrop'
         ]);
-        // this.state = {
-        //     extension: extensionData.find(ext => ext.extensionId === props.extensionId),
-        //     phase: props.vm.getPeripheralIsConnected(props.extensionId) ?
-        //         PHASES.connected : PHASES.scanning
-        // };
+        this.state = {
+            phase: PHASES.menu
+        }
+    }
+
+    handleNewBackdropFromModal (backdrops_, shouldActivateTab = true) {
+        const backdrops = Array.isArray(backdrops_) ? backdrops_ : [backdrops_];
+        return Promise.all(backdrops.map(backdrop =>
+            this.props.vm.addBackdrop(backdrop.md5, backdrop)
+        ))
+    }
+
+    handleNewMapBackdrop(buffer, fileType) {
+        // Use buffer and fileType for map processing here
+        var storage = this.props.vm.runtime.storage
+        var fileName = "Map "
+
+        costumeUpload(buffer, fileType, storage, vmCostumes => {
+            this.props.vm.setEditingTarget(this.props.id);
+            vmCostumes.forEach((costume, i) => {
+                costume.name = `${fileName}${i ? i + 1 : ''}`;
+            });
+            this.handleNewBackdropFromModal(vmCostumes).then(() => {
+               console.log("Successfully loaded map.")
+            });
+        });  
     }
 
     handleSurprise() {
-        console.log("SURPRISE!")
-    }
-    // componentDidMount () {
-    //     this.props.vm.on('PERIPHERAL_CONNECTED', this.handleConnected);
-    //     this.props.vm.on('PERIPHERAL_REQUEST_ERROR', this.handleError);
-    // }
-    // componentWillUnmount () {
-    //     this.props.vm.removeListener('PERIPHERAL_CONNECTED', this.handleConnected);
-    //     this.props.vm.removeListener('PERIPHERAL_REQUEST_ERROR', this.handleError);
-    // }
-    // handleScanning () {
-    //     this.setState({
-    //         phase: PHASES.scanning
-    //     });
-    // }
-    // handleConnecting (peripheralId) {
-    //     this.props.vm.connectPeripheral(this.props.extensionId, peripheralId);
-    //     this.setState({
-    //         phase: PHASES.connecting
-    //     });
-    //     analytics.event({
-    //         category: 'extensions',
-    //         action: 'connecting',
-    //         label: this.props.extensionId
-    //     });
-    // }
-    // handleDisconnect () {
-    //     try {
-    //         this.props.vm.disconnectPeripheral(this.props.extensionId);
-    //     } finally {
-    //         this.props.onCancel();
-    //     }
-    // }
-    handleCancel () {
-        // try {
-        //     // If we're not connected to a peripheral, close the websocket so we stop scanning.
-        //     // if (!this.props.vm.getPeripheralIsConnected(this.props.extensionId)) {
-        //     //     this.props.vm.disconnectPeripheral(this.props.extensionId);
-        //     // }
-        // } finally {
-            // Close the modal.
-            this.props.onCancel();
-    }
-    // handleError () {
-    //     // Assume errors that come in during scanning phase are the result of not
-    //     // having scratch-link installed.
-    //     if (this.state.phase === PHASES.scanning || this.state.phase === PHASES.unavailable) {
-    //         this.setState({
-    //             phase: PHASES.unavailable
-    //         });
-    //     } else {
-    //         this.setState({
-    //             phase: PHASES.error
-    //         });
-    //         analytics.event({
-    //             category: 'extensions',
-    //             action: 'connecting error',
-    //             label: this.props.extensionId
-    //         });
-    //     }
-    // }
-    // handleConnected () {
-    //     this.setState({
-    //         phase: PHASES.connected
-    //     });
-    //     analytics.event({
-    //         category: 'extensions',
-    //         action: 'connected',
-    //         label: this.props.extensionId
-    //     });
-    // }
-    // handleHelp () {
-    //     window.open(this.state.extension.helpLink, '_blank');
-    //     analytics.event({
-    //         category: 'extensions',
-    //         action: 'help',
-    //         label: this.props.extensionId
-    //     });
-    // }
-    // handleUpdatePeripheral () {
-    //     this.setState({
-    //         phase: PHASES.updatePeripheral
-    //     });
-    //     analytics.event({
-    //         category: 'extensions',
-    //         action: 'enter peripheral update flow',
-    //         label: this.props.extensionId
-    //     });
-    // }
-    // /**
-    //  * Handle sending an update to the peripheral.
-    //  * @param {function(number): void} [progressCallback] Optional callback for progress updates in the range of [0..1].
-    //  * @returns {Promise} Resolves when the update is complete.
-    //  */
-    // handleSendUpdate (progressCallback) {
-    //     analytics.event({
-    //         category: 'extensions',
-    //         action: 'send update to peripheral',
-    //         label: this.props.extensionId
-    //     });
+        this.props.onCancel(); // close Modal
+        console.log("Getting a surprise map.")
 
-    //     // TODO: get this functionality from the extension
-    //     return selectAndUpdateMicroBit(progressCallback);
-    // }
+        // this.props.onActivateTab(MAP_TAB_INDEX);
+        const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
+
+        // Define desired map properties
+        var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
+        var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
+
+        console.log("Lat, long:")
+        console.log(lat +", " + long)
+
+        // var lat = 12.1299
+        // var long = 21.12455
+        const styleId = 'satellite-streets-v12';
+        const zoom = 1;
+        const width = 960;
+        const height = 720;
+
+        // Build the Static Images API URL
+        const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},14.25,0,60/${width}x${height}?access_token=${accessToken}`;
+
+        this.props.onShowMapLoad();
+
+        handleMapFromAPI(imageUrl)
+        .then((data) => {
+            if (!data || !data.buffer || !data.fileType) {
+                throw new Error("Invalid data returned from handleMapFromAPI");
+            }
+
+            const { buffer, fileType } = data;
+            console.log("we got data");
+            console.log(fileType);
+
+            // Proceed with buffer and fileType
+            this.handleNewMapBackdrop(buffer, fileType)
+            this.props.onCloseMapLoad();
+        })
+        .catch((error) => {
+          console.error("Error fetching map:", error);
+          this.props.onCloseMapLoad();
+          this.props.onShowMapError(error.message || "An error occurred while loading the map.");
+        });
+    }
+
+    handleCancel () {
+        this.props.onCancel();
+    }
+
+    handleCoordinates() {
+        // this.props.onCancel(); // close Modal
+        console.log("handling coords")
+        this.state['phase'] = PHASES.coordinates
+    }
+ 
     render () {
         // const canUpdatePeripheral = (this.props.extensionId === 'microbit') && isMicroBitUpdateSupported();
         return (
@@ -146,26 +115,20 @@ class MapModal extends React.Component {
                 // connectionTipIconURL={this.state.extension && this.state.extension.connectionTipIconURL}
                 // extensionId={this.props.extensionId}
                 // name={this.state.extension && this.state.extension.name}
-                // phase={this.state.phase}
+                phase={this.state.phase}
                 title={"Choose a Map Backdrop!"}
-                // useAutoScan={this.state.extension && this.state.extension.useAutoScan}
                 vm={this.props.vm}
                 onCancel={this.handleCancel}
                 name={"Map Background Selector"}
-                // onConnected={this.handleConnected}
-                // onConnecting={this.handleConnecting}
-                // onDisconnect={this.handleDisconnect}
+                onSurprise={this.handleSurprise}
+                onCoords={this.handleCoordinates}
                 // onHelp={this.handleHelp}
-                // onScanning={this.handleScanning}
-                // onSendPeripheralUpdate={canUpdatePeripheral ? this.handleSendUpdate : null}
-                // onUpdatePeripheral={canUpdatePeripheral ? this.handleUpdatePeripheral : null}
             />
         );
     }
 }
 
 MapModal.propTypes = {
-    extensionId: PropTypes.string.isRequired,
     onCancel: PropTypes.func.isRequired,
     vm: PropTypes.instanceOf(VM).isRequired
 };
@@ -177,7 +140,13 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     onCancel: () => {
         dispatch(closeMapModal());
-    }
+    },
+    onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
+    onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
+    onShowMapError: () => dispatch(showStandardAlert('loadingMapError')),
+    onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
+    onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
+    onShowMapError: () => dispatch(showStandardAlert('loadingMapError'))
 });
 
 export default connect(

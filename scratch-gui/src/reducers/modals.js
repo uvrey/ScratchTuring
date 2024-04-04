@@ -48,6 +48,15 @@ const openModal = function (modal) {
         modal: modal
     };
 };
+
+const openMOModal = function (modal, stageref) {
+    return {
+        type: OPEN_MODAL,
+        modal: modal,
+        stageRef: stageref
+    };
+};
+
 const closeModal = function (modal) {
     return {
         type: CLOSE_MODAL,
@@ -83,6 +92,9 @@ const openConnectionModal = function () {
 };
 const openMapModal = function () {
     return openModal(MODAL_MAP);
+};
+const openMapOptionsModal = function (stageref) {
+    return openMOModal(MODAL_MAP, stageref);
 };
 const openTipsLibrary = function () {
     return openModal(MODAL_TIPS_LIBRARY);
@@ -134,6 +146,7 @@ export {
     openTipsLibrary,
     openConnectionModal,
     openMapModal,
+    openMapOptionsModal,
     closeBackdropLibrary,
     closeCostumeLibrary,
     closeExtensionLibrary,
