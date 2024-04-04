@@ -48,17 +48,7 @@ class MapModal extends React.Component {
         });  
     }
 
-    handleSurprise() {
-        this.props.onCancel(); // close Modal
-        console.log("Getting a surprise map.")
-
-        // this.props.onActivateTab(MAP_TAB_INDEX);
-        const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
-
-        // Define desired map properties
-        var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
-        var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
-
+    handleFetchingMap(lat, long) {
         console.log("Lat, long:")
         console.log(lat +", " + long)
 
@@ -68,6 +58,8 @@ class MapModal extends React.Component {
         const zoom = 1;
         const width = 960;
         const height = 720;
+
+        const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
 
         // Build the Static Images API URL
         const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},14.25,0,60/${width}x${height}?access_token=${accessToken}`;
@@ -95,6 +87,17 @@ class MapModal extends React.Component {
         });
     }
 
+    handleSurprise() {
+        this.props.onCancel(); // close Modal
+        console.log("Getting a surprise map.")
+
+        // Define desired map properties
+        var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
+        var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
+
+        this.handleFetchingMap(lat, long)
+    }
+
     handleCancel () {
         this.props.onCancel();
     }
@@ -103,6 +106,32 @@ class MapModal extends React.Component {
         // this.props.onCancel(); // close Modal
         console.log("handling coords")
         this.state['phase'] = PHASES.coordinates
+
+        const longitudeInput = document.getElementById("longitude");
+        const latitudeInput = document.getElementById("latitude");
+      
+        var longitudeValue = longitudeInput.value;
+        var latitudeValue = latitudeInput.value;
+      
+        try {
+            var long = parseFloat(longitudeValue);
+            var lat = parseFloat(latitudeValue);
+
+            // check for Null and do error checking
+            console.log("Longitude:", longitudeValue);
+            console.log("Latitude:", latitudeValue);
+
+            this.props.onCancel(); // close modal
+
+            // check if valid 
+            this.handleFetchingMap(lat, long)
+
+          } catch (error) {
+            console.log(error)
+            this.props.onShowMapError()
+            console.log("Please enter valid numbers for longitude and latitude.");
+            return; // Exit the function if conversion fails
+          }
     }
  
     render () {

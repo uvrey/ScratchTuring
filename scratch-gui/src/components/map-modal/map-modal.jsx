@@ -12,7 +12,6 @@ import ActionMenu from '../action-menu/action-menu.jsx';
 import {defineMessages, intlShape, injectIntl, FormattedMessage} from 'react-intl';
 import CoordinatesStep from './coords-step.jsx';
 import MenuStep from './menu-step.jsx';
-
 import surpriseIcon from '../action-menu/icon--surprise.svg'
 import searchIcon from '../action-menu/icon--search.svg';
 import globeIcon from '../action-menu/icon--globe.svg';
@@ -63,6 +62,19 @@ const MapModalComponent = props => (
         onRequestClose={props.onCancel}
      >
         <Box className={styles.body}>
+
+            <Box className={styles.activityArea}>
+                <label>Longitude:</label>
+                <input
+                    type="text"
+                    id={"longitude"}
+                />
+                <label>Latitude:</label>
+                 <input
+                    type="text"
+                    id={"latitude"}
+                />
+            </Box>
             <Box className={styles.buttonRow}>
                 <button
                     className={styles.mapOptionsButton}
