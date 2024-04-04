@@ -5,8 +5,8 @@ import React from 'react';
 import {intlShape, injectIntl} from 'react-intl';
 
 import {connect} from 'react-redux';
-import {openBackdropLibrary} from '../reducers/modals';
-import {activateTab, COSTUMES_TAB_INDEX} from '../reducers/editor-tab';
+import {openBackdropLibrary, openMapModal} from '../reducers/modals';
+import {activateTab, COSTUMES_TAB_INDEX, MAP_TAB_INDEX} from '../reducers/editor-tab';
 import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
 import {setHoveredSprite} from '../reducers/hovered-target';
 import DragConstants from '../lib/drag-constants';
@@ -91,9 +91,14 @@ class StageSelector extends React.Component {
             }
         });
     }
+    // handleTuringData() {} TODO build fetching from Turing that has a loading screen?
     handleMap(e) {
         e.stopPropagation();
-        console.log("We will do something with a map here!");
+
+        dispatch(openMapModal());
+
+        // this.props.onActivateTab(MAP_TAB_INDEX);
+        return
 
         const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
 
@@ -101,9 +106,8 @@ class StageSelector extends React.Component {
         var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
         var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
 
-
-        console.log("Longitude and latitude:")
-        console.log(long +", " + lat)
+        console.log("Lat, long:")
+        console.log(lat +", " + long)
 
         // var lat = 12.1299
         // var long = 21.12455
@@ -118,26 +122,26 @@ class StageSelector extends React.Component {
         handleMapFromAPI(imageUrl)
         .then((data) => { // data will be the entire object returned by handleMapFromAPI
           const { buffer, fileType } = data;
-          console.log("Got something...");
-        //   console.log(data.fileType); // Access fileType property directly
-        //   const mapBuffer = data.buffer; // Access buffer property directly
+
           // Use buffer and fileType for map processing here
           const storage = this.props.vm.runtime.storage;
-          var fileName = "newMap.jpeg"
-        //   this.props.onShowImporting();
+          var fileName = "Map "
+          this.props.onShowMapLoad();
               costumeUpload(buffer, fileType, storage, vmCostumes => {
                   this.props.vm.setEditingTarget(this.props.id);
                   vmCostumes.forEach((costume, i) => {
                       costume.name = `${fileName}${i ? i + 1 : ''}`;
                   });
                   this.handleNewBackdrop(vmCostumes).then(() => {
-                        console.log("Success")
+                        this.props.onCloseMapLoad();
+                        console.log("Successfully loaded map.")
                   });
               }, this.props.onCloseImporting);  
         })
         .catch((error) => {
+          this.props.onCloseMapLoad();
+          this.props.onShowMapError();
           console.error("Error fetching map:", error);
-          // Handle any errors during the API call or processing
         });
       }
     handleBackdropUpload (e) {
@@ -209,7 +213,8 @@ class StageSelector extends React.Component {
     render () {
         const componentProps = omit(this.props, [
             'asset', 'dispatchSetHoveredSprite', 'id', 'intl',
-            'onActivateTab', 'onSelect', 'onShowImporting', 'onCloseImporting']);
+            'onActivateTab', 'onSelect', 'onShowImporting', 'onCloseImporting', 
+            'onShowMapLoad', 'onCloseMapLoad', 'onShowMapError']);
         return (
             <DroppableThrottledStage
                 componentRef={this.setRef}
@@ -234,7 +239,10 @@ StageSelector.propTypes = {
     intl: intlShape.isRequired,
     onCloseImporting: PropTypes.func,
     onSelect: PropTypes.func,
-    onShowImporting: PropTypes.func
+    onShowImporting: PropTypes.func,
+    onShowMapLoad: PropTypes.func,
+    onCloseMapLoad: PropTypes.func,
+    onShowMapError: PropTypes.func
 };
 
 const mapStateToProps = (state, {asset, id}) => ({
@@ -250,6 +258,10 @@ const mapDispatchToProps = dispatch => ({
         e.stopPropagation();
         dispatch(openBackdropLibrary());
     },
+    onNewMapClick: e => {
+        e.stopPropagation();
+        dispatch(openMapModal());
+    },
     onActivateTab: tabIndex => {
         dispatch(activateTab(tabIndex));
     },
@@ -257,7 +269,10 @@ const mapDispatchToProps = dispatch => ({
         dispatch(setHoveredSprite(spriteId));
     },
     onCloseImporting: () => dispatch(closeAlertWithId('importingAsset')),
-    onShowImporting: () => dispatch(showStandardAlert('importingAsset'))
+    onShowImporting: () => dispatch(showStandardAlert('importingAsset')),
+    onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
+    onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
+    onShowMapError: () => dispatch(showStandardAlert('loadingMapError')),
 });
 
 export default injectIntl(connect(

@@ -60,6 +60,7 @@ const StageSelector = props => {
         onMouseEnter,
         onMouseLeave,
         onNewBackdropClick,
+        onNewMapClick,
         onSurpriseBackdropClick,
         onEmptyBackdropClick,
         onMapClick,
@@ -125,8 +126,7 @@ const StageSelector = props => {
                     }, {
                         title: intl.formatMessage(messages.addMapFromAPI),
                         img: mapIcon,
-                        onClick: onMapClick,
-                        mapInput: true
+                        onClick: onNewMapClick,
                     }, {
                         title: intl.formatMessage(messages.addBackdropFromLibrary),
                         img: searchIcon,
@@ -155,6 +155,7 @@ StageSelector.propTypes = {
     onMouseEnter: PropTypes.func,
     onMouseLeave: PropTypes.func,
     onNewBackdropClick: PropTypes.func,
+    onNewMapClick: PropTypes.func,
     onSurpriseBackdropClick: PropTypes.func,
     raised: PropTypes.bool.isRequired,
     receivedBlocks: PropTypes.bool.isRequired,

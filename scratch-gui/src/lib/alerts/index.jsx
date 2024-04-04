@@ -212,7 +212,49 @@ const alerts = [
         ),
         iconSpinner: true,
         level: AlertLevels.SUCCESS
-    }
+    },
+    {
+        alertId: 'loadingMap',
+        alertType: AlertTypes.STANDARD,
+        clearList: [],
+        content: (
+            <FormattedMessage
+                defaultMessage="Loading map..."
+                description="Message indicating that map is in process of loading"
+                id="gui.alerts.loadingMap"
+            />
+        ),
+        iconSpinner: true,
+        level: AlertLevels.SUCCESS
+    },
+    {
+        alertId: 'loadingMapError',
+        clearList: [],
+        closeButton: true,
+        content: (
+            <FormattedMessage
+                defaultMessage="Map could not load. Please try again!"
+                description="Message indicating that map could not be loaded"
+                id="gui.alerts.loadingMapError"
+            />
+        ),
+        level: AlertLevels.WARN
+    },
+    {
+        alertId: 'fetchingFromTuring',
+        alertType: AlertTypes.STANDARD,
+        clearList: [],
+        content: (
+            <FormattedMessage
+                defaultMessage="Fetching data from Turing..."
+                description="Message indicating that data is in process of being fetched from Turing"
+                id="gui.alerts.fetchingTuring"
+            />
+        ),
+        iconSpinner: true,
+        level: AlertLevels.SUCCESS
+    },
+    
 ];
 
 export {

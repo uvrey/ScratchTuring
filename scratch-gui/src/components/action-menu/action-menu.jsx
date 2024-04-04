@@ -145,43 +145,40 @@ class ActionMenu extends React.Component {
                             fileAccept, fileChange, fileInput, fileMultiple, mapInput}, keyId) => {
                             const isComingSoon = !handleClick;
                             const hasFileInput = fileInput;
-                            const hasMapInput = mapInput;
                             const tooltipId = `${this.mainTooltipId}-${title}`;
                             return (
                                 <div key={`${tooltipId}-${keyId}`}>
-                                    <button
-                                        aria-label={title}
-                                        className={classNames(styles.button, styles.moreButton, {
-                                            [styles.comingSoon]: isComingSoon
-                                        })}
-                                        data-for={tooltipId}
-                                        data-tip={title}
-                                        onClick={hasFileInput ? handleClick : this.clickDelayer(handleClick)}
-                                    >
-                                        <img
-                                            className={styles.moreIcon}
-                                            draggable={false}
-                                            src={img}
-                                        />
-                                        {hasFileInput ? (
-                                            <input
-                                                accept={fileAccept}
-                                                className={styles.fileInput}
-                                                multiple={fileMultiple}
-                                                ref={fileInput}
-                                                type="file"
-                                                onChange={fileChange}
-                                            />) : null}
-                                    </button>
-                                    <ReactTooltip
-                                        className={classNames(styles.tooltip, {
-                                            [styles.comingSoonTooltip]: isComingSoon
-                                        })}
-                                        effect="solid"
-                                        id={tooltipId}
-                                        place={tooltipPlace || 'left'}
+                                <button
+                                  aria-label={title}
+                                  className={classNames(styles.button, styles.moreButton, {
+                                    [styles.comingSoon]: isComingSoon
+                                  })}
+                                  data-for={tooltipId}
+                                  data-tip={title}
+                                  onClick={hasFileInput ? handleClick : this.clickDelayer(handleClick)}
+                                >
+                                  <img className={styles.moreIcon} draggable={false} src={img} />
+                                  {hasFileInput ? (
+                                    <input
+                                      accept={fileAccept}
+                                      className={styles.fileInput}
+                                      multiple={fileMultiple}
+                                      ref={fileInput}
+                                      type="file"
+                                      onChange={fileChange}
                                     />
-                                </div>
+                                  ) : null}
+                                </button>
+                                <ReactTooltip
+                                  aria-haspopup='true'
+                                  className={classNames(styles.tooltip, {
+                                    [styles.comingSoonTooltip]: isComingSoon
+                                  })}
+                                  effect="solid"
+                                  id={tooltipId}
+                                  place={tooltipPlace || 'left'}
+                                />
+                              </div>
                             );
                         })}
                     </div>
