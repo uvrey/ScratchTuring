@@ -48,21 +48,21 @@ class MapModal extends React.Component {
         });  
     }
 
-    handleFetchingMap(lat, long) {
+    handleFetchingMap(lat, long, zoom, pitch) {
         console.log("Lat, long:")
         console.log(lat +", " + long)
 
-        // var lat = 12.1299
-        // var long = 21.12455
         const styleId = 'satellite-streets-v12';
-        const zoom = 1;
         const width = 960;
         const height = 720;
-
         const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
 
+        console.log("ZOOM & PITCH?")
+        console.log(zoom)
+        console.log(pitch)
+
         // Build the Static Images API URL
-        const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},14.25,0,60/${width}x${height}?access_token=${accessToken}`;
+        const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},${zoom},0,${pitch}/${width}x${height}?access_token=${accessToken}`;
 
         this.props.onShowMapLoad();
 
@@ -95,7 +95,7 @@ class MapModal extends React.Component {
         var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
         var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
 
-        this.handleFetchingMap(lat, long)
+        this.handleFetchingMap(lat, long, 12, 30) // default pitch and zoom
     }
 
     handleCancel () {
@@ -103,34 +103,35 @@ class MapModal extends React.Component {
     }
 
     handleCoordinates() {
-        // this.props.onCancel(); // close Modal
-        console.log("handling coords")
-        this.state['phase'] = PHASES.coordinates
-
-        const longitudeInput = document.getElementById("longitude");
-        const latitudeInput = document.getElementById("latitude");
-      
-        var longitudeValue = longitudeInput.value;
-        var latitudeValue = latitudeInput.value;
+        const inputs = ["longitude", "latitude", "zoom", "pitch"];
+        const values = {};
+        
+        for (const inputName of inputs) {
+          const input = document.getElementById(inputName);
+          values[inputName] = parseFloat(input.value);
+        }
+        
+        const longitudeValue = values.longitude;
+        const latitudeValue = values.latitude;
+        const zoomValue = values.zoom;
+        const pitchValue = values.pitch;
       
         try {
             var long = parseFloat(longitudeValue);
             var lat = parseFloat(latitudeValue);
-
-            // check for Null and do error checking
-            console.log("Longitude:", longitudeValue);
-            console.log("Latitude:", latitudeValue);
+            var zoom = parseFloat(zoomValue);
+            var pitch = parseFloat(pitchValue);
 
             this.props.onCancel(); // close modal
 
             // check if valid 
-            this.handleFetchingMap(lat, long)
+            this.handleFetchingMap(lat, long, zoom, pitch)
 
           } catch (error) {
             console.log(error)
             this.props.onShowMapError()
             console.log("Please enter valid numbers for longitude and latitude.");
-            return; // Exit the function if conversion fails
+            return; 
           }
     }
  
@@ -148,7 +149,7 @@ class MapModal extends React.Component {
                 title={"Choose a Map Backdrop!"}
                 vm={this.props.vm}
                 onCancel={this.handleCancel}
-                name={"Map Background Selector"}
+                name={"Map Generator"}
                 onSurprise={this.handleSurprise}
                 onCoords={this.handleCoordinates}
                 // onHelp={this.handleHelp}
