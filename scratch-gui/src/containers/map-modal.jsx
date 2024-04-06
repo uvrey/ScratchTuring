@@ -18,8 +18,9 @@ class MapModal extends React.Component {
             'handleCoordinates',
             'handleNewMapBackdrop'
         ]);
+        this.styleRef = React.createRef();
         this.state = {
-            phase: PHASES.menu
+            style: "satellite-v9" // default style is just satellite data
         }
     }
 
@@ -53,21 +54,20 @@ class MapModal extends React.Component {
         localStorage.setItem("latitude", lat);
         localStorage.setItem("zoom", zoom);
         localStorage.setItem("pitch", pitch);
+        localStorage.setItem("style", this.state.style);
       }
 
 
     handleFetchingMap(lat, long, zoom, pitch) {
         console.log("Lat, long:")
         console.log(lat +", " + long)
+        console.log("style: " + this.state.style)
 
-        const styleId = 'satellite-streets-v12';
+        const styleId = this.state.style
+        // const styleId = 'satellite-streets-v12';
         const width = 960;
         const height = 720;
         const accessToken = 'pk.eyJ1Ijoiam1yMjM5IiwiYSI6ImNsdWp1YjczZzBobm4ycWxpNjFwb3Q3eGgifQ.qOHGVYmd3wr7G9_AGVESMg';
-
-        console.log("ZOOM & PITCH?")
-        console.log(zoom)
-        console.log(pitch)
 
         // Build the Static Images API URL
         const imageUrl = `https://api.mapbox.com/styles/v1/mapbox/${styleId}/static/${long},${lat},${zoom},0,${pitch}/${width}x${height}?access_token=${accessToken}`;
@@ -111,33 +111,6 @@ class MapModal extends React.Component {
         this.props.onCancel();
     }
 
-    // Test if there are values to fetch
-    checkRestore() {
-        try {
-            console.log("we got a stored value for longitude: ")
-            console.log(localStorage.getItem("longitude"));
-            return true; // Explicitly return true on success
-          } catch (error) {
-            return false; // Return false on error
-          }
-    }
-
-    getStoredValues() {
-        const inputs = ["longitude", "latitude", "zoom", "pitch"];
-        const storedValues = {};
-
-        if (this.checkRestore()) {
-            console.log("we are trying to find coordinates again, but some are already stored")
-        } else {
-            console.log("No previous coords are stored")
-        }
-        
-        for (const inputName of inputs) {
-            storedValues[inputName] = localStorage.getItem(inputName);
-        }
-        return storedValues
-    }
-
     getStoredValue(value, defaultValue) {
         try {
             return localStorage.getItem(value);
@@ -146,21 +119,23 @@ class MapModal extends React.Component {
         }
     }
 
+    handleSelectionChange = (newStyle) => {
+        this.setState({ style: newStyle });
+      };
+
     handleCoordinates() {
+
+        console.log("handling coords, style is: ")
+        console.log(this.state.style)
+
         const inputs = ["longitude", "latitude", "zoom", "pitch"];
         const values = {};
-
-        if (this.checkRestore()) {
-            console.log("we are trying to find coordinates again, but some are already stored")
-        } else {
-            console.log("No previous coords are stored")
-        }
         
         for (const inputName of inputs) {
           const input = document.getElementById(inputName);
           values[inputName] = parseFloat(input.value);
         }
-        
+
         const longitudeValue = values.longitude;
         const latitudeValue = values.latitude;
         const zoomValue = values.zoom;
@@ -173,7 +148,6 @@ class MapModal extends React.Component {
             var pitch = parseFloat(pitchValue);
 
             this.props.onCancel(); // close modal
-
             // check if valid 
             this.handleFetchingMap(lat, long, zoom, pitch)
 
@@ -184,17 +158,10 @@ class MapModal extends React.Component {
             return; 
           }
     }
- 
+
     render () {
-        // const canUpdatePeripheral = (this.props.extensionId === 'microbit') && isMicroBitUpdateSupported();
         return (
             <MapModalComponent
-                // connectingMessage={this.state.extension && this.state.extension.connectingMessage}
-                // connectionIconURL={this.state.extension && this.state.extension.connectionIconURL}
-                // connectionSmallIconURL={this.state.extension && this.state.extension.connectionSmallIconURL}
-                // connectionTipIconURL={this.state.extension && this.state.extension.connectionTipIconURL}
-                // extensionId={this.props.extensionId}
-                // name={this.state.extension && this.state.extension.name}
                 phase={this.state.phase}
                 title={"Choose a Map Backdrop!"}
                 vm={this.props.vm}
@@ -203,6 +170,8 @@ class MapModal extends React.Component {
                 onSurprise={this.handleSurprise}
                 onCoords={this.handleCoordinates}
                 getValue={this.getStoredValue}
+                styleRef={this.dropdownRef}
+                onStyleChange={this.handleSelectionChange}
             />
         );
     }

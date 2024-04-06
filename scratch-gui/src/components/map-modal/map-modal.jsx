@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React,  { useState } from 'react';
 import keyMirror from 'keymirror';
 import classNames from 'classnames';
 import Box from '../box/box.jsx';
@@ -53,12 +53,6 @@ const PHASES = keyMirror({
 });
 
 
-function updateSliderValue(sliderId) {
-    const slider = document.getElementById(sliderId);
-    const label = document.getElementById(`${sliderId}Value`);
-    label.textContent = slider.value;
-}
-
 const MapModalComponent = props => (
     <Modal
         className={styles.modalContent}
@@ -70,9 +64,6 @@ const MapModalComponent = props => (
         onRequestClose={props.onCancel}
      >
         <Box className={styles.body}>
-
-        
-
           <Box className={styles.sliderArea}>
 
                 <Box className={styles.dropdownTitle}>
@@ -84,12 +75,15 @@ const MapModalComponent = props => (
                 </Box>
                 <Box className={styles.dropdownBox}>
                 <select
-                    id="style-dropdown" 
-                    name="style-dropdown"
                     className={classNames(styles.dropdownStyle, styles.sliderValueBackground)}
+                    onChange={(event) => {props.onStyleChange(event.target.value)}}
+                    defaultValue={props.getValue('style', 'satellite-streets-v12')}
                     >
-                    <option  className={classNames(styles.dropdownValue)} value="satellite">Satellite</option>
-                    <option  className={classNames(styles.dropdownValue)} value="street">Street</option>
+                    {/* <option className={classNames(styles.dropdownValue)} value="satellite-streets-v12">Satellite & Streets</option> */}
+                    <option className={classNames(styles.dropdownValue)} value="satellite-v9">Satellite</option>
+                    <option className={classNames(styles.dropdownValue)} value="streets-v12">Streets</option>
+                    <option className={classNames(styles.dropdownValue)} value="navigation-night-v1">Night GPS</option>
+                    <option className={classNames(styles.dropdownValue)} value="navigation-day-v1">Day GPS</option>
                     </select>
                 </Box>
 
@@ -112,8 +106,6 @@ const MapModalComponent = props => (
                     onChange={(event) => {
                         const newValue = parseFloat(event.target.value);
                         document.getElementById("longitudeValue").value = newValue;
-                        adjustInputWidth('longitudeValue')
-                        updateSliderValue('longitudeValue', newValue); // Assuming your function
                     }}
                 />
                 <input
@@ -126,7 +118,6 @@ const MapModalComponent = props => (
                     const newValue = parseFloat(event.target.value);
                     if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
                         document.getElementById("longitude").value = newValue;
-                        updateSliderValue('longitude', newValue); // Assuming your function
                     }
                     }}
                 />
@@ -151,8 +142,6 @@ const MapModalComponent = props => (
                     onChange={(event) => {
                         const newValue = parseFloat(event.target.value);
                         document.getElementById("latitudeValue").value = newValue;
-                        adjustInputWidth('latitude')
-                        updateSliderValue('latitude', newValue); // Assuming your function
                     }}
                 />
                 <input
@@ -165,7 +154,6 @@ const MapModalComponent = props => (
                     const newValue = parseFloat(event.target.value);
                     if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
                         document.getElementById("latitude").value = newValue;
-                        updateSliderValue('latitude', newValue); // Assuming your function
                     }
                     }}
                 />
@@ -190,8 +178,6 @@ const MapModalComponent = props => (
                     onChange={(event) => {
                         const newValue = parseFloat(event.target.value);
                         document.getElementById("zoomValue").value = newValue;
-                        adjustInputWidth('zoomValue')
-                        updateSliderValue('zoomValue', newValue); // Assuming your function
                     }}
                 />
                 <input
@@ -204,7 +190,6 @@ const MapModalComponent = props => (
                     const newValue = parseFloat(event.target.value);
                     if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
                         document.getElementById("zoom").value = newValue;
-                        updateSliderValue('zoom', newValue); // Assuming your function
                     }
                     }}
                 />
@@ -229,8 +214,6 @@ const MapModalComponent = props => (
                         onChange={(event) => {
                             const newValue = parseFloat(event.target.value);
                             document.getElementById("pitchValue").value = newValue;
-                            adjustInputWidth('pitchValue')
-                            updateSliderValue('pitchValue', newValue); // Assuming your function
                         }}
                     />
                     <input
@@ -243,7 +226,6 @@ const MapModalComponent = props => (
                         const newValue = parseFloat(event.target.value);
                         if (!isNaN(newValue) && newValue >= 0 && newValue <= 60) {
                             document.getElementById("pitch").value = newValue;
-                            updateSliderValue('pitch', newValue); // Assuming your function
                         }
                         }}
                     />
