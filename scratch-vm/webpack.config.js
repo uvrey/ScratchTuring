@@ -13,7 +13,8 @@ const base = {
     devtool: 'cheap-module-source-map',
     output: {
         library: 'VirtualMachine',
-        filename: '[name].js'
+        filename: '[name].js',
+	hashFunction: 'xxhash64'
     },
     module: {
         rules: [{

@@ -89,7 +89,6 @@ class MapModal extends React.Component {
 
     handleSurprise() {
         this.props.onCancel(); // close Modal
-        console.log("Getting a surprise map.")
 
         // Define desired map properties
         var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90

@@ -54,7 +54,7 @@ import libraryCodeCartoon from './thumbnails/code-a-cartoon.jpg';
 // Talking Tales
 import libraryTalking from './thumbnails/talking.png';
 
-// Talking Tales
+// library Turing
 import libraryUseTuring from './thumbnails/use-turing.png';
 
 // Videos

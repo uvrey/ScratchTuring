@@ -17,12 +17,15 @@ Now link the VM with the GUI:
     From the top level of each repository (such as scratch-vm) that depends on scratch-gui:
         Make sure you have run `npm install`
         Run `npm link scratch-gui`
-        Build or run the repository
 
 
-In `scratch-gui`, start the GUI. 
+
+In `scratch-gui`, link the vm and start the GUI. 
 ```
+npm link scratch-vm
 npm start
 ```
+For more:
+https://scratch.mit.edu/discuss/topic/336496/
 
 It may take a little while to build, but should soon appear at `localhost:8601``

@@ -339,5 +339,5 @@ export default [
         internetConnectionRequired: true,
         bluetoothRequired: false,
         helpLink: 'https://scratch.mit.edu'
-    }
+    },
 ];
