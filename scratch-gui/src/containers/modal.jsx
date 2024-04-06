@@ -7,8 +7,6 @@ import ModalComponent from '../components/modal/modal.jsx';
 
 class Modal extends React.Component {
     constructor (props) {
-        console.log("MODAL PROPERTIES?")
-        console.log(props)
         super(props);
         bindAll(this, [
             'addEventListeners',

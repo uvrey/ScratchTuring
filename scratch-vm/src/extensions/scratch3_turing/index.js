@@ -76,7 +76,7 @@ class Scratch3Turing {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: 'turing.testStuff',
-                        default: '🎨 do something',
+                        default: '🎨 Go and do something',
                         description: 'test some stuff'
                     })
                 },

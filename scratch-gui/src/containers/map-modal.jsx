@@ -4,12 +4,10 @@ import bindAll from 'lodash.bindall';
 import MapModalComponent, {PHASES} from '../components/map-modal/map-modal.jsx';
 import VM from 'scratch-vm';
 import analytics from '../lib/analytics.js';
-import extensionData from '../lib/libraries/extensions/index.jsx';
 import {connect} from 'react-redux';
 import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
 import {closeMapModal} from '../reducers/modals.js';
 import {costumeUpload, handleMapFromAPI} from '../lib/file-uploader.js';
-import {StageSelector, onNewMapBackdrop} from './stage-selector.jsx';
 
 class MapModal extends React.Component {
     constructor (props) {
@@ -48,6 +46,16 @@ class MapModal extends React.Component {
         });  
     }
 
+    storeModalValues(lat, long, zoom, pitch) {
+        console.log("Storing configuration:")
+        console.log(long + "," + lat + "," + zoom + "," + pitch)
+        localStorage.setItem("longitude", long);
+        localStorage.setItem("latitude", lat);
+        localStorage.setItem("zoom", zoom);
+        localStorage.setItem("pitch", pitch);
+      }
+
+
     handleFetchingMap(lat, long, zoom, pitch) {
         console.log("Lat, long:")
         console.log(lat +", " + long)
@@ -73,11 +81,10 @@ class MapModal extends React.Component {
             }
 
             const { buffer, fileType } = data;
-            console.log("we got data");
-            console.log(fileType);
 
             // Proceed with buffer and fileType
             this.handleNewMapBackdrop(buffer, fileType)
+            this.storeModalValues(lat, long, zoom, pitch) // store modal values once set
             this.props.onCloseMapLoad();
         })
         .catch((error) => {
@@ -93,17 +100,61 @@ class MapModal extends React.Component {
         // Define desired map properties
         var lat = Math.random() * (50.0 + 50.0) - 50.0; // Random latitude between -90 and 90
         var long = Math.random() * (100.0 + 100.0) - 100.0; // Random longitude between -180 and 180
+        const roundedLat = Math.round(lat * 10000) / 10000;
+        const roundedLong = Math.round(long * 10000) / 10000;
 
-        this.handleFetchingMap(lat, long, 12, 30) // default pitch and zoom
+        // Fetch the map
+        this.handleFetchingMap(roundedLat, roundedLong, 10, 35);
     }
 
     handleCancel () {
         this.props.onCancel();
     }
 
+    // Test if there are values to fetch
+    checkRestore() {
+        try {
+            console.log("we got a stored value for longitude: ")
+            console.log(localStorage.getItem("longitude"));
+            return true; // Explicitly return true on success
+          } catch (error) {
+            return false; // Return false on error
+          }
+    }
+
+    getStoredValues() {
+        const inputs = ["longitude", "latitude", "zoom", "pitch"];
+        const storedValues = {};
+
+        if (this.checkRestore()) {
+            console.log("we are trying to find coordinates again, but some are already stored")
+        } else {
+            console.log("No previous coords are stored")
+        }
+        
+        for (const inputName of inputs) {
+            storedValues[inputName] = localStorage.getItem(inputName);
+        }
+        return storedValues
+    }
+
+    getStoredValue(value, defaultValue) {
+        try {
+            return localStorage.getItem(value);
+        }  catch (error) {
+            return defaultValue; 
+        }
+    }
+
     handleCoordinates() {
         const inputs = ["longitude", "latitude", "zoom", "pitch"];
         const values = {};
+
+        if (this.checkRestore()) {
+            console.log("we are trying to find coordinates again, but some are already stored")
+        } else {
+            console.log("No previous coords are stored")
+        }
         
         for (const inputName of inputs) {
           const input = document.getElementById(inputName);
@@ -151,7 +202,7 @@ class MapModal extends React.Component {
                 name={"Map Generator"}
                 onSurprise={this.handleSurprise}
                 onCoords={this.handleCoordinates}
-                // onHelp={this.handleHelp}
+                getValue={this.getStoredValue}
             />
         );
     }

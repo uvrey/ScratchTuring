@@ -67,6 +67,10 @@ function updateSliderValue(sliderId) {
     label.textContent = slider.value;
 }
 
+function getValue() {
+    return "16"
+}
+
 const MapModalComponent = props => (
     <Modal
         className={styles.modalContent}
@@ -88,16 +92,16 @@ const MapModalComponent = props => (
                 />
             </Box>
             <Box className={styles.sliderBox}>
-                <input
-                    type="range"
-                    id="longitude"
-                    min="-180"
-                    max="180"
-                    step="0.0001"
-                    defaultValue="0.1119"
-                    onChange={() => updateSliderValue('longitude')}
-                />
-                <span id="longitudeValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>0.1119</span>
+            <input
+                type="range"
+                id="longitude"
+                min="-180"
+                max="180"
+                step="0.0001"
+                defaultValue={props.getValue('longitude', 0.1119)} // Use props.getValue directly
+                onChange={() => updateSliderValue('longitude')}
+            />
+            <span id="longitudeValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('longitude', '0.1119')}</span>
             </Box>
 
             <Box className={styles.sliderTitle}>
@@ -115,10 +119,10 @@ const MapModalComponent = props => (
                     min="-90"
                     max="90"
                     step="0.0001"
-                    defaultValue="52.221"
+                    defaultValue={props.getValue('latitude', 52.221)}
                     onChange={() => updateSliderValue('latitude')}
                 />
-            <span id="latitudeValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>52</span>
+            <span id="latitudeValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('latitude', 52.221)}</span>
             </Box>
            
             <Box className={styles.sliderTitle}>
@@ -136,10 +140,10 @@ const MapModalComponent = props => (
                     min="0"
                     max="22"
                     step="0.01"
-                    defaultValue="14.25"
+                    defaultValue={props.getValue('zoom', 14.25)}
                     onInput={() => updateSliderValue('zoom')}
                 />
-            <span id="zoomValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>14.25</span>
+            <span id="zoomValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('zoom', 14.25)}</span>
             </Box>
            
             <Box className={styles.sliderTitle}>
@@ -157,10 +161,10 @@ const MapModalComponent = props => (
                     min="0"
                     max="60"
                     step="0.01"
-                    defaultValue = "60"
+                    defaultValue = {props.getValue('pitch', 60)}
                     onChange={() => updateSliderValue('pitch')}
                 />
-            <span id="pitchValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>60</span>
+            <span id="pitchValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('pitch', 60)}</span>
             </Box>
            
             </Box>
@@ -171,7 +175,7 @@ const MapModalComponent = props => (
                     onClick={props.onCoords}
                 >
                     <FormattedMessage
-                        defaultMessage="Get Coordinates"
+                        defaultMessage="Get Map"
                         description="Button in prompt for starting a search"
                         id="gui.mapModal.getCoords"
                     />
@@ -212,6 +216,7 @@ MapModalComponent.propTypes = {
     onCancel: PropTypes.func.isRequired,
     title: PropTypes.string.isRequired,
     phase: PropTypes.oneOf(Object.keys(PHASES)).isRequired,
+    getValue: PropTypes.func
 };
     // onHelp: PropTypes.func.isRequired,
 MapModalComponent.defaultProps = {
