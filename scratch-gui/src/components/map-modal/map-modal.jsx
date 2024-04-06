@@ -52,23 +52,11 @@ const PHASES = keyMirror({
     coordinates: null,
 });
 
+
 function updateSliderValue(sliderId) {
-    // const slider = document.getElementById(sliderId);
-    // const label = document.getElementById(`${sliderId}Value`);
-    // const sliderWidth = slider.offsetWidth;
-    // const labelWidth = label.offsetWidth;
-    // const value = slider.value;
-    // const offset = (value - slider.min) / (slider.max - slider.min);
-    // const labelPosition = offset * (sliderWidth - labelWidth);
-    // label.style.left = `${labelPosition}px`;
-    // label.textContent = value;
     const slider = document.getElementById(sliderId);
     const label = document.getElementById(`${sliderId}Value`);
     label.textContent = slider.value;
-}
-
-function getValue() {
-    return "16"
 }
 
 const MapModalComponent = props => (
@@ -84,89 +72,162 @@ const MapModalComponent = props => (
         <Box className={styles.body}>
 
           <Box className={styles.sliderArea}>
-            <Box className={styles.sliderTitle}>
-                <FormattedMessage
-                    defaultMessage="Longitude"
-                    description="Longitude label"
-                    id="gui.mapModal.longitudeLabel"
-                />
-            </Box>
-            <Box className={styles.sliderBox}>
-            <input
-                type="range"
-                id="longitude"
-                min="-180"
-                max="180"
-                step="0.0001"
-                defaultValue={props.getValue('longitude', 0.1119)} // Use props.getValue directly
-                onChange={() => updateSliderValue('longitude')}
-            />
-            <span id="longitudeValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('longitude', '0.1119')}</span>
-            </Box>
+                <Box className={styles.sliderTitle}>
+                    <FormattedMessage
+                        defaultMessage="Longitude"
+                        description="Longitude label"
+                        id="gui.mapModal.longitudeLabel"
+                    />
+                </Box>
 
-            <Box className={styles.sliderTitle}>
-                <FormattedMessage
-                    defaultMessage="Latitude"
-                    description="Latitude label"
-                    id="gui.mapModal.latitudeLabel"
+                <Box className={styles.sliderBox}>
+                <input
+                    type="range"
+                    id="longitude"
+                    min="-180"
+                    max="180"
+                    step="0.0001"
+                    defaultValue={props.getValue('longitude', 0.1119)}
+                    onChange={(event) => {
+                        const newValue = parseFloat(event.target.value);
+                        document.getElementById("longitudeValue").value = newValue;
+                        adjustInputWidth('longitudeValue')
+                        updateSliderValue('longitudeValue', newValue); // Assuming your function
+                    }}
                 />
-            </Box>
-        
-            <Box className={styles.sliderBox}>
-            <input
+                <input
+                    type="text"
+                    id="longitudeValue" 
+                    maxLength="8" // Restrict to 8 characters
+                    defaultValue={props.getValue('longitude', 0.1119)} // Set initial value
+                    className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.longLat)}
+                    onChange={(event) => {
+                    const newValue = parseFloat(event.target.value);
+                    if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
+                        document.getElementById("longitude").value = newValue;
+                        updateSliderValue('longitude', newValue); // Assuming your function
+                    }
+                    }}
+                />
+                </Box>
+
+                <Box className={styles.sliderTitle}>
+                    <FormattedMessage
+                        defaultMessage="Latitude"
+                        description="Latitude label"
+                        id="gui.mapModal.latitudeLabel"
+                    />
+                </Box>
+
+                <Box className={styles.sliderBox}>
+                <input
                     type="range"
                     id="latitude"
                     min="-90"
                     max="90"
                     step="0.0001"
                     defaultValue={props.getValue('latitude', 52.221)}
-                    onChange={() => updateSliderValue('latitude')}
+                    onChange={(event) => {
+                        const newValue = parseFloat(event.target.value);
+                        document.getElementById("latitudeValue").value = newValue;
+                        adjustInputWidth('latitude')
+                        updateSliderValue('latitude', newValue); // Assuming your function
+                    }}
                 />
-            <span id="latitudeValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('latitude', 52.221)}</span>
-            </Box>
-           
-            <Box className={styles.sliderTitle}>
-                <FormattedMessage
-                    defaultMessage="Zoom"
-                    description="Zoom label"
-                    id="gui.mapModal.zoomLabel"
+                <input
+                    type="text"
+                    id="latitudeValue" 
+                    maxLength="8" // Restrict to 8 characters
+                    defaultValue={props.getValue('latitude', 52.221)} // Set initial value
+                    className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.longLat)}
+                    onChange={(event) => {
+                    const newValue = parseFloat(event.target.value);
+                    if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
+                        document.getElementById("latitude").value = newValue;
+                        updateSliderValue('latitude', newValue); // Assuming your function
+                    }
+                    }}
                 />
-            </Box>
-        
-            <Box className={styles.sliderBox}>
-            <input
+                </Box>
+
+                <Box className={styles.sliderTitle}>
+                    <FormattedMessage
+                        defaultMessage="Zoom"
+                        description="Zoom label"
+                        id="gui.mapModal.zoomLabel"
+                    />
+                </Box>
+
+                <Box className={styles.sliderBox}>
+                <input
                     type="range"
                     id="zoom"
                     min="0"
                     max="22"
-                    step="0.01"
-                    defaultValue={props.getValue('zoom', 14.25)}
-                    onInput={() => updateSliderValue('zoom')}
+                    step="0.05"
+                    defaultValue={props.getValue('zoom', 0.1119)}
+                    onChange={(event) => {
+                        const newValue = parseFloat(event.target.value);
+                        document.getElementById("zoomValue").value = newValue;
+                        adjustInputWidth('zoomValue')
+                        updateSliderValue('zoomValue', newValue); // Assuming your function
+                    }}
                 />
-            <span id="zoomValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('zoom', 14.25)}</span>
-            </Box>
-           
-            <Box className={styles.sliderTitle}>
-                <FormattedMessage
-                    defaultMessage="Pitch"
-                    description="Pitch label"
-                    id="gui.mapModal.pitchLabel"
+                <input
+                    type="text"
+                    id="zoomValue" 
+                    maxLength="4" // Restrict to 8 characters
+                    defaultValue={props.getValue('zoom', 14.25)} // Set initial value
+                    className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                    onChange={(event) => {
+                    const newValue = parseFloat(event.target.value);
+                    if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                        document.getElementById("zoom").value = newValue;
+                        updateSliderValue('zoom', newValue); // Assuming your function
+                    }
+                    }}
                 />
-            </Box>
-        
-            <Box className={styles.sliderBox}>
-            <input
+                </Box>
+
+                <Box className={styles.sliderTitle}>
+                    <FormattedMessage
+                        defaultMessage="Pitch"
+                        description="Pitch label"
+                        id="gui.mapModal.pitchLabel"
+                    />
+                </Box>
+            
+                <Box className={styles.sliderBox}>
+                    <input
                     type="range"
                     id="pitch"
                     min="0"
                     max="60"
-                    step="0.01"
-                    defaultValue = {props.getValue('pitch', 60)}
-                    onChange={() => updateSliderValue('pitch')}
-                />
-            <span id="pitchValue" className={classNames(styles.sliderValue, styles.sliderValueBackground)}>{props.getValue('pitch', 60)}</span>
-            </Box>
-           
+                    step="0.5"
+                        defaultValue={props.getValue('pitch', 60)}
+                        onChange={(event) => {
+                            const newValue = parseFloat(event.target.value);
+                            document.getElementById("pitchValue").value = newValue;
+                            adjustInputWidth('pitchValue')
+                            updateSliderValue('pitchValue', newValue); // Assuming your function
+                        }}
+                    />
+                    <input
+                        type="text"
+                        id="pitchValue" 
+                        maxLength="4" // Restrict to 8 characters
+                        defaultValue={props.getValue('pitch', 60.0)} // Set initial value
+                        className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                        onChange={(event) => {
+                        const newValue = parseFloat(event.target.value);
+                        if (!isNaN(newValue) && newValue >= 0 && newValue <= 60) {
+                            document.getElementById("pitch").value = newValue;
+                            updateSliderValue('pitch', newValue); // Assuming your function
+                        }
+                        }}
+                    />
+                </Box>
+
             </Box>
             
             <Box className={styles.buttonRow}>

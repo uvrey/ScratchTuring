@@ -348,15 +348,31 @@
     font-size: 0.8rem;
     text-align: center;
     color: #ffffff;
-    padding: 0.2em 0.5em 0.2em 0.5em;
+    padding: 0.1em 0.5em 0.1em 0.5em;
     margin-left: 0.4em;
 }
+
+.zoom-pitch {
+    /* Set a minimum width to prevent excessive shrinking */
+    max-width: 4.5em;
+    /* Remove default browser styling (optional) */
+    -webkit-appearance: none;
+  }
+  
+.long-lat { /* Default rule for all text inputs */
+    /* Set a minimum width to prevent excessive shrinking (optional) */
+    max-width: 6em; /* Adjust as needed */
+    /* Remove default browser styling (optional) */
+    -webkit-appearance: none;
+  }
+  
 
 input[type=range] {
     -webkit-appearance: none;
     margin-left: 3em;
     width: 75%;
   }
+
   input[type=range]:focus {
     outline: none;
   }
