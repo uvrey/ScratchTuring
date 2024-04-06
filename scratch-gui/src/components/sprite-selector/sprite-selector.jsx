@@ -80,7 +80,6 @@ const SpriteSelectorComponent = function (props) {
             className={styles.spriteSelector}
             {...componentProps}
         >
-
             <SpriteInfo
                 direction={selectedSprite.direction}
                 disabled={spriteInfoDisabled}

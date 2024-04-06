@@ -7,11 +7,7 @@ import Modal from '../../containers/modal.jsx';
 
 import styles from './map-modal.css';
 import TargetPane from '../../containers/target-pane.jsx';
-import AssetPanel from '../asset-panel/asset-panel.jsx';
-import ActionMenu from '../action-menu/action-menu.jsx';
 import {defineMessages, intlShape, injectIntl, FormattedMessage} from 'react-intl';
-import CoordinatesStep from './coords-step.jsx';
-import MenuStep from './menu-step.jsx';
 import surpriseIcon from '../action-menu/icon--surprise.svg'
 import searchIcon from '../action-menu/icon--search.svg';
 import globeIcon from '../action-menu/icon--globe.svg';
