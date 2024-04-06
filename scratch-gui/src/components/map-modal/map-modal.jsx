@@ -71,7 +71,28 @@ const MapModalComponent = props => (
      >
         <Box className={styles.body}>
 
+        
+
           <Box className={styles.sliderArea}>
+
+                <Box className={styles.dropdownTitle}>
+                    <FormattedMessage
+                        defaultMessage="Map Style"
+                        description="map style label"
+                        id="gui.mapModal.mapStyle"
+                    />
+                </Box>
+                <Box className={styles.dropdownBox}>
+                <select
+                    id="style-dropdown" 
+                    name="style-dropdown"
+                    className={classNames(styles.dropdownStyle, styles.sliderValueBackground)}
+                    >
+                    <option  className={classNames(styles.dropdownValue)} value="satellite">Satellite</option>
+                    <option  className={classNames(styles.dropdownValue)} value="street">Street</option>
+                    </select>
+                </Box>
+
                 <Box className={styles.sliderTitle}>
                     <FormattedMessage
                         defaultMessage="Longitude"
