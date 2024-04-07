@@ -52,6 +52,7 @@ const StageComponent = props => {
                         width: stageDimensions.width
                     }}
                 >
+                
                     <DOMElementRenderer
                         domElement={canvas}
                         style={{

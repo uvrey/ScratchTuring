@@ -975,6 +975,30 @@ class RenderedTarget extends Target {
         return newClone;
     }
 
+    makePin () {
+        if (!this.runtime.clonesAvailable() || this.isStage) {
+            return null; // Hit max clone limit, or this is the stage.
+        }
+        this.runtime.changeCloneCounter(1);
+        const newClone = this.sprite.createClone();
+        // Copy all properties.
+        newClone.x = this.x;
+        newClone.y = this.y;
+        newClone.direction = this.direction;
+        newClone.draggable = this.draggable;
+        newClone.visible = this.visible;
+        newClone.size = this.size;
+        newClone.currentCostume = this.currentCostume;
+        newClone.rotationStyle = this.rotationStyle;
+        newClone.effects = Clone.simple(this.effects);
+        newClone.variables = this.duplicateVariables();
+        newClone._edgeActivatedHatValues = Clone.simple(this._edgeActivatedHatValues);
+        newClone.initDrawable(StageLayering.SPRITE_LAYER);
+        newClone.updateAllDrawableProperties();
+        return newClone;
+    }
+
+
     /**
      * Make a duplicate using a duplicate sprite.
      * @return {RenderedTarget} New clone.
@@ -1088,7 +1112,6 @@ class RenderedTarget extends Target {
             volume: this.volume,
             videoTransparency: this.videoTransparency,
             videoState: this.videoState
-
         };
     }
 

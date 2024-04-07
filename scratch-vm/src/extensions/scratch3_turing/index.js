@@ -12,6 +12,19 @@ class Scratch3Turing {
          * @type {Runtime}
          */
         this.runtime = runtime;
+        this.state = {
+            expectation: 0,
+            feature: 0,
+            unit: '%'
+        }
+        this.features = ['likelihood', 'time', 'proportion']
+        this.units = ['%', 'sec', '%']
+
+        /**
+         * The timer utility.
+         * @type {Timer}
+         */
+                this._timer = new Timer();
     }
 
         /**
@@ -63,6 +76,32 @@ class Scratch3Turing {
            ]
         }
 
+        get FEATURE_INFO () {
+            return [
+                {
+                    name: formatMessage({
+                        id: 'turing.features.likelihood',
+                        default: 'likelihood (%)',
+                        description: 'likelihood'
+                    }),
+                },
+                {
+                    name: formatMessage({
+                        id: 'turing.models.timeTaken',
+                        default: 'time (s)',
+                        description: 'Amount of time taken.'
+                    }),
+                },
+                {
+                    name: formatMessage({
+                        id: 'turing.models.proportion',
+                        default: 'proportion (%)',
+                        description: 'proportion'
+                    }),
+                },
+               ]
+            }
+    
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
@@ -73,12 +112,59 @@ class Scratch3Turing {
 
             blocks: [
                 {
+                    opcode: 'expectation',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.expectation',
+                        default:  'we expect',
+                        description: 'turing.pinLocation'
+                    })
+                },
+                {
+                    opcode: 'actualValue',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.actual',
+                        default:  'actual value',
+                        description: 'turing.actualValue'
+                    })
+                },
+                {
+                    opcode: 'setExpectation',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.setExpectation',
+                        default:  'I think [FEATURE] will be [EXP]',
+                        description: 'turing.setExpectation'
+                    }),
+                    arguments: {
+                        FEATURE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1,
+                            menu: 'FEATURES',
+                        },
+                        EXP: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                {
                     opcode: 'pinLocation',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.pinLocation',
                         default:  '📌 Pin',
                         description: 'turing.pinLocation'
+                    })
+                },
+                {
+                    opcode: 'clearPins',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.clearPins',
+                        default:  '📌 Clear Pins',
+                        description: 'turing.clearPins'
                     })
                 },
                 {
@@ -98,16 +184,56 @@ class Scratch3Turing {
                 },
             ],
             menus: {
-                MODELS: {
+                FEATURES: {
                     acceptReporters: true,
-                    items: this._buildMenu(this.MODEL_INFO)
+                    items: this._buildMenu(this.FEATURE_INFO)
                 },
             }
         };
     }
 
-    pinLocation() {
+    actualValue(args, util) {
+        if (this.state.unit == "sec") {
+            return this.getTimer(args, util).toFixed(2) + ' ' + this.state.unit
+        } else if (this.state.feature == "proportion") {
+            return "todo: prop"
+        } else {
+            return "todo: likelihood"
+        }
+    }
+
+    expectation(args, util) {
+        return this.state.expectation+' '+ this.state.unit // cast to string
+    }
+
+    setExpectation(args, util) {
+        expectation = args.EXP
+        featureIndex = args.FEATURE - 1
+        this.state.expectation = expectation
+        this.state.feature = this.features[featureIndex]
+        this.state.unit = this.units[featureIndex]
+        return "Set " + this.state.feature + " to " + this.state.expectation  + " " + this.state.unit
+    }
+
+    // how to access vm here?
+    pinLocation(args, util) {
+        x = util.target.x
+        y = util.target.y
+        util.target.makeClone()
+        // const sprite3Uri = path.resolve(__dirname, '../fixtures/cat.sprite3');
+        // const sprite3 = readFileToBuffer(sprite3Uri);
+    
+        // vm.addSprite(sprite3).then(() => {
+        //     t.equal(projectChanged, true); 
+        //     t.end();
+        // });
+
+        console.log("marked location at: " + x +", " + y)
         return "Hello world!"
+    }
+
+    clearPins(args, util) {
+        return "done"
     }
 
     /**
@@ -134,6 +260,7 @@ class Scratch3Turing {
             motion_xposition: this.getX,
             motion_yposition: this.getY,
             motion_direction: this.getDirection,
+            sensing_timer: this.getTimer,
             // Legacy no-op blocks:
             motion_scroll_right: () => {},
             motion_scroll_up: () => {},
@@ -141,6 +268,10 @@ class Scratch3Turing {
             motion_xscroll: () => {},
             motion_yscroll: () => {}
         };
+    }
+
+    getTimer (args, util) {
+        return util.ioQuery('clock', 'projectTimer');
     }
 
     getMonitored () {
@@ -156,7 +287,10 @@ class Scratch3Turing {
             motion_direction: {
                 isSpriteSpecific: true,
                 getId: targetId => `${targetId}_direction`
-            }
+            },
+            sensing_timer: {
+                getId: () => 'timer'
+            },
         };
     }
 
