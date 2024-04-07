@@ -16,7 +16,6 @@ import paintIcon from '../action-menu/icon--paint.svg';
 import spriteIcon from '../action-menu/icon--sprite.svg';
 import surpriseIcon from '../action-menu/icon--surprise.svg';
 import searchIcon from '../action-menu/icon--search.svg';
-import * as math from 'mathjs';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -64,29 +63,6 @@ const data = [
       amt: 2100,
     },
   ];  
-
-
-const generateNormalDistributionData = (mu, sigma) => {
-    const numPoints = 200; // Adjust this to control the smoothness of the curve
-    const xValues = math.linspace(mu - 3 * sigma, mu + 3 * sigma, numPoints); // Range covering 99.7% of the distribution
-    const yValues = xValues.map(x => math.normalDistribution(x, mu, sigma)); // Calculate PDF values for each x
-  
-    return yValues.map((y, i) => ({ x: xValues[i], y })); // Format as data for Recharts
-  };
-
-const NormalDistributionChart = ({ mu, sigma }) => {
-// Generate data points using a chosen method (library or manual calculation)
-    const data = generateNormalDistributionData(mu, sigma); // Maybe get this from Turing?
-
-    return (
-        <Chart width={600} height={300} data={data}>
-        <XAxis dataKey="x" />
-        <YAxis />
-        <Tooltip />
-        <Line type="monotone" dataKey="y" stroke="#8884d8" />
-        </Chart>
-    );
-};
 
 const messages = defineMessages({
     addSpriteFromLibrary: {
@@ -151,7 +127,7 @@ const SpriteSelectorComponent = function (props) {
             className={styles.spriteSelector}
             {...componentProps}
         >
-            <ResponsiveContainer width="100%" height="100%">
+            {/* <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                 width={500}
                 height={300}
@@ -171,9 +147,9 @@ const SpriteSelectorComponent = function (props) {
                 <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
                 <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
                 </LineChart>
-            </ResponsiveContainer>
+            </ResponsiveContainer> */}
 
-            {/* <SpriteInfo
+            <SpriteInfo
                 direction={selectedSprite.direction}
                 disabled={spriteInfoDisabled}
                 name={selectedSprite.name}
@@ -203,7 +179,7 @@ const SpriteSelectorComponent = function (props) {
                 onDuplicateSprite={onDuplicateSprite}
                 onExportSprite={onExportSprite}
                 onSelectSprite={onSelectSprite}
-            /> */}
+            />
             <ActionMenu
                 className={styles.addButton}
                 img={spriteIcon}

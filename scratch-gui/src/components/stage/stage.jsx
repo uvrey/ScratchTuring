@@ -42,6 +42,10 @@ const StageComponent = props => {
                     {[styles.withColorPicker]: !isFullScreen && isColorPicking})}
                 onDoubleClick={onDoubleClick}
             >
+                {/* <HighchartsReact
+                    highcharts={Highcharts}
+                    options={options}
+                /> */}
                 <Box
                     className={classNames(
                         styles.stage,

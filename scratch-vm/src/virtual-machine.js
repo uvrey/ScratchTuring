@@ -51,6 +51,7 @@ class VirtualMachine extends EventEmitter {
          * @type {!Runtime}
          */
         this.runtime = new Runtime();
+        console.log("created new runtime")
         centralDispatch.setService('runtime', this.runtime).catch(e => {
             log.error(`Failed to register runtime service: ${JSON.stringify(e)}`);
         });
@@ -153,6 +154,10 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData => {
             this.emit(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData);
         });
+        this.runtime.on(Runtime.BAYES_INIT, extensionId => {
+            this.emit(Runtime.BAYES_INIT, extensionId) // we design this to test signals between our Turing extension and the GUI
+        }
+    );
 
         this.extensionManager = new ExtensionManager(this.runtime);
 
@@ -270,7 +275,12 @@ class VirtualMachine extends EventEmitter {
      * @param {string} extensionId - the id of the extension.
      */
     scanForPeripheral (extensionId) {
+        console.log("initting scanForPeripheral from VM")
         this.runtime.scanForPeripheral(extensionId);
+    }
+
+    updateSomething (extensionId) {
+        this.runtime.updateSomething(extensionId);
     }
 
     /**

@@ -57,6 +57,7 @@ class AutoScanningStep extends React.Component {
         this.unbindPeripheralUpdates();
     }
     handleStartScan () {
+        console.log("starting the scan from autoscanningstep container")
         this.bindPeripheralUpdates();
         this.props.vm.scanForPeripheral(this.props.extensionId);
         this.setState({

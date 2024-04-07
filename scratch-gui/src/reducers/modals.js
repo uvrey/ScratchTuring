@@ -12,6 +12,7 @@ const MODAL_SOUND_RECORDER = 'soundRecorder';
 const MODAL_CONNECTION = 'connectionModal';
 const MODAL_TIPS_LIBRARY = 'tipsLibrary';
 const MODAL_MAP = 'mapModal';
+const MODAL_BAYES = 'bayesModal';
 
 const initialState = {
     [MODAL_BACKDROP_LIBRARY]: false,
@@ -24,7 +25,8 @@ const initialState = {
     [MODAL_SOUND_RECORDER]: false,
     [MODAL_CONNECTION]: false,
     [MODAL_TIPS_LIBRARY]: false,
-    [MODAL_MAP]: false
+    [MODAL_MAP]: false,
+    [MODAL_BAYES]: false
 };
 
 const reducer = function (state, action) {
@@ -90,6 +92,9 @@ const openSoundRecorder = function () {
 const openConnectionModal = function () {
     return openModal(MODAL_CONNECTION);
 };
+const openBayesModal = function () {
+    return openModal(MODAL_BAYES);
+};
 const openMapModal = function () {
     return openModal(MODAL_MAP);
 };
@@ -132,6 +137,9 @@ const closeConnectionModal = function () {
 const closeMapModal = function () {
     return closeModal(MODAL_MAP);
 };
+const closeBayesModal = function () {
+    return closeModal(MODAL_BAYES);
+};
 export {
     reducer as default,
     initialState as modalsInitialState,
@@ -146,6 +154,7 @@ export {
     openTipsLibrary,
     openConnectionModal,
     openMapModal,
+    openBayesModal,
     openMapOptionsModal,
     closeBackdropLibrary,
     closeCostumeLibrary,
@@ -157,5 +166,6 @@ export {
     closeTelemetryModal,
     closeTipsLibrary,
     closeConnectionModal,
+    closeBayesModal,
     closeMapModal
 };

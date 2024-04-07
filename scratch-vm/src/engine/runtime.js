@@ -352,6 +352,8 @@ class Runtime extends EventEmitter {
          */
         this.peripheralExtensions = {};
 
+        this.bayesExtensions = {};
+        this.bayesCallbacks = {};
         /**
          * A runtime profiler that records timed events for later playback to
          * diagnose Scratch performance.
@@ -640,6 +642,10 @@ class Runtime extends EventEmitter {
      */
     static get PERIPHERAL_DISCONNECTED () {
         return 'PERIPHERAL_DISCONNECTED';
+    }
+
+    static get DUMMY_SIGNAL () {
+        return 'DUMMY_SIGNAL';
     }
 
     /**
@@ -1517,16 +1523,31 @@ class Runtime extends EventEmitter {
         this.peripheralExtensions[extensionId] = extension;
     }
 
+    registerBayesExtension (extensionId, extension) {
+        this.bayesExtensions[extensionId] = extension;
+    }
+
     /**
      * Tell the specified extension to scan for a peripheral.
      * @param {string} extensionId - the id of the extension.
      */
     scanForPeripheral (extensionId) {
+        console.log("initialising scan from peripheral (runtime)")
         if (this.peripheralExtensions[extensionId]) {
             this.peripheralExtensions[extensionId].scan();
         }
     }
 
+    addBayesModalCallBack(id, modalCallback) {
+        console.log("populating with callback")
+        this.bayesCallbacks[id] = modalCallback
+    }
+
+    updateSomething(extensionId) {
+        if (this.bayesExtensions[extensionId]) {
+            this.bayesExtensions[extensionId].getStuff(); // we customise this
+        }
+    }
     /**
      * Connect to the extension's specified peripheral.
      * @param {string} extensionId - the id of the extension.

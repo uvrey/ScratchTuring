@@ -24,7 +24,7 @@ import {injectExtensionBlockTheme, injectExtensionCategoryTheme} from '../lib/th
 import {connect} from 'react-redux';
 import {updateToolbox} from '../reducers/toolbox';
 import {activateColorPicker} from '../reducers/color-picker';
-import {closeExtensionLibrary, openSoundRecorder, openConnectionModal, openMapModal} from '../reducers/modals';
+import {closeExtensionLibrary, openSoundRecorder, openConnectionModal, openMapModal, openBayesModal} from '../reducers/modals';
 import {activateCustomProcedures, deactivateCustomProcedures} from '../reducers/custom-procedures';
 import {setConnectionModalExtensionId} from '../reducers/connection-modal';
 import {updateMetrics} from '../reducers/workspace-metrics';
@@ -59,6 +59,7 @@ class Blocks extends React.Component {
             'handleCategorySelected',
             'handleConnectionModalStart',
             'handleMapModalStart',
+            'handleBayesModalStart',
             'handleDrop',
             'handleStatusButtonUpdate',
             'handleOpenSoundRecorder',
@@ -84,6 +85,7 @@ class Blocks extends React.Component {
         this.ScratchBlocks.statusButtonCallback = this.handleConnectionModalStart;
         this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
         this.ScratchBlocks.mapButtonCallback = this.handleMapModalStart;
+        this.ScratchBlocks.bayesButtonCallback = this.handleBayesModalStart;
 
         this.state = {
             prompt: null
@@ -92,11 +94,13 @@ class Blocks extends React.Component {
         this.toolboxUpdateQueue = [];
     }
     componentDidMount () {
+        console.log("Component did mount? - gui containers/blocks.hsx/componentDidMount")
         this.ScratchBlocks = VMScratchBlocks(this.props.vm, this.props.useCatBlocks);
         this.ScratchBlocks.prompt = this.handlePromptStart;
         this.ScratchBlocks.statusButtonCallback = this.handleConnectionModalStart;
         this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
         this.ScratchBlocks.mapButtonCallback = this.handleMapModalStart;
+        this.ScratchBlocks.bayesButtonCallback = this.handleBayesModalStart;
 
         this.ScratchBlocks.FieldColourSlider.activateEyedropper_ = this.props.onActivateColorPicker;
         this.ScratchBlocks.Procedures.externalProcedureDefCallback = this.props.onActivateCustomProcedures;
@@ -107,8 +111,6 @@ class Blocks extends React.Component {
             this.props.options,
             {rtl: this.props.isRtl, toolbox: this.props.toolboxXML, colours: getColorsForTheme(this.props.theme)}
         );
-        console.log("WORKSPACE CONFIG")
-        console.log(workspaceConfig)
         this.workspace = this.ScratchBlocks.inject(this.blocks, workspaceConfig);
 
         // Register buttons under new callback keys for creating variables,
@@ -281,6 +283,7 @@ class Blocks extends React.Component {
         this.props.vm.addListener('BLOCKSINFO_UPDATE', this.handleBlocksInfoUpdate);
         this.props.vm.addListener('PERIPHERAL_CONNECTED', this.handleStatusButtonUpdate);
         this.props.vm.addListener('PERIPHERAL_DISCONNECTED', this.handleStatusButtonUpdate);
+        this.props.vm.addListener('BAYES_INIT', this.onBlockGlowOn); // edit this
     }
     detachVM () {
         this.props.vm.removeListener('SCRIPT_GLOW_ON', this.onScriptGlowOn);
@@ -295,6 +298,7 @@ class Blocks extends React.Component {
         this.props.vm.removeListener('BLOCKSINFO_UPDATE', this.handleBlocksInfoUpdate);
         this.props.vm.removeListener('PERIPHERAL_CONNECTED', this.handleStatusButtonUpdate);
         this.props.vm.removeListener('PERIPHERAL_DISCONNECTED', this.handleStatusButtonUpdate);
+        this.props.vm.removeListener('BAYES_INIT', this.onBlockGlowOff); // edit this
     }
 
     updateToolboxBlockValue (id, value) {
@@ -483,16 +487,34 @@ class Blocks extends React.Component {
         // @todo Later we should replace this to avoid all the warnings from redefining blocks.
         this.handleExtensionAdded(categoryInfo);
     }
-    handleCategorySelected (categoryId) {
+    handleCategorySelected (categoryId, isBayes=false) {
+        console.log("handle category selected handling modal start? inside gui blocks.jsx")
         const extension = extensionData.find(ext => ext.extensionId === categoryId);
+
+        console.log("extension data...")
+        console.log(extension)
+
         if (extension && extension.launchPeripheralConnectionFlow) {
             this.handleConnectionModalStart(categoryId);
         }
 
+        if (extension && extension.launchGUIConnectionFlow) { // launch Turing connection to the GUI
+            console.log("we have selected the turing extension! inside blocks")
+            console.log("todo - transmit reference to all graphic objects we might need here.")
+            this.props.vm.runtime.addBayesModalCallBack(extension.extensionId, this.handleBayesModalStart)
+        }
+        
         this.withToolboxUpdates(() => {
             this.workspace.toolbox_.setSelectedCategoryById(categoryId);
         });
     }
+    // handleOpenBayesPanel (categoryId) {
+    //     const extension = extensionData.find(ext => ext.extensionId === categoryId);
+    //     if (extension && extension.launchGUIConnectionFlow) { // launch Turing connection to the GUI
+    //         console.log("we have selected the turing extension! inside blocks")
+    //         this.handleBayesModalStart(extension._extensionId); // instead of doing this, we communicate that we have chosen this
+    //     }
+    // }
     setBlocks (blocks) {
         this.blocks = blocks;
     }
@@ -510,10 +532,14 @@ class Blocks extends React.Component {
         this.setState(p);
     }
     handleConnectionModalStart (extensionId) {
+        console.log("triggered handleConnectionModalStart")
         this.props.onOpenConnectionModal(extensionId);
     }
     handleMapModalStart () {
         this.props.onOpenMapModal();
+    }
+    handleBayesModalStart (extensionId) {
+        this.props.onOpenBayesModal(extensionId);
     }
     handleStatusButtonUpdate () {
         this.ScratchBlocks.refreshStatusButtons(this.workspace);
@@ -567,6 +593,7 @@ class Blocks extends React.Component {
             onActivateColorPicker,
             onOpenConnectionModal,
             onOpenMapModal,
+            onOpenBayesModal,
             onOpenSoundRecorder,
             updateToolboxState,
             onActivateCustomProcedures,
@@ -633,6 +660,7 @@ Blocks.propTypes = {
     onActivateCustomProcedures: PropTypes.func,
     onOpenConnectionModal: PropTypes.func,
     onOpenMapModal: PropTypes.func,
+    onOpenBayesModal: PropTypes.func,
     onOpenSoundRecorder: PropTypes.func,
     onRequestCloseCustomProcedures: PropTypes.func,
     onRequestCloseExtensionLibrary: PropTypes.func,
@@ -704,6 +732,9 @@ const mapDispatchToProps = dispatch => ({
     },
     onOpenMapModal: () => {
         dispatch(openMapModal());
+    },
+    onOpenBayesModal: () => {
+        dispatch(openBayesModal());
     },
     onOpenSoundRecorder: () => {
         dispatch(activateTab(SOUNDS_TAB_INDEX));

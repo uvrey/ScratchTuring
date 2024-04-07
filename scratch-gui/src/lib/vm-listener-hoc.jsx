@@ -46,6 +46,7 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('PROJECT_START', this.props.onGreenFlag);
             this.props.vm.on('PERIPHERAL_CONNECTION_LOST_ERROR', this.props.onShowExtensionAlert);
             this.props.vm.on('MIC_LISTENING', this.props.onMicListeningUpdate);
+            console.log("inside listener HOC")
 
         }
         componentDidMount () {

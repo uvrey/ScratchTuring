@@ -31,6 +31,7 @@ class ConnectionModal extends React.Component {
         };
     }
     componentDidMount () {
+        console.log("inside peripheral conenction modal handler container")
         this.props.vm.on('PERIPHERAL_CONNECTED', this.handleConnected);
         this.props.vm.on('PERIPHERAL_REQUEST_ERROR', this.handleError);
     }

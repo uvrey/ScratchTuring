@@ -4,6 +4,7 @@ import assetDragReducer, {assetDragInitialState} from './asset-drag';
 import cardsReducer, {cardsInitialState} from './cards';
 import colorPickerReducer, {colorPickerInitialState} from './color-picker';
 import connectionModalReducer, {connectionModalInitialState} from './connection-modal';
+import bayesModalReducer, {bayesModalInitialState} from './bayes-modal';
 import customProceduresReducer, {customProceduresInitialState} from './custom-procedures';
 import blockDragReducer, {blockDragInitialState} from './block-drag';
 import editorTabReducer, {editorTabInitialState} from './editor-tab';
@@ -40,6 +41,7 @@ const guiInitialState = {
     blockDrag: blockDragInitialState,
     cards: cardsInitialState,
     colorPicker: colorPickerInitialState,
+    bayesModal: bayesModalInitialState,
     connectionModal: connectionModalInitialState,
     customProcedures: customProceduresInitialState,
     editorTab: editorTabInitialState,
@@ -141,6 +143,7 @@ const guiReducer = combineReducers({
     blockDrag: blockDragReducer,
     cards: cardsReducer,
     colorPicker: colorPickerReducer,
+    bayesModal: bayesModalReducer,
     connectionModal: connectionModalReducer,
     customProcedures: customProceduresReducer,
     editorTab: editorTabReducer,

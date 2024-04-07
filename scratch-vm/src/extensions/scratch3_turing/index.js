@@ -4,30 +4,35 @@ const ArgumentType = require('../../extension-support/argument-type');
 const Cast = require('../../util/cast.js');
 const MathUtil = require('../../util/math-util');
 const Timer = require('../../util/timer');
+const VirtualMachine = require('../../virtual-machine.js');
+// const GUI = require('scratch-gui')
 
 class Scratch3Turing {
-    constructor (runtime) {
+    constructor (runtime, extensionId) {
         /**
          * The runtime instantiating this block package.
          * @type {Runtime}
          */
-        this.runtime = runtime;
+        this._runtime = runtime;
         this.state = {
             expectation: 0,
             feature: 0,
             unit: '%'
         }
+        this._extensionId = 'turing'
         this.features = ['likelihood', 'time', 'proportion']
         this.units = ['%', 'sec', '%']
+
+        this._runtime.registerBayesExtension(this._extensionId, this);
 
         /**
          * The timer utility.
          * @type {Timer}
          */
-                this._timer = new Timer();
+        this._timer = new Timer();
     }
 
-        /**
+    /**
      * Create data for a menu in scratch-blocks format, consisting of an array of objects with text and
      * value properties. The text is a translated string, and the value is one-indexed.
      * @param  {object[]} info - An array of info objects each having a name property.
@@ -57,7 +62,6 @@ class Scratch3Turing {
                     default: 'bernoulli',
                     description: 'Success or failure in a single trial'
                 }),
-                // fileName: '1-snare'
             },
             {
                 name: formatMessage({
@@ -168,6 +172,15 @@ class Scratch3Turing {
                     })
                 },
                 {
+                    opcode: 'openPanel',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.openPanel',
+                        default:  'Open Control Panel',
+                        description: 'turing.openPanel'
+                    })
+                },
+                {
                     opcode: 'moveSteps',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
@@ -192,6 +205,15 @@ class Scratch3Turing {
         };
     }
 
+    openPanel() {
+        panelCallback = this._runtime.bayesCallbacks[this._extensionId]
+        panelCallback(this._extensionId)
+    }
+
+    getStuff() { // called by the runtime?
+        console.log("called by the runtime")
+    }
+
     actualValue(args, util) {
         if (this.state.unit == "sec") {
             return this.getTimer(args, util).toFixed(2) + ' ' + this.state.unit
@@ -203,6 +225,8 @@ class Scratch3Turing {
     }
 
     expectation(args, util) {
+        console.log("GUI?")
+        console.log(GUI)
         return this.state.expectation+' '+ this.state.unit // cast to string
     }
 
@@ -219,15 +243,7 @@ class Scratch3Turing {
     pinLocation(args, util) {
         x = util.target.x
         y = util.target.y
-        util.target.makeClone()
-        // const sprite3Uri = path.resolve(__dirname, '../fixtures/cat.sprite3');
-        // const sprite3 = readFileToBuffer(sprite3Uri);
-    
-        // vm.addSprite(sprite3).then(() => {
-        //     t.equal(projectChanged, true); 
-        //     t.end();
-        // });
-
+        console.log(util)
         console.log("marked location at: " + x +", " + y)
         return "Hello world!"
     }

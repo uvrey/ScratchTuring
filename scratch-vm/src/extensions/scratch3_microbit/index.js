@@ -309,6 +309,7 @@ class MicroBit {
      * @private
      */
     _onConnect () {
+        console.log("_onConnect() being called")
         this._ble.read(BLEUUID.service, BLEUUID.rxChar, true, this._onMessage);
         this._timeoutID = window.setTimeout(
             () => this._ble.handleDisconnectError(BLEDataStoppedError),

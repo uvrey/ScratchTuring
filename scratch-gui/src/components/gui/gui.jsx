@@ -33,6 +33,7 @@ import ConnectionModal from '../../containers/connection-modal.jsx';
 
 import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
 import MapModal from '../../containers/map-modal.jsx';
+import BayesModal from '../../containers/bayes-modal.jsx';
 
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
@@ -84,6 +85,7 @@ const GUIComponent = props => {
         children,
         connectionModalVisible,
         mapModalVisible,
+        bayesModalVisible,
         costumeLibraryVisible,
         costumesTabVisible,
         enableCommunity,
@@ -207,6 +209,11 @@ const GUIComponent = props => {
                 ) : null}
                 {mapModalVisible ? (
                     <MapModal
+                        vm={vm}
+                    />
+                ) : null}
+                {bayesModalVisible ? (
+                    <BayesModal
                         vm={vm}
                     />
                 ) : null}

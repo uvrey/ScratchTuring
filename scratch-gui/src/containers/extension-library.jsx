@@ -29,18 +29,36 @@ class ExtensionLibrary extends React.PureComponent {
             'handleItemSelect'
         ]);
     }
+
+    // handleBayesExtensions (id) {
+    //     const bayesExtensions = this.props.vm.runtime.bayesExtensions; 
+
+    //     if (bayesExtensions !== undefined) {
+    //       const foundItem = Object.values(bayesExtensions).find(item => item.extensionId === id);
+    //       if (foundItem) {
+    //         return foundItem; // TODO decide what elements of the GUI state we want here
+    //       } else {
+    //         // Optional: Handle the case where no matching item is found (e.g., return null or undefined)
+    //         console.log("No matching item found for id:", id);
+    //         // return null; // Or any appropriate default value
+    //       }
+    //     } else {
+    //       console.error("bayesExtensions is undefined!"); // Handle potential access errors
+    //       // return null; // Or any appropriate default value
+    //     }
+    // } TODO CLEAN UP
+
     handleItemSelect (item) {
         const id = item.extensionId;
         let url = item.extensionURL ? item.extensionURL : id;
-
-        console.log("trying to load extension at URL: ")
-        console.log(url)
         
         if (!item.disabled && !id) {
             // eslint-disable-next-line no-alert
             url = prompt(this.props.intl.formatMessage(messages.extensionUrl));
         }
         if (id && !item.disabled) {
+            // console.log("choosing an extension " + id)
+            // handleBayesExtensions(id)
             if (this.props.vm.extensionManager.isExtensionLoaded(url)) {
                 this.props.onCategorySelected(id);
             } else {

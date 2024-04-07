@@ -18,6 +18,7 @@ class ScanningStep extends React.Component {
         };
     }
     componentDidMount () {
+        console.log("Scanning step inside the ScanningStep container is scanning for a peripheral...")
         this.props.vm.scanForPeripheral(this.props.extensionId);
         this.props.vm.on(
             'PERIPHERAL_LIST_UPDATE', this.handlePeripheralListUpdate);
@@ -25,6 +26,7 @@ class ScanningStep extends React.Component {
             'PERIPHERAL_SCAN_TIMEOUT', this.handlePeripheralScanTimeout);
     }
     componentWillUnmount () {
+        console.log("stopping the scan here")
         // @todo: stop the peripheral scan here
         this.props.vm.removeListener(
             'PERIPHERAL_LIST_UPDATE', this.handlePeripheralListUpdate);

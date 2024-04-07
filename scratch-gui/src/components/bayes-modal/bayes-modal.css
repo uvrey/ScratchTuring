@@ -2,8 +2,8 @@
 @import "../../css/units.css";
 
 .modal-content {
-    width: 480px;
-    line-height: 1.75;
+    line-height: 1.25;
+    width: 40em;
 }
 
 .header {
@@ -12,11 +12,30 @@
 
 .body {
     background: $ui-white;
+    overflow-y: 'scroll';
 }
 
 .label {
     font-weight: 500;
     margin: 0 0 0.75rem;
+}
+
+.data-row {
+    width:100%;
+    padding: 1em;
+    display: flex;
+    flex-direction: row;
+}
+
+.samples-area {
+    background-color: $looks-light-transparent;
+    padding: 1em;
+}
+
+.data-col {
+    padding: 1em;
+    display: flex;
+    flex-direction: column; 
 }
 
 .centered-row {
@@ -228,62 +247,6 @@
     padding: .5rem;
 }
 
-.sliderArea {
-    height: 100%;
-    justify-content: center;
-    align-items: center;
-    padding: 1em 2em 0 3.2em;
-}
-
-.sliderBox {
-    /* display: flex; */
-    flex-direction: row;
-    justify-content: center;
-}
-
-.sliderTitle {
-    height: 100%;
-    justify-content: left;
-    align-items: center;
-    display: flex;
-    /* font-weight: 600; */
-}
-
-.dropdownTitle {
-    margin-top: 1em;
-    height: 100%;
-    justify-content: left;
-    align-items: center;
-    display: flex;
-    /* font-weight: 600; */
-}
-
-.dropdown-box {
-    display: flex;
-    align-items: center;
-    margin-top: 0.5em;
-    justify-content: center;
-    margin-bottom: 1em;
-}
-
-.dropdown-option {
-    padding: 0.6rem 1rem;
-}
-
-.dropdown-style {
-    padding: 0.6rem 0.75rem;
-    background: $looks-secondary;
-    color: white;
-    font-weight: 600;
-    font-size: 0.85rem;
-    border: none;
-    cursor: pointer;
-    align-items: center;
-    text-align: center;
-    width: 12em;
-    height: 2.5em;
-}
-
 .scratch-link-help {
     display: flex;
     flex-direction: column;
@@ -345,13 +308,9 @@
 }
 
 .button-row {
-    /* font-weight: bolder; */
+    font-weight: bolder;
     text-align: center;
     display: flex;
-    padding: 2em;
-    justify-content: center;
-    align-items: center;
-    background-color: $looks-light-transparent;
 }
 
 .abort-connecting-icon {
@@ -371,165 +330,6 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-}
-
-.slider-value-background {
-    background-color: $looks-secondary; /* Add your desired background color */
-    padding: 2px; /* Add some padding around the text */
-    border-radius: 2px; /* Add a slight border radius for aesthetics */
-  }
-  
-/* Range */
-.slider-value {
-    /* display: inline-block; */
-    position: absolute;
-    margin-top: 10px;
-    font-size: 10px;
-    /* font-weight: 600; */
-    font-size: 0.8rem;
-    text-align: center;
-    color: #ffffff;
-    padding: 0.1em 0.5em 0.1em 0.5em;
-    margin-left: 0.6em;
-}
-
-.zoom-pitch {
-    /* Set a minimum width to prevent excessive shrinking */
-    max-width: 4.5em;
-    /* Remove default browser styling (optional) */
-    -webkit-appearance: none;
-  }
-  
-.long-lat { /* Default rule for all text inputs */
-    /* Set a minimum width to prevent excessive shrinking (optional) */
-    max-width: 6em; /* Adjust as needed */
-    /* Remove default browser styling (optional) */
-    -webkit-appearance: none;
-  }
-  
-
-input[type=range] {
-    -webkit-appearance: none;
-    width: 75%;
-    margin-bottom: 1.5em;
-  }
-
-  input[type=range]:focus {
-    outline: none;
-  }
-  input[type=range]::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 0.2em;
-    cursor: pointer;
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    background:  $looks-light-transparent;
-    border-radius: 25px;
-    border: 0px solid #000101;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    border: 0px solid #000000;
-    height: 30px;
-    width: 10px;
-    border-radius: 7px;
-    background: $looks-secondary;
-    cursor: pointer;
-    -webkit-appearance: none;
-    margin-top: -3.6px;
-  }
-  input[type=range]:focus::-webkit-slider-runnable-track {
-    background: $looks-light-transparent;
-  }
-  input[type=range]::-moz-range-track {
-    width: 100%;
-    height: 12.8px;
-    cursor: pointer;
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    background:  $looks-light-transparent;
-    border-radius: 25px;
-    border: 0px solid #000101;
-  }
-  input[type=range]::-moz-range-thumb {
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    border: 0px solid #000000;
-    height: 30px;
-    width: 10px;
-    border-radius: 7px;
-    background: $looks-secondary;
-    cursor: pointer;
-  }
-  input[type=range]::-ms-track {
-    width: 100%;
-    height: 12.8px;
-    cursor: pointer;
-    background: transparent;
-    border-color: transparent;
-    border-width: 39px 0;
-    color: transparent;
-  }
-  input[type=range]::-ms-fill-lower {
-    background:  $looks-light-transparent;
-    border: 0px solid #000101;
-    border-radius: 50px;
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-  }
-  input[type=range]::-ms-fill-upper {
-    background:  $looks-light-transparent;
-    border: 0px solid #000101;
-    border-radius: 50px;
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-  }
-  input[type=range]::-ms-thumb {
-    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    border: 0px solid #000000;
-    height: 30px;
-    width: 10px;
-    border-radius: 7px;
-    background: $looks-secondary;
-    cursor: pointer;
-  }
-  input[type=range]:focus::-ms-fill-lower {
-    background:  $looks-light-transparent;
-  }
-  input[type=range]:focus::-ms-fill-upper {
-    background:  $looks-light-transparent;
-  }
-  
-  #range-wrap {
-    position: relative;
-  }
-  
-/* Stacking sliders vertically */
-/* input[type="range"] {
-    display: block;
-    width: 100%;
-    margin-bottom: 15px;
-    color:  $looks-secondary;
-} */
-
-/* Adding some spacing between label and slider */
-input[type="range"] {
-    margin-top: 1em;
-}
-
-.map-options-button {
-    padding: 0.75rem 0.75rem;
-    border-radius: 0.5rem;
-    background: $looks-secondary;
-    color: white;
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin: 0.25rem;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    height: 3rem;
-    margin: 0.25rem 1rem;
-
-    &:hover {
-        box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
-    }
 }
 
 .connection-button:disabled {
@@ -554,21 +354,17 @@ input[type="range"] {
 
 [dir="ltr"] .button-icon-right {
     margin-left: 0.5rem;
-    height: 3em;
 }
 [dir="rtl"] .button-icon-right {
     margin-right: 0.5rem;
-    height: 3em;
 }
 
 [dir="ltr"] .button-icon-left {
     margin-right: 0.5rem;
-    height: 3em;
 }
 
 [dir="rtl"] .button-icon-left {
     margin-left: 0.5rem;
-    height: 3em;
 }
 
 /* reverse back arrow icon for RTL, don't reverse other connection icons */

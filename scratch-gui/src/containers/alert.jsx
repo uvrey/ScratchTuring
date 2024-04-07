@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import SB3Downloader from './sb3-downloader.jsx';
 import AlertComponent from '../components/alerts/alert.jsx';
-import {openConnectionModal, openMapModal} from '../reducers/modals';
+import {openConnectionModal, openMapModal, openBayesModal} from '../reducers/modals';
 import {setConnectionModalExtensionId} from '../reducers/connection-modal';
 import {manualUpdateProject} from '../reducers/project-state';
 
@@ -70,6 +70,10 @@ const mapDispatchToProps = dispatch => ({
     },
     onOpenMapModal: () => {
         dispatch(openMapModal());
+    },
+    onOpenBayesModal: id => {
+        dispatch(setConnectionModalExtensionId(id));
+        dispatch(openBayesModal());
     },
     onSaveNow: () => {
         dispatch(manualUpdateProject());

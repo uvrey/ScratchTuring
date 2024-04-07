@@ -336,6 +336,7 @@ export default [
         ),
         featured: true,
         disabled: false,
+        launchGUIConnectionFlow: true,
         internetConnectionRequired: true,
         bluetoothRequired: false,
         helpLink: 'https://scratch.mit.edu'
