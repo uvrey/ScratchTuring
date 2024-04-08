@@ -149,13 +149,16 @@ class VirtualMachine extends EventEmitter {
             this.emit(Runtime.MIC_LISTENING, listening);
         });
         this.runtime.on(Runtime.RUNTIME_STARTED, () => {
+            console.log("emitting runtime started from VM")
             this.emit(Runtime.RUNTIME_STARTED);
         });
         this.runtime.on(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData => {
+            console.log("emitting cloud data started from VM")
             this.emit(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData);
         });
-        this.runtime.on(Runtime.BAYES_INIT, extensionId => {
-            this.emit(Runtime.BAYES_INIT, extensionId) // we design this to test signals between our Turing extension and the GUI
+        this.runtime.on(Runtime.BAYES_UPDATE, () => { // TODO add data or callback here
+            console.log("emitting bayes update? started from VM")
+            this.emit(Runtime.BAYES_UPDATE)
         }
     );
 

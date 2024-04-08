@@ -28,7 +28,7 @@ class BayesModal extends React.Component {
     }
     
     componentDidMount () {
-        console.log("We got a bayes init signal inside the bayes modal handler container")
+        console.log("Mounting bayes modal handler container")
         this.props.vm.on('BAYES_INIT', this.handleInit);
         this.props.vm.on('BAYES_ERROR', this.handleError);
     }

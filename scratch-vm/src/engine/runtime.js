@@ -644,8 +644,8 @@ class Runtime extends EventEmitter {
         return 'PERIPHERAL_DISCONNECTED';
     }
 
-    static get DUMMY_SIGNAL () {
-        return 'DUMMY_SIGNAL';
+    static get BAYES_UPDATE () {
+        return 'BAYES_UPDATE';
     }
 
     /**

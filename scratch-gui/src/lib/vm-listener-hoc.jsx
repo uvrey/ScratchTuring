@@ -9,7 +9,7 @@ import {updateTargets} from '../reducers/targets';
 import {updateBlockDrag} from '../reducers/block-drag';
 import {updateMonitors} from '../reducers/monitors';
 import {setProjectChanged, setProjectUnchanged} from '../reducers/project-changed';
-import {setRunningState, setTurboState, setStartedState} from '../reducers/vm-status';
+import {setRunningState, setTurboState, setStartedState, setBayesState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
 
@@ -46,8 +46,8 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('PROJECT_START', this.props.onGreenFlag);
             this.props.vm.on('PERIPHERAL_CONNECTION_LOST_ERROR', this.props.onShowExtensionAlert);
             this.props.vm.on('MIC_LISTENING', this.props.onMicListeningUpdate);
+            this.props.vm.on('BAYES_UPDATE', this.props.onBayesUpdate);
             console.log("inside listener HOC")
-
         }
         componentDidMount () {
             if (this.props.attachKeyboardEvents) {
@@ -136,6 +136,7 @@ const vmListenerHOC = function (WrappedComponent) {
                 onTurboModeOff,
                 onTurboModeOn,
                 onShowExtensionAlert,
+                onBayesUpdate,
                 /* eslint-enable no-unused-vars */
                 ...props
             } = this.props;
@@ -159,6 +160,7 @@ const vmListenerHOC = function (WrappedComponent) {
         onTargetsUpdate: PropTypes.func.isRequired,
         onTurboModeOff: PropTypes.func.isRequired,
         onTurboModeOn: PropTypes.func.isRequired,
+        onBayesUpdate: PropTypes.func,
         projectChanged: PropTypes.bool,
         shouldUpdateTargets: PropTypes.bool,
         shouldUpdateProjectChanged: PropTypes.bool,
@@ -179,7 +181,8 @@ const vmListenerHOC = function (WrappedComponent) {
         shouldUpdateProjectChanged: !state.scratchGui.mode.isFullScreen && !state.scratchGui.mode.isPlayerOnly,
         vm: state.scratchGui.vm,
         username: state.session && state.session.session && state.session.session.user ?
-            state.session.session.user.username : ''
+            state.session.session.user.username : '',
+        shouldUpdateBayes: false // TODO change this
     });
     const mapDispatchToProps = dispatch => ({
         onTargetsUpdate: data => {
@@ -198,6 +201,7 @@ const vmListenerHOC = function (WrappedComponent) {
         onRuntimeStarted: () => dispatch(setStartedState(true)),
         onTurboModeOn: () => dispatch(setTurboState(true)),
         onTurboModeOff: () => dispatch(setTurboState(false)),
+        onBayesUpdate: () => dispatch(setBayesState(true)),
         onShowExtensionAlert: data => {
             dispatch(showExtensionAlert(data));
         },
