@@ -72,9 +72,10 @@ const BayesModalComponent = props => (
         id="bayesModal"
         onHelp={props.onHelp}
         onRequestClose={props.onCancel}
+        closeOnClick={false}
     >
         <Box className={styles.body}>
-            
+        <h3>Our value: {props.data}</h3>
             <Box className={classNames(styles.dataRow)}>
             <Box className = {styles.samplesArea}>
                 <FormattedMessage
@@ -196,6 +197,7 @@ BayesModalComponent.propTypes = {
     name: PropTypes.node, // Todo send name here
     onCancel: PropTypes.func.isRequired,
     onHelp: PropTypes.func.isRequired,
+    data: PropTypes.node,
     // phase: PropTypes.oneOf(Object.keys(PHASES)).isRequired,
     // title: PropTypes.string.isRequired,
     // useAutoScan: PropTypes.bool.isRequired

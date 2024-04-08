@@ -225,8 +225,8 @@ class Scratch3Turing {
     }
 
     expectation(args, util) {
-        console.log("GUI?")
-        console.log(GUI)
+        console.log("RENDERER??")
+        console.log(this._runtime.renderer)
         return this.state.expectation+' '+ this.state.unit // cast to string
     }
 
@@ -244,8 +244,11 @@ class Scratch3Turing {
         x = util.target.x
         y = util.target.y
         console.log(util)
-        console.log("marked location at: " + x +", " + y)
-        return "Hello world!"
+        data = x + ", " + y
+        this._runtime.emit('BAYES_DATA', data)
+        //console.log(color)
+        return "marked location at: " + x +", " + y
+        //return color
     }
 
     clearPins(args, util) {

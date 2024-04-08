@@ -551,6 +551,10 @@ class Runtime extends EventEmitter {
         return 'PROJECT_CHANGED';
     }
 
+    static get BAYES_DATA () {
+        return 'BAYES_DATA';
+    }
+
     /**
      * Event name for report that a change was made to an extension in the toolbox.
      * @const {string}
@@ -2516,6 +2520,10 @@ class Runtime extends EventEmitter {
         this.emit(Runtime.PROJECT_CHANGED);
     }
 
+    emitBayesChanged () {
+        this.emit(Runtime.BAYES_CHANGED);
+    } // can remove this
+    
     /**
      * Report that a new target has been created, possibly by cloning an existing target.
      * @param {Target} newTarget - the newly created target.

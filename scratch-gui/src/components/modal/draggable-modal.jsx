@@ -22,6 +22,7 @@ const DraggableModalComponent = props => (
             contentLabel={props.contentLabel}
             overlayClassName={styles.modalOverlay}
             onRequestClose={props.onRequestClose}
+            shouldCloseOnOverlayClick={false}
         >
             <Draggable>
             <Box

@@ -145,20 +145,21 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.PERIPHERAL_SCAN_TIMEOUT, () =>
             this.emit(Runtime.PERIPHERAL_SCAN_TIMEOUT)
         );
+        this.runtime.on(Runtime.BAYES_DATA, data =>
+            // console.log("VM got Bayes changed update from Runtime"),
+            this.sendBayesData(data)
+        );
         this.runtime.on(Runtime.MIC_LISTENING, listening => {
             this.emit(Runtime.MIC_LISTENING, listening);
         });
         this.runtime.on(Runtime.RUNTIME_STARTED, () => {
-            console.log("emitting runtime started from VM")
             this.emit(Runtime.RUNTIME_STARTED);
         });
         this.runtime.on(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData => {
-            console.log("emitting cloud data started from VM")
             this.emit(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData);
         });
-        this.runtime.on(Runtime.BAYES_UPDATE, () => { // TODO add data or callback here
-            console.log("emitting bayes update? started from VM")
-            this.emit(Runtime.BAYES_UPDATE)
+        this.runtime.on(Runtime.BAYES_CHANGED, () => { // TODO add data or callback here
+            this.emit(Runtime.BAYES_CHANGED) // TODO remove this?
         }
     );
 
@@ -175,6 +176,10 @@ class VirtualMachine extends EventEmitter {
         this.variableListener = this.variableListener.bind(this);
     }
 
+    sendBayesData (data) {
+        console.log("emitting bayes change from VM! received from runtime")
+        this.emit(Runtime.BAYES_DATA, data)
+    }
     /**
      * Start running the VM - do this before anything else.
      */

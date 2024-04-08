@@ -328,6 +328,7 @@ class Scratch3LooksBlocks {
     }
 
     say (args, util) {
+        console.log("Sending from the Looks blocks.jsx?")
         // @TODO in 2.0 calling say/think resets the right/left bias of the bubble
         this.runtime.emit(Scratch3LooksBlocks.SAY_OR_THINK, util.target, 'say', args.MESSAGE);
     }

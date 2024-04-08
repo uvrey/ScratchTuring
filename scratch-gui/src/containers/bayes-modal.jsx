@@ -1,13 +1,16 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {useState} from 'react';
 import bindAll from 'lodash.bindall';
 import BayesModalComponent from '../components/bayes-modal/bayes-modal.jsx';
 import VM from 'scratch-vm';
 import analytics from '../lib/analytics.js';
 import extensionData from '../lib/libraries/extensions/index.jsx';
 import {connect} from 'react-redux';
+import  {setBayesData} from  '../reducers/bayes-data.js';
 
 import {closeBayesModal} from '../reducers/modals.js';
+import { setVariableValue } from '../lib/variable-utils.js';
+import { bayesDataInitialState } from '../reducers/bayes-data.js';
 // import {isMicroBitUpdateSupported, selectAndUpdateMicroBit} from '../lib/microbit-update.js';
 
 class BayesModal extends React.Component {
@@ -21,19 +24,19 @@ class BayesModal extends React.Component {
             'handleUpdate',
             'handleError',
             'handleHelp',
+            // 'handleFetchUpdate',
         ]);
         this.state = {
-            extension: extensionData.find(ext => ext.extensionId === props.extensionId)
+            extension: extensionData.find(ext => ext.extensionId === props.extensionId),
         };
     }
     
     componentDidMount () {
-        console.log("Mounting bayes modal handler container")
-        this.props.vm.on('BAYES_INIT', this.handleInit);
+        // this.props.vm.on('BAYES_DATA', (data) => this.handleUpdate(data));
         this.props.vm.on('BAYES_ERROR', this.handleError);
     }
     componentWillUnmount () {
-        this.props.vm.removeListener('BAYES_INIT', this.handleInit);
+        // this.props.vm.removeListener('BAYES_DATA', (data) => this.handleUpdate(data));
         this.props.vm.removeListener('BAYES_ERROR', this.handleError);
     }
     handleCancel () {
@@ -56,6 +59,16 @@ class BayesModal extends React.Component {
             label: this.props.extensionId
         });
     }
+    handleUpdate = data => {
+        console.log("our GUI got data!");
+        console.log("the data we got?")
+        console.log(data)
+        console.log("---")
+        // this.props.onUpdateModalData(data)
+        console.log("value of data now: " + this.props.data)
+      // console.log(typeof this.props.onUpdateModalData)
+        // dispatch(setBayesModalData(data));
+    };
     handleHelp () {
         window.open(this.state.extension.helpLink, '_blank');
         analytics.event({
@@ -91,10 +104,14 @@ class BayesModal extends React.Component {
                 // useAutoScan={this.state.extension && this.state.extension.useAutoScan}
                 vm={this.props.vm}
                 onCancel={this.handleCancel}
+                
                 // onConnected={this.handleConnected}
                 // onConnecting={this.handleConnecting}
                 // onDisconnect={this.handleDisconnect}
                 onHelp={this.handleHelp}
+                // getData={this.handleFetchUpdate}
+                data={this.props.data} // send current state to the modal for display
+                closeOnClick={this.props.closeOnClick}
                 // onScanning={this.handleScanning}
                 // onSendPeripheralUpdate={canUpdatePeripheral ? this.handleSendUpdate : null}
                 // onUpdatePeripheral={canUpdatePeripheral ? this.handleUpdatePeripheral : null}
@@ -110,12 +127,16 @@ BayesModal.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    extensionId: state.scratchGui.bayesModal.extensionId
+    extensionId: state.scratchGui.bayesModal.extensionId,
+    data: state.scratchGui.bayesData.data, 
 });
 
 const mapDispatchToProps = dispatch => ({
     onCancel: () => {
         dispatch(closeBayesModal());
+    },
+    onUpdateModalData: data => {
+        dispatch(setBayesData(data));
     }
 });
 

@@ -9,6 +9,7 @@ import {updateTargets} from '../reducers/targets';
 import {updateBlockDrag} from '../reducers/block-drag';
 import {updateMonitors} from '../reducers/monitors';
 import {setProjectChanged, setProjectUnchanged} from '../reducers/project-changed';
+import {setBayesData} from '../reducers/bayes-data';
 import {setRunningState, setTurboState, setStartedState, setBayesState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
@@ -26,7 +27,8 @@ const vmListenerHOC = function (WrappedComponent) {
                 'handleKeyDown',
                 'handleKeyUp',
                 'handleProjectChanged',
-                'handleTargetsUpdate'
+                'handleTargetsUpdate',
+                // 'handleBayesChanged'
             ]);
             // We have to start listening to the vm here rather than in
             // componentDidMount because the HOC mounts the wrapped component,
@@ -46,7 +48,7 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('PROJECT_START', this.props.onGreenFlag);
             this.props.vm.on('PERIPHERAL_CONNECTION_LOST_ERROR', this.props.onShowExtensionAlert);
             this.props.vm.on('MIC_LISTENING', this.props.onMicListeningUpdate);
-            this.props.vm.on('BAYES_UPDATE', this.props.onBayesUpdate);
+            this.props.vm.on('BAYES_DATA', (data) => this.handleBayesData(data));
             console.log("inside listener HOC")
         }
         componentDidMount () {
@@ -79,6 +81,15 @@ const vmListenerHOC = function (WrappedComponent) {
                 this.props.onProjectChanged();
             }
         }
+        handleBayesData (data) {
+            console.log("gui received a signal and is changing the state accordingly")
+            this.props.onSetBayesData(data)
+        }
+        // handleBayesChanged () {
+        //     if (this.props.shouldUpdateBayesChanged && !this.props.bayesChanged) {
+        //         this.props.onBayesChanged();
+        //     }
+        // }
         handleTargetsUpdate (data) {
             if (this.props.shouldUpdateTargets) {
                 this.props.onTargetsUpdate(data);
@@ -119,8 +130,10 @@ const vmListenerHOC = function (WrappedComponent) {
                 /* eslint-disable no-unused-vars */
                 attachKeyboardEvents,
                 projectChanged,
+             //   bayesChanged,
                 shouldUpdateTargets,
                 shouldUpdateProjectChanged,
+             //   shouldUpdateBayesChanged,
                 onBlockDragUpdate,
                 onGreenFlag,
                 onKeyDown,
@@ -129,6 +142,7 @@ const vmListenerHOC = function (WrappedComponent) {
                 onMonitorsUpdate,
                 onTargetsUpdate,
                 onProjectChanged,
+         //       onBayesChanged,
                 onProjectRunStart,
                 onProjectRunStop,
                 onProjectSaved,
@@ -136,7 +150,6 @@ const vmListenerHOC = function (WrappedComponent) {
                 onTurboModeOff,
                 onTurboModeOn,
                 onShowExtensionAlert,
-                onBayesUpdate,
                 /* eslint-enable no-unused-vars */
                 ...props
             } = this.props;
@@ -160,10 +173,12 @@ const vmListenerHOC = function (WrappedComponent) {
         onTargetsUpdate: PropTypes.func.isRequired,
         onTurboModeOff: PropTypes.func.isRequired,
         onTurboModeOn: PropTypes.func.isRequired,
-        onBayesUpdate: PropTypes.func,
+    //    onBayesChanged: PropType.func, //TODO check this
+    //    bayesChanged: PropTypes.bool,
         projectChanged: PropTypes.bool,
         shouldUpdateTargets: PropTypes.bool,
         shouldUpdateProjectChanged: PropTypes.bool,
+     //   shouldUpdateBayesChanged: PropTypes.bool,
         username: PropTypes.string,
         vm: PropTypes.instanceOf(VM).isRequired
     };
@@ -173,6 +188,7 @@ const vmListenerHOC = function (WrappedComponent) {
     };
     const mapStateToProps = state => ({
         projectChanged: state.scratchGui.projectChanged,
+    //    bayesChanged: state.scratchGui.bayesChanged,
         // Do not emit target or project updates in fullscreen or player only mode
         // or when recording sounds (it leads to garbled recordings on low-power machines)
         shouldUpdateTargets: !state.scratchGui.mode.isFullScreen && !state.scratchGui.mode.isPlayerOnly &&
@@ -182,7 +198,7 @@ const vmListenerHOC = function (WrappedComponent) {
         vm: state.scratchGui.vm,
         username: state.session && state.session.session && state.session.session.user ?
             state.session.session.user.username : '',
-        shouldUpdateBayes: false // TODO change this
+    //    shouldUpdateBayesChanged: !state.scratchGui.mode.isFullScreen && !state.scratchGui.mode.isPlayerOnly,
     });
     const mapDispatchToProps = dispatch => ({
         onTargetsUpdate: data => {
@@ -201,10 +217,11 @@ const vmListenerHOC = function (WrappedComponent) {
         onRuntimeStarted: () => dispatch(setStartedState(true)),
         onTurboModeOn: () => dispatch(setTurboState(true)),
         onTurboModeOff: () => dispatch(setTurboState(false)),
-        onBayesUpdate: () => dispatch(setBayesState(true)),
+      //  onBayesChanged: () => dispatch(setBayesChanged()), // TODO where to get data?
         onShowExtensionAlert: data => {
             dispatch(showExtensionAlert(data));
         },
+        onSetBayesData: data => dispatch(setBayesData(data)),
         onMicListeningUpdate: listening => {
             dispatch(updateMicIndicator(listening));
         }
