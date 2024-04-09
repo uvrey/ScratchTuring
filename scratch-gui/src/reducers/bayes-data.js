@@ -1,16 +1,18 @@
 const SET_DATA = 'scratch-gui/bayes-data/setData'; // Define a type for setting data
 
 const initialState = {
+  // Build data for the Turing Control panel
   data: {
       state: {}, // type of problem (ie. time taken, proportion, likelihood - affects visualisations)
-      samples: [], // updates the samples list
+      samples: [], // updates the samples list for testing
       barData: [], // plots bar chart data
       distData: [], // plots normal distribution
       distLines: [],
       domain: [-1,1],
       spriteX: '',
-      spriteY: ''
-  } // Initialize data as null
+      spriteY: '',
+      mode: 'HUE_BASED', // TIME-based, POSITION-based, HUE-based
+  }
 };
 
 const reducer = function (state, action) {

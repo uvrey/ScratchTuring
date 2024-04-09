@@ -3,13 +3,13 @@ import React from 'react';
 import Box from '../box/box.jsx';
 import classNames from 'classnames';
 import VM from 'scratch-vm';
-import styles from './turing-panel.css';
+import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 
 
-const TuringPanel = props => (
+const TuringVizPanel = props => (
         <Box className={styles.body}>
             <FormattedMessage
                 defaultMessage="Sprite Coordinates"
@@ -52,15 +52,15 @@ const TuringPanel = props => (
         </Box>
 );
 
-TuringPanel.propTypes = {
+TuringVizPanel.propTypes = {
     data: PropTypes.object,
     vm: PropTypes.instanceOf(VM),
 };
 
-TuringPanel.defaultProps = {
+TuringVizPanel.defaultProps = {
     connectingMessage: 'Connecting'
 };
 
 export {
-    TuringPanel as default,
+    TuringVizPanel as default,
 };

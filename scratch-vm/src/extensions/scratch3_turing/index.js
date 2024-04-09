@@ -31,15 +31,20 @@ class Scratch3Turing {
         this.state = {
             expectation: 0,
             feature: 0,
-            unit: '%'
+            unit: '%',
+            mode: 'HUE_BASED'
         }
+
         this._extensionId = 'turing'
         this.features = ['likelihood', 'time', 'proportion']
         this.units = ['%', 'sec', '%']
 
+        this.modes = ['HUE_BASED', 'TIME_BASED', 'HUE_BASED']
+
         this.lineList = []
         this._runtime.registerBayesExtension(this._extensionId, this);
 
+        this.samples = []
         /**
          * The timer utility.
          * @type {Timer}
@@ -260,6 +265,12 @@ class Scratch3Turing {
         this.state.expectation = expectation
         this.state.feature = this.features[featureIndex]
         this.state.unit = this.units[featureIndex]
+        this.state.mode = this.modes[featureIndex]
+
+        // Clear visualised data 
+        this.samples = [] 
+        data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
+        this._runtime.emit('BAYES_DATA', data)
         return "Set " + this.state.feature + " to " + this.state.expectation  + " " + this.state.unit
     }
 
@@ -272,26 +283,37 @@ class Scratch3Turing {
             distData: pdfD, // plots normal distribution
             distLines: this.lineList,
             spriteX: x,
-            spriteY: y
+            spriteY: y,
+            mode: this.state.mode
         }
     }
+
+    generateHexCode() {
+        // Generate a random integer representing a 24-bit color value (3 bytes)
+        const randomColor = Math.floor(Math.random() * 16777215);
+      
+        // Convert the random number to a hexadecimal string with padding
+        const hexCode = randomColor.toString(16).padStart(6, '0');
+      
+        return `#${hexCode}`; // Add '#' prefix for a valid hex color code
+      }
 
     // how to access vm here?
     pinLocation(args, util) {
         x = util.target.x
         y = util.target.y
         console.log(util)
-        samples = x + ", " + y
 
+        if (this.state.mode == "HUE_BASED") {
+            this.samples.push(this.generateHexCode())
+        } else {
+            samples = x + ", " + y
+            this.samples.push(x+y)
+        }
         console.log(this._getDistribution(x,y))
-
-        data = this._toJSON(samples, this._getBarChart(samples), this._getDistribution(), x, y)
-
-        console.log("emitting " + data)
+        data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
         this._runtime.emit('BAYES_DATA', data)
-        //console.log(color)
-        return "marked location at: " + x +", " + y
-        //return color
+        return "pinned"
     }
 
     // Add multiple curves for different samples to our distribution?
@@ -319,7 +341,6 @@ class Scratch3Turing {
             { type: "posterior", value: 200 },
         ];
     }
-
 
     _dummyDist(x,y) {
         return [
