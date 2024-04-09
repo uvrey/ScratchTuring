@@ -10,7 +10,8 @@ import {
   CartesianGrid,
   YAxis,
   ResponsiveContainer,
-  Legend
+  Legend,
+  Tooltip
 } from "recharts"
 
 const Gaussian = (props) => (
@@ -35,11 +36,11 @@ const Gaussian = (props) => (
             />
           ))}
           <Legend />
+          <Tooltip />
         </LineChart>
         {/* <InfoBar lines={props.lines}/> TODO fix this information bar*/}
       </ResponsiveContainer>
     )
-
 
 Gaussian.propTypes = {
     name: PropTypes.node, // Todo send name here

@@ -9,12 +9,12 @@ import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import tabStyles from 'react-tabs/style/react-tabs.css';
 import VM from 'scratch-vm';
 import Renderer from 'scratch-render';
-
+import controlIcon from '../action-menu/icon--control-tab.svg';
 import Blocks from '../../containers/blocks.jsx';
 import CostumeTab from '../../containers/costume-tab.jsx';
 import TargetPane from '../../containers/target-pane.jsx';
 import SoundTab from '../../containers/sound-tab.jsx';
-import MapTab from '../../containers/map-tab.jsx';
+import TuringTab from '../../containers/turing-tab.jsx';
 import StageWrapper from '../../containers/stage-wrapper.jsx';
 import Loader from '../loader/loader.jsx';
 import Box from '../box/box.jsx';
@@ -108,7 +108,7 @@ const GUIComponent = props => {
         onToggleLoginOpen,
         onActivateCostumesTab,
         onActivateSoundsTab,
-        onActivateMapTab,
+        onActivateTuringControlPanel,
         onActivateTab,
         onClickLogo,
         onExtensionButtonClick,
@@ -125,7 +125,7 @@ const GUIComponent = props => {
         onTelemetryModalOptOut,
         showComingSoon,
         soundsTabVisible,
-        mapTabVisible,
+        turingTabVisible,
         stageSizeMode,
         targetIsStage,
         telemetryModalVisible,
@@ -321,6 +321,22 @@ const GUIComponent = props => {
                                             id="gui.gui.soundsTab"
                                         />
                                     </Tab>
+                                    {/* {turingExtensionActive ? ( TODO ADD THIS LOGIC HERE */}
+                                         <Tab
+                                            className={tabClassNames.tab}
+                                            onClick={onActivateTuringControlPanel}
+                                        >
+                                            <img
+                                                draggable={false}
+                                                src={controlIcon}
+                                            />
+                                            <FormattedMessage
+                                                defaultMessage="Turing Panel"
+                                                description="Button to get to the turing control panel"
+                                                id="gui.gui.turingControlPanel"
+                                            />
+                                        </Tab>
+                                    {/* ) : null} */}
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     <Box className={styles.blocksWrapper}>
@@ -359,6 +375,9 @@ const GUIComponent = props => {
                                 </TabPanel>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {soundsTabVisible ? <SoundTab vm={vm} /> : null}
+                                </TabPanel>
+                                <TabPanel className={tabClassNames.tabPanel}>
+                                    {turingTabVisible ? <TuringTab vm={vm} /> : null}
                                 </TabPanel>
                             </Tabs>
                             {backpackVisible ? (
@@ -427,7 +446,7 @@ GUIComponent.propTypes = {
     logo: PropTypes.string,
     onActivateCostumesTab: PropTypes.func,
     onActivateSoundsTab: PropTypes.func,
-    onActivateMapTab: PropTypes.func,
+    onActivateTuringControlPanel: PropTypes.func,
     onActivateTab: PropTypes.func,
     onClickAccountNav: PropTypes.func,
     onClickLogo: PropTypes.func,
@@ -450,7 +469,7 @@ GUIComponent.propTypes = {
     renderLogin: PropTypes.func,
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
-    mapTabVisible: PropTypes.bool,
+    turingTabVisible: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
     targetIsStage: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,

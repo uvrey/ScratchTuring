@@ -7,7 +7,9 @@ const initialState = {
       barData: [], // plots bar chart data
       distData: [], // plots normal distribution
       distLines: [],
-      domain: [-1,1]
+      domain: [-1,1],
+      spriteX: '',
+      spriteY: ''
   } // Initialize data as null
 };
 

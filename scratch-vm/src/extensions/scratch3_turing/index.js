@@ -264,13 +264,15 @@ class Scratch3Turing {
     }
 
     /* Prepare a JSON of relevant data */
-    _toJSON(samples, bcD, pdfD) {
+    _toJSON(samples, bcD, pdfD, x, y) {
         return {
             state: this.state, // type of problem (ie. time taken, proportion, likelihood - affects visualisations)
             samples: samples, // updates the samples list
             barData: bcD, // plots bar chart data
             distData: pdfD, // plots normal distribution
-            distLines: this.lineList
+            distLines: this.lineList,
+            spriteX: x,
+            spriteY: y
         }
     }
 
@@ -283,7 +285,7 @@ class Scratch3Turing {
 
         console.log(this._getDistribution(x,y))
 
-        data = this._toJSON(samples, this._getBarChart(samples), this._getDistribution())
+        data = this._toJSON(samples, this._getBarChart(samples), this._getDistribution(), x, y)
 
         console.log("emitting " + data)
         this._runtime.emit('BAYES_DATA', data)
