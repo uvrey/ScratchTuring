@@ -296,12 +296,12 @@ class Scratch3Turing {
     _addCurve(mu, sigma, id) {
         newCurve = {
             id: id,
-            stroke: this._getColorFromPalette(),
             name: id,
             mean: mu,
             stdv: sigma,
             zScore: 0,
             pValue: 0, 
+            stroke: this._getColorFromPalette(),
           }
         this.lineList.push(newCurve)
     }

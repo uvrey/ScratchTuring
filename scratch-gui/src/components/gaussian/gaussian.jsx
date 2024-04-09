@@ -1,6 +1,7 @@
 import React from "react"
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
+import InfoBar from "./info-bar.jsx";
+import styles from './gaussian.css'
 
 import {
   LineChart,
@@ -9,6 +10,7 @@ import {
   CartesianGrid,
   YAxis,
   ResponsiveContainer,
+  Legend
 } from "recharts"
 
 const Gaussian = (props) => (
@@ -32,9 +34,12 @@ const Gaussian = (props) => (
               strokeWidth="1.5px"
             />
           ))}
+          <Legend />
         </LineChart>
+        {/* <InfoBar lines={props.lines}/> TODO fix this information bar*/}
       </ResponsiveContainer>
     )
+
 
 Gaussian.propTypes = {
     name: PropTypes.node, // Todo send name here

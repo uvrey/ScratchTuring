@@ -13,7 +13,7 @@ import classNames from 'classnames';
 // import UnavailableStep from './unavailable-step.jsx';
 // import UpdatePeripheralStep from './update-peripheral-step.jsx';
 import styles from './bayes-modal.css';
-import DraggableModalComponent from '../modal/draggable-modal.jsx';
+import DraggableModalComponent from '../draggable-modal/draggable-modal.jsx';
 import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
@@ -98,7 +98,6 @@ const BayesModalComponent = props => (
                 name="Gaussian"
                 data={props.data.distData}
                 lines={props.data.distLines}
-                domain={props.data.domain}
              >
              </Gaussian>
 
