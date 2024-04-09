@@ -773,6 +773,7 @@ class RenderWebGL extends EventEmitter {
      * @returns {boolean} True iff the Drawable is touching the color.
      */
     isTouchingColor (drawableID, color3b, mask3b, fetchColor=false) {
+        console.log("RENDERER IS CHECKING IF TOUCHING COLOR!")
         const candidates = this._candidatesTouching(drawableID, this._visibleDrawList);
 
         let bounds;

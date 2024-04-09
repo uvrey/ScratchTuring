@@ -7,6 +7,7 @@ const Timer = require('../../util/timer');
 const VirtualMachine = require('../../virtual-machine.js');
 const Distributions = require('./distributions.js')
 const Data = require('./data.js')
+const Color = require('../../util/color.js')
 // const GUI = require('scratch-gui')
 
 const palette = [
@@ -298,29 +299,32 @@ class Scratch3Turing {
         return `#${hexCode}`; // Add '#' prefix for a valid hex color code
       }
 
+
     // how to access vm here?
     pinLocation(args, util) {
         if (this.state.mode == "HUE_BASED") {
+            var x = util.target.x
+            var y = util.target.y
+            size = util.target.size/2
 
-            x = util.target.x
-            y = util.target.y
-            size = util.target.size
+            // Handle negative values
+            x = x + 180; // Translate x to the range [0, 360] (considering negative values)
+            y = y + 160; // Translate y to the range [0, 320] (considering negative values)
 
-            if (this._runtime.renderer) {
-                console.log("we extracted this color:")
-                console.log(this._runtime.renderer.extractColor(x, y, size).color);
-            }
+            // Perform linear scaling
+            x = x * (480 / 360); // Scale x to the range [0, 480]
+            y = y * (360 / 320); // Scale y to the range [0, 360]
 
-            this.samples.push(this.generateHexCode())
+            color = util.target.renderer.extractColor(x, y, 1).color // TODO bug fix here
+            this.samples.push(Color.rgbToHex(color))
 
         } else {
-            samples = x + ", " + y
-            this.samples.push(x+y)
+            this.samples.push(this._timer.timeElapsed()) 
+            this._timer.start(); // start a new timer
         }
-        console.log(this._getDistribution(x,y))
+        // Emit data
         data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
-       // this._runtime.emit('BAYES_DATA', data)
-        return "pinned"
+        this._runtime.emit('BAYES_DATA', data)
     }
 
     // Add multiple curves for different samples to our distribution?
