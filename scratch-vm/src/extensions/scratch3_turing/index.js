@@ -5,8 +5,22 @@ const Cast = require('../../util/cast.js');
 const MathUtil = require('../../util/math-util');
 const Timer = require('../../util/timer');
 const VirtualMachine = require('../../virtual-machine.js');
+const Distributions = require('./distributions.js')
+const Data = require('./data.js')
 // const GUI = require('scratch-gui')
 
+const palette = [
+    "#4D97FF",
+    "#9966FF",
+    "#D957D9",
+    "#FFAB1A",
+    "#45BDE5",
+    "#00B295",
+    "#4CBF56",
+    "#FF5959"
+  ];
+
+  
 class Scratch3Turing {
     constructor (runtime, extensionId) {
         /**
@@ -23,6 +37,7 @@ class Scratch3Turing {
         this.features = ['likelihood', 'time', 'proportion']
         this.units = ['%', 'sec', '%']
 
+        this.lineList = []
         this._runtime.registerBayesExtension(this._extensionId, this);
 
         /**
@@ -30,6 +45,17 @@ class Scratch3Turing {
          * @type {Timer}
          */
         this._timer = new Timer();
+        this.palette_idx = 0;
+
+        // Build line list
+        this._addCurve(0, 1, 'prior') // standard normal
+        this._addCurve(0.5, 0.5, 'posterior') // standard normal
+        this._addCurve(-0.2, 2, 'observed') // standard normal
+    }
+
+    _getColorFromPalette() {
+        this.palette_idx = (this.palette_idx + 1) % palette.length
+        return palette[this.palette_idx]
     }
 
     /**
@@ -225,8 +251,6 @@ class Scratch3Turing {
     }
 
     expectation(args, util) {
-        console.log("RENDERER??")
-        console.log(this._runtime.renderer)
         return this.state.expectation+' '+ this.state.unit // cast to string
     }
 
@@ -239,16 +263,101 @@ class Scratch3Turing {
         return "Set " + this.state.feature + " to " + this.state.expectation  + " " + this.state.unit
     }
 
+    /* Prepare a JSON of relevant data */
+    _toJSON(samples, bcD, pdfD) {
+        return {
+            state: this.state, // type of problem (ie. time taken, proportion, likelihood - affects visualisations)
+            samples: samples, // updates the samples list
+            barData: bcD, // plots bar chart data
+            distData: pdfD, // plots normal distribution
+            distLines: this.lineList
+        }
+    }
+
     // how to access vm here?
     pinLocation(args, util) {
         x = util.target.x
         y = util.target.y
         console.log(util)
-        data = x + ", " + y
+        samples = x + ", " + y
+
+        console.log(this._getDistribution(x,y))
+
+        data = this._toJSON(samples, this._getBarChart(samples), this._getDistribution())
+
+        console.log("emitting " + data)
         this._runtime.emit('BAYES_DATA', data)
         //console.log(color)
         return "marked location at: " + x +", " + y
         //return color
+    }
+
+    // Add multiple curves for different samples to our distribution?
+    _addCurve(mu, sigma, id) {
+        newCurve = {
+            id: id,
+            stroke: this._getColorFromPalette(),
+            name: id,
+            mean: mu,
+            stdv: sigma,
+            zScore: 0,
+            pValue: 0, 
+          }
+        this.lineList.push(newCurve)
+    }
+
+    _getDistribution() {
+        return Distributions.generateProbabilityData(this.lineList)
+    }
+
+    _getBarChart(samples, distribution = "Normal") {
+        return [
+            { type: "prior", value: 400 },
+            { type: "observed", value: 700 },
+            { type: "posterior", value: 200 },
+        ];
+    }
+
+
+    _dummyDist(x,y) {
+        return [
+            {
+                prior: x*100,
+                observed: y*100,
+                amt: 200,
+            },
+            {
+        
+                prior: x*300,
+                observed: 1398,
+                amt: 2210,
+            },
+            {
+                prior: 2000,
+                observed: 9800,
+                amt: 2290,
+            },
+            {
+                prior: 2780,
+                observed: 3908,
+                amt: 2000,
+            },
+            {
+                prior: 1890,
+                observed: 4800,
+                amt: 2181,
+            },
+            {
+                prior: 2390,
+                observed: 3800,
+                amt: 2500,
+            },
+            {
+                prior: 3490,
+                observed: 4300,
+                amt: 2100,
+            }
+        ];
     }
 
     clearPins(args, util) {

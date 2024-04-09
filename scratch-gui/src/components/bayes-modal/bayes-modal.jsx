@@ -16,6 +16,7 @@ import styles from './bayes-modal.css';
 import DraggableModalComponent from '../modal/draggable-modal.jsx';
 import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Gaussian from '../gaussian/gaussian.jsx'
 
 const lineData = [
     {
@@ -75,7 +76,6 @@ const BayesModalComponent = props => (
         closeOnClick={false}
     >
         <Box className={styles.body}>
-        <h3>Our value: {props.data}</h3>
             <Box className={classNames(styles.dataRow)}>
             <Box className = {styles.samplesArea}>
                 <FormattedMessage
@@ -94,33 +94,19 @@ const BayesModalComponent = props => (
                 id="gui.bayesModal.vis"
             />
             <Box className={styles.dataRow}>
-             {/* <ResponsiveContainer width="95%" > */}
-             <LineChart
-                width={250}
-                height={200}
-                data={lineData}
-                margin={{
-                    top: 5,
-                    right: 5,
-                    left: 5,
-                    bottom: 5,
-                }}
-                >
-                <CartesianGrid strokeDasharray="3 3" />
-                {/* <XAxis dataKey="name" /> */}
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="prior" stroke="#8884d8" />
-                <Line type="monotone" dataKey="observed" stroke="#82ca9d" />
-                </LineChart>
+             <Gaussian 
+                name="Gaussian"
+                data={props.data.distData}
+                lines={props.data.distLines}
+                domain={props.data.domain}
+             >
+             </Gaussian>
 
-                <BarChart width={150} height={200} data={barData}>
+                <BarChart width={150} height={200} data={props.data.barData}>
                     <Bar dataKey="value" fill="#8884d8" />
                     <CartesianGrid  strokeDasharray="3 3" />
                     <YAxis />
                 </BarChart>
-                {/* </ResponsiveContainer> */}
                 </Box>
                 </Box>
                     {/* <Box className={styles.dataRow}>
@@ -197,7 +183,7 @@ BayesModalComponent.propTypes = {
     name: PropTypes.node, // Todo send name here
     onCancel: PropTypes.func.isRequired,
     onHelp: PropTypes.func.isRequired,
-    data: PropTypes.node,
+    data: PropTypes.object,
     // phase: PropTypes.oneOf(Object.keys(PHASES)).isRequired,
     // title: PropTypes.string.isRequired,
     // useAutoScan: PropTypes.bool.isRequired

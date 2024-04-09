@@ -1,7 +1,14 @@
 const SET_DATA = 'scratch-gui/bayes-data/setData'; // Define a type for setting data
 
 const initialState = {
-  data: null // Initialize data as null
+  data: {
+      state: {}, // type of problem (ie. time taken, proportion, likelihood - affects visualisations)
+      samples: [], // updates the samples list
+      barData: [], // plots bar chart data
+      distData: [], // plots normal distribution
+      distLines: [],
+      domain: [-1,1]
+  } // Initialize data as null
 };
 
 const reducer = function (state, action) {
