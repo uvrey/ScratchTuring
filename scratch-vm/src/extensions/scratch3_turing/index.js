@@ -300,19 +300,26 @@ class Scratch3Turing {
 
     // how to access vm here?
     pinLocation(args, util) {
-        x = util.target.x
-        y = util.target.y
-        console.log(util)
-
         if (this.state.mode == "HUE_BASED") {
+
+            x = util.target.x
+            y = util.target.y
+            size = util.target.size
+
+            if (this._runtime.renderer) {
+                console.log("we extracted this color:")
+                console.log(this._runtime.renderer.extractColor(x, y, size).color);
+            }
+
             this.samples.push(this.generateHexCode())
+
         } else {
             samples = x + ", " + y
             this.samples.push(x+y)
         }
         console.log(this._getDistribution(x,y))
         data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
-        this._runtime.emit('BAYES_DATA', data)
+       // this._runtime.emit('BAYES_DATA', data)
         return "pinned"
     }
 

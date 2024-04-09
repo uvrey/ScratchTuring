@@ -47,7 +47,7 @@ const ScratchStorage = require('scratch-storage');
 const VirtualMachine = require('..');
 const Runtime = require('../engine/runtime');
 
-const ScratchRender = require('scratch-render');
+const ScratchRender = require('scratch-render'); // require basic scratch render library
 const AudioEngine = require('scratch-audio');
 const ScratchSVGRenderer = require('scratch-svg-renderer');
 
