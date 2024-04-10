@@ -154,7 +154,7 @@ const mapStateToProps = state => {
         cardsVisible: state.scratchGui.cards.visible,
         connectionModalVisible: state.scratchGui.modals.connectionModal,
         mapModalVisible: state.scratchGui.modals.mapModal,
-        bayesModalVisible: state.scratchGui.modals.bayesModal,
+        turingModalVisible: state.scratchGui.modals.turingModal,
         costumeLibraryVisible: state.scratchGui.modals.costumeLibrary,
         costumesTabVisible: state.scratchGui.editorTab.activeTabIndex === COSTUMES_TAB_INDEX,
         error: state.scratchGui.projectState.error,
@@ -167,7 +167,7 @@ const mapStateToProps = state => {
         projectId: state.scratchGui.projectState.projectId,
         soundsTabVisible: state.scratchGui.editorTab.activeTabIndex === SOUNDS_TAB_INDEX,
         turingTabVisible: state.scratchGui.editorTab.activeTabIndex === TURING_TAB_INDEX,
-        turingExtensionActive: state.scratchGui.bayesData.turingActive,
+        turingExtensionActive: state.scratchGui.turingData.turingActive,
         targetIsStage: (
             state.scratchGui.targets.stage &&
             state.scratchGui.targets.stage.id === state.scratchGui.targets.editingTarget

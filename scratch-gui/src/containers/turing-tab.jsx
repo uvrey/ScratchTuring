@@ -183,7 +183,7 @@ const mapStateToProps = state => ({
     isRtl: state.locales.isRtl,
     sprites: state.scratchGui.targets.sprites,
     stage: state.scratchGui.targets.stage,
-    data: state.scratchGui.bayesData.data
+    data: state.scratchGui.turingData.data
 });
 
 const mapDispatchToProps = dispatch => ({

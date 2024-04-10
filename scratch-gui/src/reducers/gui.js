@@ -4,7 +4,7 @@ import assetDragReducer, {assetDragInitialState} from './asset-drag';
 import cardsReducer, {cardsInitialState} from './cards';
 import colorPickerReducer, {colorPickerInitialState} from './color-picker';
 import connectionModalReducer, {connectionModalInitialState} from './connection-modal';
-import bayesModalReducer, {bayesModalInitialState} from './bayes-modal';
+import turingModalReducer, {turingModalInitialState} from './turing-modal.js';
 import customProceduresReducer, {customProceduresInitialState} from './custom-procedures';
 import blockDragReducer, {blockDragInitialState} from './block-drag';
 import editorTabReducer, {editorTabInitialState} from './editor-tab';
@@ -16,7 +16,7 @@ import modeReducer, {modeInitialState} from './mode';
 import monitorReducer, {monitorsInitialState} from './monitors';
 import monitorLayoutReducer, {monitorLayoutInitialState} from './monitor-layout';
 import projectChangedReducer, {projectChangedInitialState} from './project-changed';
-import bayesDataReducer, {bayesDataInitialState} from './bayes-data';
+import turingDataReducer, {turingDataInitialState} from './turing-data.js';
 import projectStateReducer, {projectStateInitialState} from './project-state';
 import projectTitleReducer, {projectTitleInitialState} from './project-title';
 import fontsLoadedReducer, {fontsLoadedInitialState} from './fonts-loaded';
@@ -42,7 +42,7 @@ const guiInitialState = {
     blockDrag: blockDragInitialState,
     cards: cardsInitialState,
     colorPicker: colorPickerInitialState,
-    bayesModal: bayesModalInitialState,
+    turingModal: turingModalInitialState,
     connectionModal: connectionModalInitialState,
     customProcedures: customProceduresInitialState,
     editorTab: editorTabInitialState,
@@ -55,7 +55,7 @@ const guiInitialState = {
     monitors: monitorsInitialState,
     monitorLayout: monitorLayoutInitialState,
     projectChanged: projectChangedInitialState,
-    bayesData: bayesDataInitialState,
+    turingData: turingDataInitialState,
     projectState: projectStateInitialState,
     projectTitle: projectTitleInitialState,
     fontsLoaded: fontsLoadedInitialState,
@@ -145,7 +145,7 @@ const guiReducer = combineReducers({
     blockDrag: blockDragReducer,
     cards: cardsReducer,
     colorPicker: colorPickerReducer,
-    bayesModal: bayesModalReducer,
+    turingModal: turingModalReducer,
     connectionModal: connectionModalReducer,
     customProcedures: customProceduresReducer,
     editorTab: editorTabReducer,
@@ -158,7 +158,7 @@ const guiReducer = combineReducers({
     monitors: monitorReducer,
     monitorLayout: monitorLayoutReducer,
     projectChanged: projectChangedReducer,
-    bayesData: bayesDataReducer,
+    turingData: turingDataReducer,
     projectState: projectStateReducer,
     projectTitle: projectTitleReducer,
     fontsLoaded: fontsLoadedReducer,

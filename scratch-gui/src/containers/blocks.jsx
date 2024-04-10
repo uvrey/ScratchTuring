@@ -24,7 +24,7 @@ import {injectExtensionBlockTheme, injectExtensionCategoryTheme} from '../lib/th
 import {connect} from 'react-redux';
 import {updateToolbox} from '../reducers/toolbox';
 import {activateColorPicker} from '../reducers/color-picker';
-import {closeExtensionLibrary, openSoundRecorder, openConnectionModal, openMapModal, openBayesModal} from '../reducers/modals';
+import {closeExtensionLibrary, openSoundRecorder, openConnectionModal, openMapModal, openTuringModal} from '../reducers/modals';
 import {activateCustomProcedures, deactivateCustomProcedures} from '../reducers/custom-procedures';
 import {setConnectionModalExtensionId} from '../reducers/connection-modal';
 import {updateMetrics} from '../reducers/workspace-metrics';
@@ -59,7 +59,7 @@ class Blocks extends React.Component {
             'handleCategorySelected',
             'handleConnectionModalStart',
             'handleMapModalStart',
-            'handleBayesModalStart',
+            'handleTuringModalStart',
             'handleDrop',
             'handleStatusButtonUpdate',
             'handleOpenSoundRecorder',
@@ -85,7 +85,7 @@ class Blocks extends React.Component {
         this.ScratchBlocks.statusButtonCallback = this.handleConnectionModalStart;
         this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
         this.ScratchBlocks.mapButtonCallback = this.handleMapModalStart;
-        this.ScratchBlocks.bayesButtonCallback = this.handleBayesModalStart;
+        this.ScratchBlocks.turingButtonCallback = this.handleTuringModalStart;
 
         this.state = {
             prompt: null
@@ -100,7 +100,7 @@ class Blocks extends React.Component {
         this.ScratchBlocks.statusButtonCallback = this.handleConnectionModalStart;
         this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
         this.ScratchBlocks.mapButtonCallback = this.handleMapModalStart;
-        this.ScratchBlocks.bayesButtonCallback = this.handleBayesModalStart;
+        this.ScratchBlocks.turingButtonCallback = this.handleturingModalStart;
 
         this.ScratchBlocks.FieldColourSlider.activateEyedropper_ = this.props.onActivateColorPicker;
         this.ScratchBlocks.Procedures.externalProcedureDefCallback = this.props.onActivateCustomProcedures;
@@ -485,7 +485,7 @@ class Blocks extends React.Component {
         // @todo Later we should replace this to avoid all the warnings from redefining blocks.
         this.handleExtensionAdded(categoryInfo);
     }
-    handleCategorySelected (categoryId, isBayes=false) {
+    handleCategorySelected (categoryId, isTuring=false) {
         console.log("handle category selected handling modal start? inside gui blocks.jsx")
         const extension = extensionData.find(ext => ext.extensionId === categoryId);
 
@@ -499,18 +499,18 @@ class Blocks extends React.Component {
         if (extension && extension.launchGUIConnectionFlow) { // launch Turing connection to the GUI
             console.log("we have selected the turing extension! inside blocks")
             console.log("todo - transmit reference to all graphic objects we might need here.")
-            this.props.vm.runtime.addBayesModalCallBack(extension.extensionId, this.handleBayesModalStart)
+            this.props.vm.runtime.addTuringModalCallBack(extension.extensionId, this.handleTuringModalStart)
         }
         
         this.withToolboxUpdates(() => {
             this.workspace.toolbox_.setSelectedCategoryById(categoryId);
         });
     }
-    // handleOpenBayesPanel (categoryId) {
+    // handleOpenTuringPanel (categoryId) {
     //     const extension = extensionData.find(ext => ext.extensionId === categoryId);
     //     if (extension && extension.launchGUIConnectionFlow) { // launch Turing connection to the GUI
     //         console.log("we have selected the turing extension! inside blocks")
-    //         this.handleBayesModalStart(extension._extensionId); // instead of doing this, we communicate that we have chosen this
+    //         this.handleTuringModalStart(extension._extensionId); // instead of doing this, we communicate that we have chosen this
     //     }
     // }
     setBlocks (blocks) {
@@ -536,8 +536,8 @@ class Blocks extends React.Component {
     handleMapModalStart () {
         this.props.onOpenMapModal();
     }
-    handleBayesModalStart (extensionId) {
-        this.props.onOpenBayesModal(extensionId);
+    handleTuringModalStart (extensionId) {
+        this.props.onOpenTuringModal(extensionId);
     }
     handleStatusButtonUpdate () {
         this.ScratchBlocks.refreshStatusButtons(this.workspace);
@@ -591,7 +591,7 @@ class Blocks extends React.Component {
             onActivateColorPicker,
             onOpenConnectionModal,
             onOpenMapModal,
-            onOpenBayesModal,
+            onOpenTuringModal,
             onOpenSoundRecorder,
             updateToolboxState,
             onActivateCustomProcedures,
@@ -658,7 +658,7 @@ Blocks.propTypes = {
     onActivateCustomProcedures: PropTypes.func,
     onOpenConnectionModal: PropTypes.func,
     onOpenMapModal: PropTypes.func,
-    onOpenBayesModal: PropTypes.func,
+    onOpenTuringModal: PropTypes.func,
     onOpenSoundRecorder: PropTypes.func,
     onRequestCloseCustomProcedures: PropTypes.func,
     onRequestCloseExtensionLibrary: PropTypes.func,
@@ -731,8 +731,8 @@ const mapDispatchToProps = dispatch => ({
     onOpenMapModal: () => {
         dispatch(openMapModal());
     },
-    onOpenBayesModal: () => {
-        dispatch(openBayesModal());
+    onOpenTuringModal: () => {
+        dispatch(openTuringModal());
     },
     onOpenSoundRecorder: () => {
         dispatch(activateTab(SOUNDS_TAB_INDEX));

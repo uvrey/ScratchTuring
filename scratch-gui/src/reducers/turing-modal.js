@@ -1,5 +1,5 @@
-const SET_ID = 'scratch-gui/bayes-modal/setId';
-const SET_DATA = 'scratch-gui/bayes-modal/setData'; // Define a type for setting data
+const SET_ID = 'scratch-gui/turing-modal/setId';
+const SET_DATA = 'scratch-gui/turing-modal/setData'; // Define turing a type for setting data
 
 const initialState = {
   extensionId: null,
@@ -22,15 +22,8 @@ const reducer = function (state, action) {
   }
 };
 
-const setBayesModalExtensionID = function (extensionID) {
-    return {
-        type: SET_ID,
-        extensionId: extensionId
-    };
-};
-
-const setBayesModalData = function (data) {
-  console.log("the reducer is updating its state... (bayes modal): " + data)
+const setTuringModalData = function (data) {
+  console.log("the reducer is updating its state... (turing modal): " + data)
   return {
     type: SET_DATA,
     data: data // Include the data in the action
@@ -39,7 +32,6 @@ const setBayesModalData = function (data) {
 
 export {
   reducer as default,
-  initialState as bayesModalInitialState,
-//   setBayesModalExtensionID,
-  setBayesModalData
+  initialState as turingModalInitialState,
+  setTuringModalData
 };

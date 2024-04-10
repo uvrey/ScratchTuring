@@ -31,10 +31,10 @@ class ExtensionLibrary extends React.PureComponent {
     }
 
     // handleBayesExtensions (id) {
-    //     const bayesExtensions = this.props.vm.runtime.bayesExtensions; 
+    //     const turingExtensions = this.props.vm.runtime.turingExtensions; 
 
-    //     if (bayesExtensions !== undefined) {
-    //       const foundItem = Object.values(bayesExtensions).find(item => item.extensionId === id);
+    //     if (turingExtensions !== undefined) {
+    //       const foundItem = Object.values(turingExtensions).find(item => item.extensionId === id);
     //       if (foundItem) {
     //         return foundItem; // TODO decide what elements of the GUI state we want here
     //       } else {
@@ -43,7 +43,7 @@ class ExtensionLibrary extends React.PureComponent {
     //         // return null; // Or any appropriate default value
     //       }
     //     } else {
-    //       console.error("bayesExtensions is undefined!"); // Handle potential access errors
+    //       console.error("turingExtensions is undefined!"); // Handle potential access errors
     //       // return null; // Or any appropriate default value
     //     }
     // } TODO CLEAN UP

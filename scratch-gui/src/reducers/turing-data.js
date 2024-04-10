@@ -1,5 +1,5 @@
-const SET_DATA = 'scratch-gui/bayes-data/setData'; // Define a type for setting data
-const SET_TURING_ACTIVE = 'scratch-gui/bayes-data/setTuringActive'; // Define a type for setting data
+const SET_DATA = 'scratch-gui/turing-data/setData'; // Define a type for setting data
+const SET_TURING_ACTIVE = 'scratch-gui/turing-data/setTuringActive'; // Define a type for setting data
 
 const initialState = {
   // Build data for the Turing Control panel
@@ -41,8 +41,8 @@ const setTuringActive = function () {
   };
 };
 
-const setBayesData = function (data) {
-  console.log("the reducer is updating its state... (bayes data): " + data)
+const setTuringData = function (data) {
+  console.log("the reducer is updating its state... (turing data): " + data)
   return {
     type: SET_DATA,
     data: data // Include the data in the action
@@ -51,7 +51,7 @@ const setBayesData = function (data) {
 
 export {
   reducer as default,
-  initialState as bayesDataInitialState,
-  setBayesData,
+  initialState as turingDataInitialState,
+  setTuringData,
   setTuringActive
 };

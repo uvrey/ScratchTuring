@@ -352,8 +352,8 @@ class Runtime extends EventEmitter {
          */
         this.peripheralExtensions = {};
 
-        this.bayesExtensions = {};
-        this.bayesCallbacks = {};
+        this.turingExtensions = {};
+        this.turingCallbacks = {};
         /**
          * A runtime profiler that records timed events for later playback to
          * diagnose Scratch performance.
@@ -551,8 +551,8 @@ class Runtime extends EventEmitter {
         return 'PROJECT_CHANGED';
     }
 
-    static get BAYES_DATA () {
-        return 'BAYES_DATA';
+    static get TURING_DATA () {
+        return 'TURING_DATA';
     }
 
     static get TURING_ACTIVE () {
@@ -650,10 +650,6 @@ class Runtime extends EventEmitter {
      */
     static get PERIPHERAL_DISCONNECTED () {
         return 'PERIPHERAL_DISCONNECTED';
-    }
-
-    static get BAYES_UPDATE () {
-        return 'BAYES_UPDATE';
     }
 
     /**
@@ -1531,8 +1527,8 @@ class Runtime extends EventEmitter {
         this.peripheralExtensions[extensionId] = extension;
     }
 
-    registerBayesExtension (extensionId, extension) {
-        this.bayesExtensions[extensionId] = extension;
+    registerTuringExtension (extensionId, extension) {
+        this.turingExtensions[extensionId] = extension;
     }
 
     /**
@@ -1546,14 +1542,14 @@ class Runtime extends EventEmitter {
         }
     }
 
-    addBayesModalCallBack(id, modalCallback) {
+    addTuringModalCallBack(id, modalCallback) {
         console.log("populating with callback")
-        this.bayesCallbacks[id] = modalCallback
+        this.turingCallbacks[id] = modalCallback
     }
 
     updateSomething(extensionId) {
-        if (this.bayesExtensions[extensionId]) {
-            this.bayesExtensions[extensionId].getStuff(); // we customise this
+        if (this.turingExtensions[extensionId]) {
+            this.turingExtensions[extensionId].getStuff(); // we customise this
         }
     }
     /**
@@ -2524,10 +2520,6 @@ class Runtime extends EventEmitter {
         this.emit(Runtime.PROJECT_CHANGED);
     }
 
-    emitBayesChanged () {
-        this.emit(Runtime.BAYES_CHANGED);
-    } // can remove this
-    
     /**
      * Report that a new target has been created, possibly by cloning an existing target.
      * @param {Target} newTarget - the newly created target.

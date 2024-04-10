@@ -48,7 +48,7 @@ class Scratch3Turing {
 
         this.lineList = []
         this._runtime.emit('TURING_ACTIVE')
-        this._runtime.registerBayesExtension(this._extensionId, this);
+        this._runtime.registerTuringExtension(this._extensionId, this);
 
         this.samples = []
         this.lastSampleTime = 0;
@@ -220,11 +220,6 @@ class Scratch3Turing {
         };
     }
 
-    // openPanel() {
-    //     panelCallback = this._runtime.bayesCallbacks[this._extensionId]
-    //     panelCallback(this._extensionId)
-    // }
-
     actualValue(args, util) {
         if (this.state.unit == "sec") {
             return this.getTimer(args, util).toFixed(2) + ' ' + this.state.unit
@@ -250,7 +245,7 @@ class Scratch3Turing {
         // Clear visualised data 
         this.samples = [] 
         data = this._toJSON(this.samples, this._getBarChart('mean'), this._getDistribution())
-        this._runtime.emit('BAYES_DATA', data)
+        this._runtime.emit('TURING_DATA', data)
         return "Set " + this.state.feature + " to " + this.state.expectation  + " " + this.state.unit
     }
 
@@ -415,7 +410,7 @@ class Scratch3Turing {
         }
         this.updateObservedData(newSample)
         data = this._toJSON(this.samples, this._getBarChart('mean'), this._getDistribution())
-        this._runtime.emit('BAYES_DATA', data)
+        this._runtime.emit('TURING_DATA', data)
     }
       
     updateObservedData() {

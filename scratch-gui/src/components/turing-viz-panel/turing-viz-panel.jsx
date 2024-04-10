@@ -49,7 +49,7 @@ const TuringVizPanel = props => (
             {/* <FormattedMessage
                 defaultMessage="Sprite Coordinates"
                 description="sprite coords"
-                id="gui.bayesModal.spriteCoords"
+                id="gui.turingModal.spriteCoords"
             />
             <br></br>
             <h3>X: {props.data.spriteX}</h3><h3>Y: {props.data.spriteY}</h3>

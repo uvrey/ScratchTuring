@@ -12,7 +12,7 @@ import classNames from 'classnames';
 // import ErrorStep from './error-step.jsx';
 // import UnavailableStep from './unavailable-step.jsx';
 // import UpdatePeripheralStep from './update-peripheral-step.jsx';
-import styles from './bayes-modal.css';
+import styles from './turing-modal.css';
 import DraggableModalComponent from '../draggable-modal/draggable-modal.jsx';
 import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -64,13 +64,13 @@ const barData = [
 ];
 
 
-const BayesModalComponent = props => (
+const turingModalComponent = props => (
     <DraggableModalComponent
         className={styles.modalContent}
         contentLabel={props.name}
         headerClassName={styles.header}
         // headerImage={props.connectionSmallIconURL}
-        id="bayesModal"
+        id="turingModal"
         onHelp={props.onHelp}
         onRequestClose={props.onCancel}
         closeOnClick={false}
@@ -81,7 +81,7 @@ const BayesModalComponent = props => (
                 <FormattedMessage
                     defaultMessage="Samples"
                     description="normal dist"
-                    id="gui.bayesModal.samples"
+                    id="gui.turingModal.samples"
                 />
             </Box>
             {/* <Samples>// TODO
@@ -91,7 +91,7 @@ const BayesModalComponent = props => (
             <FormattedMessage
                 defaultMessage="Visualisations"
                 description="vis"
-                id="gui.bayesModal.vis"
+                id="gui.turingModal.vis"
             />
             <Box className={styles.dataRow}>
              <Gaussian 
@@ -175,7 +175,7 @@ const BayesModalComponent = props => (
     </DraggableModalComponent>
 );
 
-BayesModalComponent.propTypes = {
+turingModalComponent.propTypes = {
     // connectingMessage: PropTypes.node.isRequired,
     // connectionSmallIconURL: PropTypes.string,
     // connectionTipIconURL: PropTypes.string,
@@ -188,10 +188,10 @@ BayesModalComponent.propTypes = {
     // useAutoScan: PropTypes.bool.isRequired
 };
 
-BayesModalComponent.defaultProps = {
+turingModalComponent.defaultProps = {
     connectingMessage: 'Connecting'
 };
 
 export {
-    BayesModalComponent as default,
+    turingModalComponent as default,
 };

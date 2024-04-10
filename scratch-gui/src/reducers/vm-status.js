@@ -6,7 +6,6 @@ const initialState = {
     running: false,
     started: false,
     turbo: false,
-    bayes: false
 };
 
 const reducer = function (state, action) {

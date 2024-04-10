@@ -1,19 +1,19 @@
 import PropTypes from 'prop-types';
 import React, {useState} from 'react';
 import bindAll from 'lodash.bindall';
-import BayesModalComponent from '../components/bayes-modal/bayes-modal.jsx';
+import TuringModalComponent from '../components/turing-modal/turing-modal.jsx';
 import VM from 'scratch-vm';
 import analytics from '../lib/analytics.js';
 import extensionData from '../lib/libraries/extensions/index.jsx';
 import {connect} from 'react-redux';
-import  {setBayesData} from  '../reducers/bayes-data.js';
+import  {setTuringData} from  '../reducers/turing-data.js';
 
-import {closeBayesModal} from '../reducers/modals.js';
+import {closeTuringModal} from '../reducers/modals.js';
 import { setVariableValue } from '../lib/variable-utils.js';
-import { bayesDataInitialState } from '../reducers/bayes-data.js';
+import { turingDataInitialState } from '../reducers/turing-data.js';
 // import {isMicroBitUpdateSupported, selectAndUpdateMicroBit} from '../lib/microbit-update.js';
 
-class BayesModal extends React.Component {
+class TuringModal extends React.Component {
     constructor (props) {
         super(props);
         bindAll(this, [
@@ -33,11 +33,12 @@ class BayesModal extends React.Component {
     
     componentDidMount () {
         // this.props.vm.on('BAYES_DATA', (data) => this.handleUpdate(data));
-        this.props.vm.on('BAYES_ERROR', this.handleError);
+        console.log('modal mounting')
     }
     componentWillUnmount () {
+        console.log('modal unmounting')
         // this.props.vm.removeListener('BAYES_DATA', (data) => this.handleUpdate(data));
-        this.props.vm.removeListener('BAYES_ERROR', this.handleError);
+        // this.props.vm.removeListener('BAYES_ERROR', this.handleError);
     }
     handleCancel () {
         this.props.onCancel();
@@ -47,15 +48,15 @@ class BayesModal extends React.Component {
         // having scratch-link installed.
         analytics.event({
             category: 'extensions',
-            action: 'bayes error',
+            action: 'turing error',
             label: this.props.extensionId
         });
     }
     handleInit () {
-        console.log("WE are initialising a bayes?? just got a signal from the runtime :)")
+        console.log("WE are initialising a turing?? just got a signal from the runtime :)")
         analytics.event({
             category: 'extensions',
-            action: 'bayes init',
+            action: 'turing init',
             label: this.props.extensionId
         });
     }
@@ -67,7 +68,7 @@ class BayesModal extends React.Component {
         // this.props.onUpdateModalData(data)
         console.log("value of data now: " + this.props.data)
       // console.log(typeof this.props.onUpdateModalData)
-        // dispatch(setBayesModalData(data));
+        // dispatch(setTuringModalData(data));
     };
     handleHelp () {
         window.open(this.state.extension.helpLink, '_blank');
@@ -86,13 +87,13 @@ class BayesModal extends React.Component {
     //     // });
     //     analytics.event({
     //         category: 'extensions',
-    //         action: 'enter bayes update flow',
+    //         action: 'enter turing update flow',
     //         label: this.props.extensionId
     //     });
     // }
     render () {
         return (
-            <BayesModalComponent
+            <TuringModalComponent
                 // connectingMessage={this.state.extension && this.state.extension.connectingMessage}
                 // connectionIconURL={this.state.extension && this.state.extension.connectionIconURL}
                 // connectionSmallIconURL={this.state.extension && this.state.extension.connectionSmallIconURL}
@@ -120,27 +121,27 @@ class BayesModal extends React.Component {
     }
 }
 
-BayesModal.propTypes = {
+TuringModal.propTypes = {
     extensionId: PropTypes.string,
     onCancel: PropTypes.func,
     vm: PropTypes.instanceOf(VM)
 };
 
 const mapStateToProps = state => ({
-    extensionId: state.scratchGui.bayesModal.extensionId,
-    data: state.scratchGui.bayesData.data, 
+    extensionId: state.scratchGui.turingModal.extensionId,
+    data: state.scratchGui.turingData.data, 
 });
 
 const mapDispatchToProps = dispatch => ({
     onCancel: () => {
-        dispatch(closeBayesModal());
+        dispatch(closeTuringModal());
     },
     onUpdateModalData: data => {
-        dispatch(setBayesData(data));
+        dispatch(setTuringData(data));
     }
 });
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(BayesModal);
+)(TuringModal);

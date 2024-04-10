@@ -15,7 +15,6 @@ const Alerts = ({
     onCloseAlert
 }) => (
     <AlertsComponent
-        // only display standard and extension alerts here
         alertsList={filterPopupAlerts(alertsList)}
         className={className}
         onCloseAlert={onCloseAlert}
