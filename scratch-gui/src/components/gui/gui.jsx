@@ -130,6 +130,7 @@ const GUIComponent = props => {
         stageSizeMode,
         targetIsStage,
         telemetryModalVisible,
+        turingExtensionActive,
         theme,
         tipsLibraryVisible,
         vm,
@@ -322,7 +323,9 @@ const GUIComponent = props => {
                                             id="gui.gui.soundsTab"
                                         />
                                     </Tab>
-                                    {/* {turingExtensionActive ? ( TODO ADD THIS LOGIC HERE */}
+                                    {console.log("is turing active?")}
+                                    {console.log(turingExtensionActive)}
+                                    {turingExtensionActive ? ( 
                                          <Tab
                                             className={tabClassNames.tab}
                                             onClick={onActivateTuringControlPanel}
@@ -337,7 +340,7 @@ const GUIComponent = props => {
                                                 id="gui.gui.turingControlPanel"
                                             />
                                         </Tab>
-                                    {/* ) : null} */}
+                                    ) : null }
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     <Box className={styles.blocksWrapper}>
@@ -471,6 +474,7 @@ GUIComponent.propTypes = {
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
     turingTabVisible: PropTypes.bool,
+    turingExtensionActive: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
     targetIsStage: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,

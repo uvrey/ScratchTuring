@@ -47,6 +47,7 @@ class Scratch3Turing {
         this.modes = ['HUE_BASED', 'TIME_BASED', 'HUE_BASED']
 
         this.lineList = []
+        this._runtime.emit('TURING_ACTIVE')
         this._runtime.registerBayesExtension(this._extensionId, this);
 
         this.samples = []

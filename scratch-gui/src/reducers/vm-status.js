@@ -1,7 +1,6 @@
 const SET_RUNNING_STATE = 'scratch-gui/vm-status/SET_RUNNING_STATE';
 const SET_TURBO_STATE = 'scratch-gui/vm-status/SET_TURBO_STATE';
 const SET_STARTED_STATE = 'scratch-gui/vm-status/SET_STARTED_STATE';
-const SET_BAYES_STATE = 'scratch-gui/vm-status/SET_BAYES_STATE';
 
 const initialState = {
     running: false,
@@ -24,10 +23,6 @@ const reducer = function (state, action) {
     case SET_TURBO_STATE:
         return Object.assign({}, state, {
             turbo: action.turbo
-        });
-    case SET_BAYES_STATE:
-        return Object.assign({}, state, {
-            turbo: action.bayes
         });
     default:
         return state;
@@ -58,20 +53,10 @@ const setTurboState = function (turbo) {
     };
 };
 
-const setBayesState = function (bayes) {
-    console.log("setting bayes state to true")
-    return {
-        type: SET_BAYES_STATE,
-        bayes: bayes
-    };
-};
-
-
 export {
     reducer as default,
     initialState as vmStatusInitialState,
     setRunningState,
     setStartedState,
-    setTurboState,
-    setBayesState
+    setTurboState
 };

@@ -9,7 +9,7 @@ import {updateTargets} from '../reducers/targets';
 import {updateBlockDrag} from '../reducers/block-drag';
 import {updateMonitors} from '../reducers/monitors';
 import {setProjectChanged, setProjectUnchanged} from '../reducers/project-changed';
-import {setBayesData} from '../reducers/bayes-data';
+import {setBayesData, setTuringActive} from '../reducers/bayes-data';
 import {setRunningState, setTurboState, setStartedState, setBayesState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
@@ -49,6 +49,7 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('PERIPHERAL_CONNECTION_LOST_ERROR', this.props.onShowExtensionAlert);
             this.props.vm.on('MIC_LISTENING', this.props.onMicListeningUpdate);
             this.props.vm.on('BAYES_DATA', (data) => this.handleBayesData(data));
+            this.props.vm.on('TURING_ACTIVE', this.props.onTuringActive);
             console.log("inside listener HOC")
         }
         componentDidMount () {
@@ -222,6 +223,7 @@ const vmListenerHOC = function (WrappedComponent) {
             dispatch(showExtensionAlert(data));
         },
         onSetBayesData: data => dispatch(setBayesData(data)),
+        onTuringActive: () => dispatch(setTuringActive()),
         onMicListeningUpdate: listening => {
             dispatch(updateMicIndicator(listening));
         }

@@ -555,6 +555,10 @@ class Runtime extends EventEmitter {
         return 'BAYES_DATA';
     }
 
+    static get TURING_ACTIVE () {
+        return 'TURING_ACTIVE';
+    }
+
     /**
      * Event name for report that a change was made to an extension in the toolbox.
      * @const {string}

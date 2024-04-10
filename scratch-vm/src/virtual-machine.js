@@ -149,6 +149,9 @@ class VirtualMachine extends EventEmitter {
             // console.log("VM got Bayes changed update from Runtime"),
             this.sendBayesData(data)
         );
+        this.runtime.on(Runtime.TURING_ACTIVE, () => 
+            this.emit(Runtime.TURING_ACTIVE)
+        );
         this.runtime.on(Runtime.MIC_LISTENING, listening => {
             this.emit(Runtime.MIC_LISTENING, listening);
         });

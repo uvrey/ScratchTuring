@@ -167,7 +167,7 @@ const mapStateToProps = state => {
         projectId: state.scratchGui.projectState.projectId,
         soundsTabVisible: state.scratchGui.editorTab.activeTabIndex === SOUNDS_TAB_INDEX,
         turingTabVisible: state.scratchGui.editorTab.activeTabIndex === TURING_TAB_INDEX,
-        // turingExtensionActive: state.scratchGui.  TODO add reducer to make this tab available
+        turingExtensionActive: state.scratchGui.bayesData.turingActive,
         targetIsStage: (
             state.scratchGui.targets.stage &&
             state.scratchGui.targets.stage.id === state.scratchGui.targets.editingTarget
