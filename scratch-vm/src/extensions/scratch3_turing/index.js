@@ -8,6 +8,7 @@ const VirtualMachine = require('../../virtual-machine.js');
 const Distributions = require('./distributions.js')
 const Data = require('./data.js')
 const Color = require('../../util/color.js')
+const Mouse = require('./getMousePos.js')
 // const GUI = require('scratch-gui')
 
 const palette = [
@@ -46,6 +47,7 @@ class Scratch3Turing {
         this._runtime.registerBayesExtension(this._extensionId, this);
 
         this.samples = []
+        this.lastSampleTime = 0;
         /**
          * The timer utility.
          * @type {Timer}
@@ -292,37 +294,144 @@ class Scratch3Turing {
     generateHexCode() {
         // Generate a random integer representing a 24-bit color value (3 bytes)
         const randomColor = Math.floor(Math.random() * 16777215);
-      
         // Convert the random number to a hexadecimal string with padding
         const hexCode = randomColor.toString(16).padStart(6, '0');
-      
         return `#${hexCode}`; // Add '#' prefix for a valid hex color code
       }
 
+    getBackdrop1() {
+        this._runtime.renderer.draw();
+        var canvas = this._getStageCanvas();
+        var jpegdata = canvas.toDataURL('image/jpeg');
+        if (jpegdata.indexOf('data:image/jpeg;base64,') === 0) {
+          jpegdata = jpegdata.substr('data:image/jpeg;base64,'.length);
+        }
+        return jpegdata;
+    }
 
-    // how to access vm here?
+    getBackdrop2() {
+        // where is the sprite's top left corner and how big is it?
+        var target = util.target;
+        var costume = target.getCurrentCostume();
+        var sizeRatio = target.size / 100;
+        var width = costume.size[0] / costume.bitmapResolution * sizeRatio;
+        var height = costume.size[1] / costume.bitmapResolution * sizeRatio;
+        var x = target.x - costume.rotationCenterX / costume.bitmapResolution;
+        var y = target.y + costume.rotationCenterY / costume.bitmapResolution;
+        var originalCanvas = this._getStageCanvas();
+        // assume that the factor will be the same for both width and height
+        var scaleFactor = originalCanvas.width / 480;
+        x = scaleFactor * (x + 240);
+        y = -scaleFactor * (y - 180);
+        width *= scaleFactor;
+        height *= scaleFactor;
+
+        // make a new off-screen canvas to copy to
+        console.log('[mlforkids] Resizing backdrop to dimensions needed for classifying');
+        var RESIZE_WIDTH = 224;
+        var RESIZE_HEIGHT = 224;
+        var copyCanvas = document.createElement('canvas');
+        copyCanvas.width = RESIZE_WIDTH;
+        copyCanvas.height = RESIZE_HEIGHT;
+        var copyContext = copyCanvas.getContext('2d');
+
+        // get the backdrop image
+        this._runtime.renderer.draw();
+
+        // copy a section of the backdrop to the copy canvas
+        copyContext.drawImage(originalCanvas, x, y, width, height, 0, 0, RESIZE_WIDTH, RESIZE_HEIGHT);
+
+        // get the base64-encoded version of the copy canvas
+        var jpegdata = copyCanvas.toDataURL('image/jpeg');
+        if (jpegdata.indexOf('data:image/jpeg;base64,') === 0) {
+        jpegdata = jpegdata.substr('data:image/jpeg;base64,'.length);
+        }
+        return jpegdata;
+    }
+
+    downloadImage(jpegdata) {
+        // Assuming jpegdata is the base64 encoded string
+        var byteArray = atob(jpegdata);
+
+        // Convert the byte array to a Uint8Array (an array of 8-bit unsigned integers)
+        var uint8Array = new Uint8Array(byteArray.length);
+        for (var i = 0; i < byteArray.length; i++) {
+        uint8Array[i] = byteArray.charCodeAt(i);
+        }
+
+        var blob = new Blob([uint8Array], { type: 'image/jpeg' });
+        link.href = URL.createObjectURL(blob);
+        link.download = 'image.jpg'; // Set your desired filename      
+    }
+    
+    _getStageCanvas() {
+        var allCanvases = document.getElementsByTagName('canvas');
+        for (var i = 0; i < allCanvases.length; i++) {
+          var canvas = allCanvases[i];
+          if (canvas.width > 0 && canvas.className.indexOf('paper-canvas_paper-canvas') === -1) {
+            return canvas;
+          }
+        }
+    }
+
+    getStageCanvas() {
+        var allCanvases = document.getElementsByTagName('canvas');
+        if (allCanvases.length > 0) {
+            return allCanvases[0] // we assume that the stage is the first canvas
+        }
+    }
+
+    interpolate(x, oldMin, oldMax, newMin, newMax) {
+        // Check for invalid ranges
+        if (oldMin >= oldMax || newMin >= newMax) {
+          throw new Error("Invalid ranges provided!");
+        }
+      
+        // Calculate the ratio within the old range
+        const oldRange = oldMax - oldMin;
+        const relativeX = x - oldMin;
+        const ratio = relativeX / oldRange;
+      
+        // Calculate the new value within the new range
+        const newRange = newMax - newMin;
+        const newX = ratio * newRange + newMin;
+      
+        return newX;
+      }
+      
     pinLocation(args, util) {
+        const currentTime = Date.now(); 
+        if (currentTime - this.lastSampleTime < 800) {
+          return; 
+        }
+        this.lastSampleTime = currentTime;
+        this.sendData(util)
+    }
+
+    sendData(util) {
+        console.log("---------->")
         if (this.state.mode == "HUE_BASED") {
             var x = util.target.x
-            var y = util.target.y
-            size = util.target.size/2
+            var y = util.target.y 
+            // Get current stage dimensions
+            const canvas = this.getStageCanvas() 
+            var width = canvas.clientWidth
+            const height = canvas.clientHeight
+            // interpolate sprite co-ordinates
+            var new_X = Math.round(width - this.interpolate(x, -240, 240, 0, width))
+            var new_Y = Math.round(height - this.interpolate(y, -180, 180, 0, height))
 
-            // Handle negative values
-            x = x + 180; // Translate x to the range [0, 360] (considering negative values)
-            y = y + 160; // Translate y to the range [0, 320] (considering negative values)
+            console.log(" 0 < " + new_X + "(" + typeof new_X + ") < " + width + "(" + typeof width + ")")
+            console.log(" 0 < " + new_Y + "(" + typeof new_Y + ") < " + height + "(" + typeof height + ")")
 
-            // Perform linear scaling
-            x = x * (480 / 360); // Scale x to the range [0, 480]
-            y = y * (360 / 320); // Scale y to the range [0, 360]
-
-            color = util.target.renderer.extractColor(x, y, 1).color // TODO bug fix here
+            width = Math.abs(new_X)
+            // extract colour
+            color = util.target.renderer.extractColor(new_X,new_Y,1).color            
             this.samples.push(Color.rgbToHex(color))
-
         } else {
             this.samples.push(this._timer.timeElapsed()) 
             this._timer.start(); // start a new timer
         }
-        // Emit data
         data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
         this._runtime.emit('BAYES_DATA', data)
     }
