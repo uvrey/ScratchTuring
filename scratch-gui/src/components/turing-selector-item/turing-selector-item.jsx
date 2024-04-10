@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 // import DeleteButton from '../delete-button/delete-button.jsx';
 import styles from './turing-selector-item.css';
+import timerIcon from '../action-menu/icon--timer.svg'
 // import {ContextMenuTrigger} from 'react-contextmenu';
 // import {DangerousMenuItem, ContextMenu, MenuItem} from '../context-menu/context-menu.jsx';
 // import {FormattedMessage} from 'react-intl';
@@ -47,18 +48,14 @@ const TuringSelectorItem = props => {
         // </div>
         <Box className={styles.sampleInfo}>
             {props.mode === "TIME_BASED" ? (
-                <div key={index} className="sample-container">
-                <img src={timestampIcon} className={styles.listItem} />
-                {props.details ? (
-                    <div className={styles.sampleName}>{props.sample}</div>
-                ) : null}
+                <div key={index}>
+                <img src={timerIcon} className={styles.listItem} />
+                <div className={styles.sampleName}>{props.sample}</div>
                 </div>
             ) : (
-                <div key={index} className="sample-container">
+                <div key={index}>
                 <img src={compassIcon} className={styles.listItem} />
-                {props.details ? (
-                    <div className={styles.sampleName}>{props.sample}</div>
-                ) : null}
+                <div className={styles.sampleName}>{props.sample}</div>
                 </div>
             )}
         </Box>
@@ -86,10 +83,8 @@ const TuringSelectorItem = props => {
     }
 
 TuringSelectorItem.propTypes = {
-    key: PropTypes.node, 
     sample: PropTypes.node,
     mode: PropTypes.string,
-    details: PropTypes.bool
 };
 
 export default TuringSelectorItem;

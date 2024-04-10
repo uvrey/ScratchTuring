@@ -44,6 +44,7 @@ import addExtensionIcon from './icon--extensions.svg';
 import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
+import turingIcon from './icon--turing.svg';
 
 const messages = defineMessages({
     addExtension: {
@@ -326,12 +327,12 @@ const GUIComponent = props => {
                                             className={tabClassNames.tab}
                                             onClick={onActivateTuringControlPanel}
                                         >
-                                            <img
-                                                draggable={false}
-                                                src={controlIcon}
+                                           <img
+                                            draggable={false}
+                                            src={turingIcon} // TODO change this
                                             />
                                             <FormattedMessage
-                                                defaultMessage="Turing Panel"
+                                                defaultMessage="Dashboard"
                                                 description="Button to get to the turing control panel"
                                                 id="gui.gui.turingControlPanel"
                                             />

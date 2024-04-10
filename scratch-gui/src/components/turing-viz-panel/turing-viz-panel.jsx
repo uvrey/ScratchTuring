@@ -9,6 +9,40 @@ import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import Gaussian from '../gaussian/gaussian.jsx'
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
 
+const getIntroOfPage = (label) => {
+    if (label === 'Page A') {
+      return "Page A is about men's clothing";
+    }
+    if (label === 'Page B') {
+      return "Page B is about women's dress";
+    }
+    if (label === 'Page C') {
+      return "Page C is about women's bag";
+    }
+    if (label === 'Page D') {
+      return 'Page D is about household goods';
+    }
+    if (label === 'Page E') {
+      return 'Page E is about food';
+    }
+    if (label === 'Page F') {
+      return 'Page F is about baby food';
+    }
+    return '';
+  };
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className={styles.customTooltip}>
+          <p className={styles.chartLabel}>{`Average: ${payload[0].value} sec`}</p>
+          <p className="intro">{getIntroOfPage(label)}</p>
+          {/* <p className="desc">Anything you want can be displayed here.</p> */}
+        </div>
+      );
+    }
+    return null;
+  };
 
 const TuringVizPanel = props => (
         <Box className={styles.body}>
@@ -22,22 +56,27 @@ const TuringVizPanel = props => (
             <br></br> */}
             <Box className={styles.dataCol}>
             <h1>Dashboard</h1>
-            {/* <Box className={styles.dataRow}> */}
-                {/* <Gaussian 
-                    name="Gaussian"
-                    data={props.data.distData}
-                    lines={props.data.distLines}
-                >
-                </Gaussian> */}
 
-                {/* <MeanPlot 
-                    name="Gaussian"
-                    data={props.data.distData}
-                    lines={props.data.distLines}
-                >
-                </MeanPlot> */}
+                <Box className={styles.keyStats}>
+                    <b>Number of Samples:</b> {props.data.samples.length}
+                </Box>
 
-                <h2>PDF</h2>
+                <Box className={styles.dataRow}>
+       
+                <Box className={styles.dataCol}>
+                <h3>Average Values</h3>
+                {console.log(props.data.barData[1])}
+       
+                <BarChart width={200} height={300} data={props.data.barData} className={styles.chartElement}>
+                    <Bar key={props.data.barData.type} fill="#45BDE5" isAnimationActive={true} dataKey="value" barsize={10} activeBar={{ stroke: 'red', strokeWidth: 2 }}/>
+                <XAxis dataKey="type" />
+                <Tooltip content={<CustomTooltip/>}/>
+                <YAxis />
+                </BarChart>
+                </Box>
+
+                <Box className={styles.dataCol}>
+                <h3>Probability</h3>
                 <LineChart width={730} height={300} data={props.data.distData}>
                 <XAxis
                     allowDecimals={false}
@@ -60,13 +99,8 @@ const TuringVizPanel = props => (
                 <Legend />
                 <Tooltip />
                 </LineChart>
-
-                <h2>Bar</h2>
-                <BarChart width={150} height={200} data={props.data.barData}>
-                    <Bar dataKey="prior" fill={props.data.distLines.color} />
-                    <CartesianGrid  stroke="#eee" strokeDasharray="5 5"  />
-                    <YAxis />
-                </BarChart>
+                </Box>
+                </Box>
                 </Box>
             </Box>
         // </Box>
@@ -84,3 +118,19 @@ TuringVizPanel.defaultProps = {
 export {
     TuringVizPanel as default,
 };
+
+
+            {/* <Box className={styles.dataRow}> */}
+                {/* <Gaussian 
+                    name="Gaussian"
+                    data={props.data.distData}
+                    lines={props.data.distLines}
+                >
+                </Gaussian> */}
+
+                {/* <MeanPlot 
+                    name="Gaussian"
+                    data={props.data.distData}
+                    lines={props.data.distLines}
+                >
+                </MeanPlot> */}

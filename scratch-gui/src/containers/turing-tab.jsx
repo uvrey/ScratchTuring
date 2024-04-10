@@ -152,14 +152,7 @@ class TuringTab extends React.Component {
                     vm={this.props.vm}
                     data={this.props.data}
                 />
-                {this.props.soundLibraryVisible ? (
-                    <SampleLibrary
-                        vm={this.props.vm}
-                        onNewSample={this.handleNewSample}
-                        onRequestClose={this.props.onRequestCloseSampleLibrary}
-                    />
-                ) : null}
-            </TuringAssetPanel>
+                </TuringAssetPanel>
         );
     }
 }

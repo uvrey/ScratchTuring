@@ -6,12 +6,11 @@ import ActionMenu from '../action-menu/action-menu.jsx';
 import SortableAsset from './sortable-asset.jsx';
 import SortableHOC from '../../lib/sortable-hoc.jsx';
 import DragConstants from '../../lib/drag-constants.js';
-import timestampIcon from '../action-menu/icon--timestamp.svg';
+import timestampIcon from '../action-menu/icon--timer.svg';
 import compassIcon from '../action-menu/icon--compass.svg';
-
-
+import erasorIcon from '../action-menu/icon--eraser.svg'
+import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
 import styles from './turing-selector.css';
-import { FormattedMessage } from 'react-intl';
 
 const TuringSelector = props => {
     const {
@@ -32,8 +31,33 @@ const TuringSelector = props => {
     } = props;
 
     const isRelevantDrag = draggingType === dragType;
-
     let newButtonSection = null;
+
+    const selectorMessages = defineMessages({
+            clearSampleMessage: {
+            id: 'gui.turingSelector.clearSample',
+            defaultMessage: 'Clear Samples'
+          }
+      });
+
+    // let sampleButton = (
+    //                 [{
+    //                   title: "Clear Samples",
+    //                   img: erasorIcon,
+    //                   // onClick: handleClearSamples(),
+    //                 }]
+    //           )
+
+    newButtonSection = (
+      <Box className={styles.newButtons}>
+          <ActionMenu
+              img={erasorIcon}
+              // moreButtons={sampleButton}
+              title={"Clear Samples"}
+              // onClick={onClick}
+          />
+      </Box>
+  );
 
     return (
         <Box
@@ -41,34 +65,27 @@ const TuringSelector = props => {
           componentRef={containerRef}
         >
           <Box className={styles.listArea}>
-            <Box className={styles.samplesHeader}>
-              <FormattedMessage
-                defaultMessage="Samples"
-                description="samples"
-                id="gui.turingSelector.samples"
-              />
-            </Box>
             {props.samples.map((sample, index) => (
                 <Box className={styles.sampleInfo}>
                 {props.mode === "TIME_BASED" ? (
-                    <div key={index} className="sample-container">
+                    <div key={index} className={styles.sampleContainer}>
                         <img src={timestampIcon} className={styles.listItem} />
-                        <div className={styles.sampleInfo}>{sample}</div>
+                        <div className={styles.sampleLabel}>{sample}</div>
                     </div>
                 ) : (
-                    <div key={index} className="sample-container">
-                    <div className={styles.colorSwatch} style={{ backgroundColor: sample }}>
-                    <div className="square-rectangle"></div>
-                    </div>
-                    <div className={styles.sampleInfo}>{sample}</div>
+                    <div key={index} className={styles.sampleContainer}>
+                      <div className={styles.colorSwatch} style={{ backgroundColor: sample }}>
+                      <div className="square-rectangle"></div>
+                      </div>
+                      <div className={styles.sampleLabel}>{sample}</div>
                     </div>
                 )}
                 </Box>
             ))}
           </Box>
+          {newButtonSection}
         </Box>
-      );
-      
+      ); 
 };
 
 TuringSelector.propTypes = {

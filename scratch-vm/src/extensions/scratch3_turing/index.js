@@ -248,7 +248,7 @@ class Scratch3Turing {
 
         // Clear visualised data 
         this.samples = [] 
-        data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
+        data = this._toJSON(this.samples, this._getBarChart('mean'), this._getDistribution())
         this._runtime.emit('BAYES_DATA', data)
         return "Set " + this.state.feature + " to " + this.state.expectation  + " " + this.state.unit
     }
@@ -413,7 +413,7 @@ class Scratch3Turing {
             this._timer.start(); // start a new timer
         }
         this.updateObservedData(newSample)
-        data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
+        data = this._toJSON(this.samples, this._getBarChart('mean'), this._getDistribution())
         this._runtime.emit('BAYES_DATA', data)
     }
       
@@ -427,9 +427,7 @@ class Scratch3Turing {
           [m, s] = this.getMeanAndVariance(this.samples); // Numeric random variables here
           console.log("new mean: " + m + ", new stdv: " + s)
         }
-        const updatedLineList = [...this.lineList];
-        // updatedLineList[PRIOR_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
-        // updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
+        const updatedLineList = [...this.lineList]; 
         updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
         this.lineList = updatedLineList // update line list
         console.log("UPDATED LINE LIST")
@@ -471,12 +469,14 @@ class Scratch3Turing {
         return Distributions.generateProbabilityData(this.lineList)
     }
 
-    _getBarChart(samples, distribution = "Normal") {
+    _getBarChart(param) {
+        console.log("Data for bar chart --> " + param)
+        console.log(this.lineList[OBSERVED_INDEX][param])
         return [
-            { type: "prior", value: 400 },
-            { type: "observed", value: 700 },
-            { type: "posterior", value: 200 },
-        ];
+            { type: "prior", value: 1},
+            { type: "observed", value: this.lineList[OBSERVED_INDEX][param] },
+            { type: "posterior", value: 1},
+            ];
     }
 
     _dummyDist(x,y) {
