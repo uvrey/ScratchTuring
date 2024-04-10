@@ -8,7 +8,6 @@ const VirtualMachine = require('../../virtual-machine.js');
 const Distributions = require('./distributions.js')
 const Data = require('./data.js')
 const Color = require('../../util/color.js')
-const Mouse = require('./getMousePos.js')
 // const GUI = require('scratch-gui')
 
 const palette = [
@@ -22,6 +21,10 @@ const palette = [
     "#FF5959"
   ];
 
+  
+const PRIOR_INDEX = 0
+const POSTERIOR_INDEX = 1
+const OBSERVED_INDEX = 2
   
 class Scratch3Turing {
     constructor (runtime, extensionId) {
@@ -53,12 +56,13 @@ class Scratch3Turing {
          * @type {Timer}
          */
         this._timer = new Timer();
+        this._timer.start();
         this.palette_idx = 0;
 
         // Build line list
-        this._addCurve(0, 1, 'prior') // standard normal
-        this._addCurve(0.5, 0.5, 'posterior') // standard normal
-        this._addCurve(-0.2, 2, 'observed') // standard normal
+        this._addCurve(0, 0.02, 'prior') // standard normal
+        this._addCurve(0.5, 10, 'posterior') // standard normal
+        this._addCurve(-0.2, 1, 'observed') // standard normal
     }
 
     _getColorFromPalette() {
@@ -188,12 +192,12 @@ class Scratch3Turing {
                     }
                 },
                 {
-                    opcode: 'pinLocation',
+                    opcode: 'sample',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.pinLocation',
-                        default:  '📌 Pin',
-                        description: 'turing.pinLocation'
+                        id: 'turing.sample',
+                        default:  '📌 Take Sample',
+                        description: 'turing.sample'
                     })
                 },
                 {
@@ -205,30 +209,6 @@ class Scratch3Turing {
                         description: 'turing.clearPins'
                     })
                 },
-                {
-                    opcode: 'openPanel',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.openPanel',
-                        default:  'Open Control Panel',
-                        description: 'turing.openPanel'
-                    })
-                },
-                {
-                    opcode: 'moveSteps',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.moveSteps',
-                        default:  '📌 Move [STEPS] steps',
-                        description: 'turing.moveSteps'
-                    }),
-                    arguments: {
-                        STEPS: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        }
-                    }
-                },
             ],
             menus: {
                 FEATURES: {
@@ -239,14 +219,10 @@ class Scratch3Turing {
         };
     }
 
-    openPanel() {
-        panelCallback = this._runtime.bayesCallbacks[this._extensionId]
-        panelCallback(this._extensionId)
-    }
-
-    getStuff() { // called by the runtime?
-        console.log("called by the runtime")
-    }
+    // openPanel() {
+    //     panelCallback = this._runtime.bayesCallbacks[this._extensionId]
+    //     panelCallback(this._extensionId)
+    // }
 
     actualValue(args, util) {
         if (this.state.unit == "sec") {
@@ -399,7 +375,7 @@ class Scratch3Turing {
         return newX;
       }
       
-    pinLocation(args, util) {
+    sample(args, util) {
         const currentTime = Date.now(); 
         if (currentTime - this.lastSampleTime < 800) {
           return; 
@@ -407,9 +383,10 @@ class Scratch3Turing {
         this.lastSampleTime = currentTime;
         this.sendData(util)
     }
-
     sendData(util) {
         console.log("---------->")
+        var newSample;
+
         if (this.state.mode == "HUE_BASED") {
             var x = util.target.x
             var y = util.target.y 
@@ -418,24 +395,64 @@ class Scratch3Turing {
             var width = canvas.clientWidth
             const height = canvas.clientHeight
             // interpolate sprite co-ordinates
+            var yy = y / (height / 360) + 180
+            var xx = x / (width / 480) + 240
             var new_X = Math.round(width - this.interpolate(x, -240, 240, 0, width))
             var new_Y = Math.round(height - this.interpolate(y, -180, 180, 0, height))
-
-            console.log(" 0 < " + new_X + "(" + typeof new_X + ") < " + width + "(" + typeof width + ")")
-            console.log(" 0 < " + new_Y + "(" + typeof new_Y + ") < " + height + "(" + typeof height + ")")
-
-            width = Math.abs(new_X)
+            console.log("NewX: 0 < " + new_X + "(" + typeof new_X + ") < " + width + "(" + typeof width + ")")
+            console.log("XX: 0 < " + new_X + "(" + typeof xx + ") < " + width + "(" + typeof width + ")")
+            console.log("NewY: 0 < " + new_Y + "(" + typeof new_Y + ") < " + height + "(" + typeof height + ")")
+            console.log("YY: 0 < " + yy + "(" + typeof yy + ") < " + height + "(" + typeof height + ")")
             // extract colour
-            color = util.target.renderer.extractColor(new_X,new_Y,1).color            
-            this.samples.push(Color.rgbToHex(color))
+            color = util.target.renderer.extractColor(new_X, new_Y, 1).color // ????????????????????   
+            newSample = Color.rgbToHex(color)
+            this.samples.push(newSample)
         } else {
-            this.samples.push(this._timer.timeElapsed()) 
+            newSample = this._timer.timeElapsed() / 1000
+            this.samples.push(newSample) 
             this._timer.start(); // start a new timer
         }
+        this.updateObservedData(newSample)
         data = this._toJSON(this.samples, this._getBarChart(this.samples), this._getDistribution())
         this._runtime.emit('BAYES_DATA', data)
     }
+      
+    updateObservedData() {
+        var m, s
 
+        if (this.state.mode === "HUE_BASED") {
+          m = 10
+          s = 4
+        } else {
+          [m, s] = this.getMeanAndVariance(this.samples); // Numeric random variables here
+          console.log("new mean: " + m + ", new stdv: " + s)
+        }
+        const updatedLineList = [...this.lineList];
+        // updatedLineList[PRIOR_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
+        // updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
+        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
+        this.lineList = updatedLineList // update line list
+        console.log("UPDATED LINE LIST")
+        console.log(this.lineList)
+      }
+
+    getMeanAndVariance(numbers) {
+        if (!Array.isArray(numbers)) {
+          throw new Error("Input must be an array of numbers");
+        }
+        console.log(numbers)
+        const sum = numbers.reduce((acc, num) => acc + num, 0);
+        const mean = sum / numbers.length;
+        const squaredDeviations = numbers.reduce((acc, num) => {
+          const diff = num - mean;
+          return acc + Math.pow(diff, 2);
+        }, 0);
+        const stdv = squaredDeviations / numbers.length;
+        console.log(mean)
+        console.log(stdv)
+        return [mean, stdv];
+    }
+      
     // Add multiple curves for different samples to our distribution?
     _addCurve(mu, sigma, id) {
         newCurve = {

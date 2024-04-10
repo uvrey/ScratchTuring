@@ -1,0 +1,17 @@
+.grid-container {
+    border: 1px solid lightgrey;
+    border-radius: 7px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    margin: 30px auto;
+    padding: 10px 20px;
+    width: 500px;
+    background-color: #f0f0f0;
+  }
+  
+  @media (max-width: 768px) {
+    .grid-container {
+      width: 300px;
+      padding: 10px 5px;
+    }
+  }

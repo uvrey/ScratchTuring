@@ -1,10 +1,11 @@
 import React from "react"
 import PropTypes from 'prop-types';
-import InfoBar from "./info-bar.jsx";
-import styles from './gaussian.css'
+import styles from './mean-plot.css'
 
 import {
   LineChart,
+  BarChart,
+  Bar,
   Line,
   XAxis,
   CartesianGrid,
@@ -14,9 +15,9 @@ import {
   Tooltip
 } from "recharts"
 
-const Gaussian = (props) => (
+const MeanPlot = (props) => (
       <ResponsiveContainer>
-        <LineChart width={730} height={300} data={props.data}>
+        <BarChart width={730} height={300} data={props.data}>
           <XAxis
             allowDecimals={false}
             dataKey="input"
@@ -25,27 +26,26 @@ const Gaussian = (props) => (
           <YAxis allowDecimals={true} />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
           {props.lines.map((line) => (
-            <Line
+            <Bar
               key={line.id}
               dataKey={line.id}
               type = "monotone"
               stroke={line.stroke}
-              dot={false}
               isAnimationActive={true}
               strokeWidth="1.5px"
             />
           ))}
           <Legend />
           <Tooltip />
-        </LineChart>
+        </BarChart>
       </ResponsiveContainer>
     )
 
-Gaussian.propTypes = {
+MeanPlot.propTypes = {
     name: PropTypes.node, // Todo send name here
     lines: PropTypes.array, // list of chart data descriptions
-    data: PropTypes.object
+    data: PropTypes.array
 };
 
-export default Gaussian;
+export default MeanPlot;
 
