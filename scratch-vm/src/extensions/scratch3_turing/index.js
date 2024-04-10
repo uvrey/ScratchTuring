@@ -390,9 +390,12 @@ class Scratch3Turing {
             const canvas = this.getStageCanvas() 
             var width = canvas.clientWidth
             const height = canvas.clientHeight
+
+            console.log("x: -240 < " + x + "(" + typeof x + ") < 240 )")
             // interpolate sprite co-ordinates
             var yy = y / (height / 360) + 180
             var xx = x / (width / 480) + 240
+
             var new_X = Math.round(width - this.interpolate(x, -240, 240, 0, width))
             var new_Y = Math.round(height - this.interpolate(y, -180, 180, 0, height))
             console.log("NewX: 0 < " + new_X + "(" + typeof new_X + ") < " + width + "(" + typeof width + ")")
