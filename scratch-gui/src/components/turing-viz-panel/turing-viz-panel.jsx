@@ -65,8 +65,6 @@ const TuringVizPanel = props => (
        
                 <Box className={styles.dataCol}>
                 <h3>Average Values</h3>
-                {console.log(props.data.barData[1])}
-       
                 <BarChart width={200} height={300} data={props.data.barData} className={styles.chartElement}>
                     <Bar key={props.data.barData.type} fill="#45BDE5" isAnimationActive={true} dataKey="value" barsize={10} activeBar={{ stroke: 'red', strokeWidth: 2 }}/>
                 <XAxis dataKey="type" />

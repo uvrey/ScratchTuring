@@ -108,6 +108,11 @@ class Stage extends React.Component {
             this.props.vm.runtime.emit('ANSWER', answer);
         });
     }
+    handleRequestColorInfo (data) {
+        var data_x = data[0]
+        var data_y = data[1]
+        this.props.vm.runtime.emit('COLOR_FROM_STAGE', this.getColorInfo(data_x, data_y));
+    }
     startColorPickingLoop () {
         this.intervalId = setInterval(() => {
             if (typeof this.pickX === 'number') {

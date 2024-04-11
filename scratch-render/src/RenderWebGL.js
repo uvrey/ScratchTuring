@@ -144,6 +144,7 @@ class RenderWebGL extends EventEmitter {
             throw new Error('Could not get WebGL context: this browser or environment may not support WebGL.');
         }
 
+        console.log("Creating a renderer!")
         /** @type {RenderWebGL.UseGpuModes} */
         this._useGpuMode = RenderWebGL.UseGpuModes.Automatic;
 
@@ -800,7 +801,7 @@ class RenderWebGL extends EventEmitter {
         }
 
         // if there are just too many pixels to CPU render efficiently, we need to let readPixels happen
-        if (bounds.width * bounds.height * (candidates.length + 1) >= maxPixelsForCPU) {
+        if (bounds.width * bounds.height * (candidates.length + 1) >= maxPixelsForCPU && !fetchData) {
             this._isTouchingColorGpuStart(drawableID, candidates.map(({id}) => id).reverse(), bounds, color3b, mask3b);
         }
 
@@ -816,9 +817,12 @@ class RenderWebGL extends EventEmitter {
 
         // Scratch Space - +y is top
         for (let y = bounds.bottom; y <= bounds.top; y++) {
-            if (bounds.width * (y - bounds.bottom) * (candidates.length + 1) >= maxPixelsForCPU) {
-                return this._isTouchingColorGpuFin(bounds, color3b, y - bounds.bottom);
+            if (!fetchColor) {
+                if (bounds.width * (y - bounds.bottom) * (candidates.length + 1) >= maxPixelsForCPU) {
+                    return this._isTouchingColorGpuFin(bounds, color3b, y - bounds.bottom, fetchColor);
+                }
             }
+          
             for (let x = bounds.left; x <= bounds.right; x++) {
                 point[1] = y;
                 point[0] = x;
@@ -832,15 +836,22 @@ class RenderWebGL extends EventEmitter {
                         debugCanvasContext.fillRect(x - bounds.left, bounds.bottom - y, 1, 1);
                     }
                     // ...and the target color is drawn at this pixel
+                    if (fetchColor) {
+                        console.log("Got this bg colour: "+`rgb(${color[0]},${color[1]},${color[2]})`)
+                        return color
+                    }
                     if (colorMatches(color, color3b, 0)) {
-                        console.log("GOT BG COLOR: "+`rgb(${color[0]},${color[1]},${color[2]})`)
-                        return true;
+                        return true
                     }
                 }
             }
         }
-        console.log("GOT BG COLOR: "+`rgb(${color[0]},${color[1]},${color[2]})`)
-        return false;
+        if (fetchColor) {
+            console.log("Got this bg colour: "+`rgb(${color[0]},${color[1]},${color[2]})`)
+            return color
+        } else {
+            return false;
+        }
     }
 
     _getMaxPixelsForCPU () {
@@ -937,7 +948,7 @@ class RenderWebGL extends EventEmitter {
         }
     }
 
-    _isTouchingColorGpuFin (bounds, color3b, stop) {
+    _isTouchingColorGpuFin (bounds, color3b, stop, fetchColor) {
         const gl = this._gl;
         const pixels = new Uint8Array(Math.floor(bounds.width * (bounds.height - stop) * 4));
         gl.readPixels(0, 0, bounds.width, (bounds.height - stop), gl.RGBA, gl.UNSIGNED_BYTE, pixels);
@@ -957,7 +968,6 @@ class RenderWebGL extends EventEmitter {
                 return true;
             }
         }
-
         return false;
     }
 

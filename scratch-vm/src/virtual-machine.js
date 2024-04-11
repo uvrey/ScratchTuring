@@ -1012,16 +1012,6 @@ class VirtualMachine extends EventEmitter {
             this.runtime.emitProjectChanged();
         });
     }
-
-    // my function
-    tryAddBackdrop (md5ext, backdropObject, runtime, stage) {
-        return loadCostume(md5ext, backdropObject, runtime).then(() => {
-            stage.addCostume(backdropObject);
-            stage.setCostume(stage.getCostumes().length - 1);
-            this.runtime.emitProjectChanged();
-        });
-    }
-
     /**
      * Rename a sprite.
      * @param {string} targetId ID of a target whose sprite to rename.
@@ -1056,7 +1046,6 @@ class VirtualMachine extends EventEmitter {
             throw new Error('No target with the provided id.');
         }
     }
-
     /**
      * Delete a sprite and all its clones.
      * @param {string} targetId ID of a target whose sprite to delete.

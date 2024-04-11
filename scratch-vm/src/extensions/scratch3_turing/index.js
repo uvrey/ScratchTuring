@@ -6,8 +6,9 @@ const MathUtil = require('../../util/math-util');
 const Timer = require('../../util/timer');
 const VirtualMachine = require('../../virtual-machine.js');
 const Distributions = require('./distributions.js')
-const Data = require('./data.js')
-const Color = require('../../util/color.js')
+const Color = require('../../util/color.js');
+const TuringSensing = require('./turing-sensing.js')
+// const { codePayload } = require('../../../../scratch-gui/src/lib/backpack-api.js');
 // const GUI = require('scratch-gui')
 
 const palette = [
@@ -382,29 +383,23 @@ class Scratch3Turing {
     sendData(util) {
         console.log("---------->")
         var newSample;
-
         if (this.state.mode == "HUE_BASED") {
-            var x = util.target.x
-            var y = util.target.y 
-            // Get current stage dimensions
-            const canvas = this.getStageCanvas() 
-            var width = canvas.clientWidth
-            const height = canvas.clientHeight
+            // var x = util.target.x
+            // var y = util.target.y 
+            // var r = 10
+            // // Get current stage dimensions
 
-            console.log("x: -240 < " + x + "(" + typeof x + ") < 240 )")
-            // interpolate sprite co-ordinates
-            var yy = y / (height / 360) + 180
-            var xx = x / (width / 480) + 240
+            // var canvas = this._getStageCanvas()
+            // var width = canvas.clientWidth
+            // var height = canvas.clientHeight
 
-            var new_X = Math.round(width - this.interpolate(x, -240, 240, 0, width))
-            var new_Y = Math.round(height - this.interpolate(y, -180, 180, 0, height))
-            console.log("NewX: 0 < " + new_X + "(" + typeof new_X + ") < " + width + "(" + typeof width + ")")
-            console.log("XX: 0 < " + new_X + "(" + typeof xx + ") < " + width + "(" + typeof width + ")")
-            console.log("NewY: 0 < " + new_Y + "(" + typeof new_Y + ") < " + height + "(" + typeof height + ")")
-            console.log("YY: 0 < " + yy + "(" + typeof yy + ") < " + height + "(" + typeof height + ")")
-            // extract colour
-            color = util.target.renderer.extractColor(new_X, new_Y, 1).color // ????????????????????   
+            // var new_X = Math.round(this.interpolate(x, -240, 240, 0 + r, width - r))
+            // var new_Y = Math.round(height - this.interpolate(y, -180, 180, 0 + r, height - r))
+            color = TuringSensing.fetchColor(util.target)
+            console.log("we extracted this color: ")
+            console.log(color)
             newSample = Color.rgbToHex(color)
+            console.log(            )
             this.samples.push(newSample)
         } else {
             newSample = this._timer.timeElapsed() / 1000
@@ -415,7 +410,25 @@ class Scratch3Turing {
         data = this._toJSON(this.samples, this._getBarChart('mean'), this._getDistribution())
         this._runtime.emit('TURING_DATA', data)
     }
-      
+
+    // var r = 8
+
+// console.log("x: -240 < " + x + "(" + typeof x + ") < 240 )")
+// // interpolate sprite co-ordinates
+// var yy = y / (height / 360) + 180
+// var xx = x / (width / 480) + 240
+
+// var new_X = Math.round(this.interpolate(x, -240, 240, 0 + r, width - r))
+// var new_Y = Math.round(height - this.interpolate(y, -180, 180, 0 + r, height - r))
+
+// console.log("NewX: 0 < " + new_X + "(" + typeof new_X + ") < " + width + "(" + typeof width + ")")
+// console.log("XX: 0 < " + new_X + "(" + typeof xx + ") < " + width + "(" + typeof width + ")")
+// console.log("NewY: 0 < " + new_Y + "(" + typeof new_Y + ") < " + height + "(" + typeof height + ")")
+// console.log("YY: 0 < " + yy + "(" + typeof yy + ") < " + height + "(" + typeof height + ")")
+// // extract colour
+
+// color = util.target.isTouchingColor([0,0,0], true); // send with a dummy colour to hack the bg
+// console.log("got " + color)
     updateObservedData() {
         var m, s
 
@@ -469,11 +482,11 @@ class Scratch3Turing {
     }
 
     _getBarChart(param) {
-        console.log("Data for bar chart --> " + param)
-        console.log(this.lineList[OBSERVED_INDEX][param])
+        // console.log("Data for bar chart --> " + param)
+        // console.log(this.lineList[OBSERVED_INDEX][param])
         return [
             { type: "prior", value: 1},
-            { type: "observed", value: this.lineList[OBSERVED_INDEX][param] },
+            { type: "observed", value: 0.5}, // this.lineList[OBSERVED_INDEX][param] 
             { type: "posterior", value: 1},
             ];
     }

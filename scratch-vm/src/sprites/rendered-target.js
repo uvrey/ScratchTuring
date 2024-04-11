@@ -809,9 +809,9 @@ class RenderedTarget extends Target {
      * @param {Array.<number>} rgb [r,g,b], values between 0-255.
      * @return {Promise.<boolean>} True iff the rendered target is touching the color.
      */
-    isTouchingColor (rgb) {
+    isTouchingColor (rgb, fetchColor) {
         if (this.renderer) {
-            return this.renderer.isTouchingColor(this.drawableID, rgb);
+            return this.renderer.isTouchingColor(this.drawableID, rgb, fetchColor);
         }
         return false;
     }
