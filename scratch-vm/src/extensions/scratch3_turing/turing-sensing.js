@@ -757,19 +757,12 @@ function fetchColor(target, mask3b) {
     console.log("the bounds we are checking are...")
     console.log(bounds)
 
-    const maxPixelsForCPU = renderer._getMaxPixelsForCPU();
-
     const debugCanvasContext = renderer._debugCanvas && renderer._debugCanvas.getContext('2d');
 
     if (debugCanvasContext) {
         renderer._debugCanvas.width = bounds.width;
         renderer._debugCanvas.height = bounds.height;
     }
-
-    // if there are just too many pixels to CPU render efficiently, we need to let readPixels happen
-    // if (bounds.width * bounds.height * (candidates.length + 1) >= maxPixelsForCPU) {
-    //     renderer._isTouchingColorGpuStart(drawableID, candidates.map(({ id }) => id).reverse(), bounds, color3b, mask3b);
-    // }
 
     const drawable = renderer._allDrawables[drawableID];
     const point = __isTouchingDrawablesPoint;
@@ -783,9 +776,6 @@ function fetchColor(target, mask3b) {
 
     // Scratch Space - +y is top
     for (let y = bounds.bottom; y <= bounds.top; y++) {
-        // if (bounds.width * (y - bounds.bottom) * (candidates.length + 1) >= maxPixelsForCPU) {
-        //     return renderer._isTouchingColorGpuFin(bounds, color3b, y - bounds.bottom);
-        // }
         for (let x = bounds.left; x <= bounds.right; x++) {
             point[1] = y;
             point[0] = x;
@@ -795,15 +785,12 @@ function fetchColor(target, mask3b) {
                 drawable.isTouching(point)) {
                 sampleColor3b(point, candidates, color);
                 if (debugCanvasContext) {
-                    debugCanvasContext.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
                     debugCanvasContext.fillRect(x - bounds.left, bounds.bottom - y, 1, 1);
                 }
-                console.log("1) GOT BG COLOR: " + `rgb(${color[0]},${color[1]},${color[2]})`)
                 return {r: color[0], g: color[1], b: color[2]}
             }
         }
     }
-    console.log("2) GOT BG COLOR: " + `rgb(${color[0]},${color[1]},${color[2]})`)
     return {r: color[0], g: color[1], b: color[2]}
 }
 

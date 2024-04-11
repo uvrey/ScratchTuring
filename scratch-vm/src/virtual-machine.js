@@ -175,7 +175,6 @@ class VirtualMachine extends EventEmitter {
     }
 
     sendTuringData (data) {
-        console.log("emitting turing change from VM! received from runtime")
         this.emit(Runtime.TURING_DATA, data)
     }
     /**
