@@ -17,7 +17,7 @@ const TuringAssetPanel = props => (
 );
 
 TuringAssetPanel.propTypes = {
-    mode: PropTypes.node,
+    state: PropTypes.object,
     samples: PropTypes.array, // list of time stamps, postions or samples
 };
 

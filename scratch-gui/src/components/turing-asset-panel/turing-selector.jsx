@@ -6,9 +6,12 @@ import ActionMenu from '../action-menu/action-menu.jsx';
 import SortableAsset from './sortable-asset.jsx';
 import SortableHOC from '../../lib/sortable-hoc.jsx';
 import DragConstants from '../../lib/drag-constants.js';
-import timestampIcon from '../action-menu/icon--timer.svg';
-import compassIcon from '../action-menu/icon--compass.svg';
-import erasorIcon from '../action-menu/icon--eraser.svg'
+import timeIcon from './icon--time.svg';
+import xIcon from './icon--x.svg';
+import yIcon from './icon--y.svg';
+import loudnessIcon from './icon--loudness.svg';
+import sizeIcon from './icon--size.svg';
+import erasorIcon from './icon--eraser.svg'
 import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
 import styles from './turing-selector.css';
 
@@ -33,21 +36,23 @@ const TuringSelector = props => {
     const isRelevantDrag = draggingType === dragType;
     let newButtonSection = null;
 
-    const selectorMessages = defineMessages({
-            clearSampleMessage: {
-            id: 'gui.turingSelector.clearSample',
-            defaultMessage: 'Clear Samples'
-          }
-      });
-
-    // let sampleButton = (
-    //                 [{
-    //                   title: "Clear Samples",
-    //                   img: erasorIcon,
-    //                   // onClick: handleClearSamples(),
-    //                 }]
-    //           )
-
+    function getIconFromType(type) {
+      switch (type) {
+          case 'TIME':
+              return timeIcon;
+          case 'SIZE':
+              return sizeIcon;
+          case 'LOUDNESS':
+              return loudnessIcon;
+          case 'X':
+              return xIcon;
+          case 'Y':
+              return yIcon;
+          default:
+              return erasorIcon; // Return null for any other type
+      }
+  }
+  
     newButtonSection = (
       <Box className={styles.newButtons}>
           <ActionMenu
@@ -67,9 +72,9 @@ const TuringSelector = props => {
           <Box className={styles.listArea}>
             {props.samples.map((sample, index) => (
                 <Box className={styles.sampleInfo}>
-                {props.mode === "TIME_BASED" ? (
+                {props.state.mode === "NUMERIC" ? (
                     <div key={index} className={styles.sampleContainer}>
-                        <img src={timestampIcon} className={styles.listItem} />
+                        <img src={getIconFromType(props.state.type)} className={styles.listItem} />
                         <div className={styles.sampleLabel}>{sample}</div>
                     </div>
                 ) : (
@@ -90,7 +95,7 @@ const TuringSelector = props => {
 
 TuringSelector.propTypes = {
     samples: PropTypes.array,
-    mode: PropTypes.string
+    state: PropTypes.object
 };
 
 export default TuringSelector; // make sortable at some point? TODO

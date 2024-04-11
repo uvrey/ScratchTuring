@@ -253,6 +253,7 @@ class Scratch3Turing {
         this.state.random_var = COLOR
         this.state.unit = UNITS[COLOR]
         this.state.mode = MODES[COLOR]
+        this.state.type = RANDOM_VAR_NAMES[COLOR]
         return this._getAffirmation()
     }
 
@@ -260,6 +261,7 @@ class Scratch3Turing {
         this.state.random_var = rv
         this.state.unit = UNITS[rv]
         this.state.mode = MODES[rv]
+        this.state.type = RANDOM_VAR_NAMES[rv]
     }
 
     setColourPrior(args, util) {
@@ -293,16 +295,20 @@ class Scratch3Turing {
         return  this._getAffirmation()
     }
 
-    takeSample (util) {
+    takeSample (util, args) {
+        console.log("Taking a sample!")
         // Slightly buffer requests
         const currentTime = Date.now(); 
         if (currentTime - this.lastSampleTime < 400) {
           return; 
         }
         this.lastSampleTime = currentTime;
+
         // Check if we can get a sample
-        if (util.target) {
-            this._getThenSendSample(util)
+        console.log(util.target)
+
+        if (typeof util.target != undefined) {
+            this._getThenSendSample(args, util)
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
@@ -347,10 +353,11 @@ class Scratch3Turing {
         return randomCautionaryMessage; // Output a random cautionary message
     }
 
-    _getThenSendSample(util) {
+    _getThenSendSample(args, util) {
         console.log("---------->")
         var newSample;
-        if (this.state.mode == "HUE_BASED") {
+
+        if (this.state.mode == "COLOR") {
             color = TuringSensing.fetchColor(util.target)
             console.log("we extracted this color: ")
             console.log(color)
@@ -371,8 +378,6 @@ class Scratch3Turing {
         switch (MODES[this.state.random_var]) {
             case 'NUMERIC':
                 return !isNaN(Number(prior));
-            case 'HUE':
-                return !isNaN(Number(prior)) && Number(prior) <= 255 && Number(prior) >= 0;
             case 'COLOR':
                 return true;
             case 'POSITION':
@@ -425,7 +430,7 @@ class Scratch3Turing {
     _updateObservedData() {
         var m, s
 
-        if (this.state.mode === "HUE_BASED") {
+        if (this.state.mode === "COLOR") {
           m = 10
           s = 4
         } else {

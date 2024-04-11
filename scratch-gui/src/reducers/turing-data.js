@@ -10,9 +10,7 @@ const initialState = {
       distData: [], // plots normal distribution
       distLines: [],
       domain: [-1,1],
-      spriteX: '',
-      spriteY: '',
-      mode: '', // TIME-based, POSITION-based, HUE-based
+      mode: '', // HUE or NUMERIC
   },
   turingActive: false // TODO set this to false and then trigger when extension opens
 };

@@ -47,7 +47,7 @@ const TuringSelectorItem = props => {
         // <p className={styles.sampleLabel}> {sample}</p>
         // </div>
         <Box className={styles.sampleInfo}>
-            {props.mode === "TIME_BASED" ? (
+            {props.state.mode === "NUMERIC" ? (
                 <div key={index}>
                 <img src={timerIcon} className={styles.listItem} />
                 <div className={styles.sampleName}>{props.sample}</div>
@@ -84,7 +84,7 @@ const TuringSelectorItem = props => {
 
 TuringSelectorItem.propTypes = {
     sample: PropTypes.node,
-    mode: PropTypes.string,
+    state: PropTypes.object
 };
 
 export default TuringSelectorItem;
