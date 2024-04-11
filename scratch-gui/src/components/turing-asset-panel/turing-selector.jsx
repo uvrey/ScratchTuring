@@ -52,6 +52,10 @@ const TuringSelector = props => {
               return erasorIcon; // Return null for any other type
       }
   }
+
+  const onClick = () => {
+      console.log("button clicked")
+  }
   
     newButtonSection = (
       <Box className={styles.newButtons}>
@@ -59,7 +63,7 @@ const TuringSelector = props => {
               img={erasorIcon}
               // moreButtons={sampleButton}
               title={"Clear Samples"}
-              // onClick={onClick}
+              onClick={onClick}
           />
       </Box>
   );

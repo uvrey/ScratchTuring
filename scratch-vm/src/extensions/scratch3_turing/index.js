@@ -7,7 +7,7 @@ const Timer = require('../../util/timer');
 const VirtualMachine = require('../../virtual-machine.js');
 const Distributions = require('./distributions.js')
 const Color = require('../../util/color.js');
-const TuringSensing = require('./turing-sensing.js')
+const TuringSensing = require('./turing-sensing.js');
 // const { codePayload } = require('../../../../scratch-gui/src/lib/backpack-api.js');
 // const GUI = require('scratch-gui')
 
@@ -114,9 +114,16 @@ class Scratch3Turing {
             },
             {
                 name: formatMessage({
-                    id: 'turing.randomVarsMenu.position',
-                    default: 'POSITION',
-                    description: 'position'
+                    id: 'turing.randomVarsMenu.x',
+                    default: 'X',
+                    description: 'x'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.randomVarsMenu.y',
+                    default: 'Y',
+                    description: 'y'
                 }),
             },
             {
@@ -295,7 +302,7 @@ class Scratch3Turing {
         return  this._getAffirmation()
     }
 
-    takeSample (util, args) {
+    takeSample (args, util) {
         console.log("Taking a sample!")
         // Slightly buffer requests
         const currentTime = Date.now(); 
@@ -375,12 +382,18 @@ class Scratch3Turing {
     }
 
     _checkCompatibility(prior) {
-        switch (MODES[this.state.random_var]) {
-            case 'NUMERIC':
-                return !isNaN(Number(prior));
+        switch (RANDOM_VAR_NAMES[this.state.random_var]) {
+            case 'X':
+                return !isNaN(Number(prior)) && Number(prior) >= -240 && Number(prior) <= 240;
+            case 'Y':
+                return !isNaN(Number(prior)) && Number(prior) >= -180 && Number(prior) <= 180;
+            case 'SIZE':
+                return !isNaN(Number(prior)) && Number(prior) > 0 && Number(prior) < 500;
+            case 'TIME':
+                return !isNaN(Number(prior)) && Number(prior) > 0;
+            case 'LOUDNESS':
+                return !isNaN(Number(prior)) && Number(prior) > 0  && Number(prior) < 100;
             case 'COLOR':
-                return true;
-            case 'POSITION':
                 return true;
             default:
                 return false; 
