@@ -474,7 +474,8 @@ class Scratch3Turing {
 
         const updatedLineList = [...this.lineList]; 
 
-        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: s };
+        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: this.state.prior, stdv: s}; // we give the prior the same standard deviation as the observed data - TODO
+        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: s};
         updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: s}; // TODO update with genuine Turing values
         
         this.lineList = updatedLineList // update line list
