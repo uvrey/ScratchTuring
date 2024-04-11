@@ -53,8 +53,14 @@ const TuringSelector = props => {
       }
   }
 
+  const setScroll = () => { // keep scrolling to bottom of sample area
+      // const listArea = document.getElementById('list-area');
+      // listArea.scrollTop = listArea.scrollHeight;
+  }
+
   const onClick = () => {
-      console.log("button clicked")
+    console.log("clearing samples with erasor button - TODO")
+    // this.props.vm.runtime.emit('COLOR_FROM_STAGE', this.getColorInfo(data_x, data_y));
   }
   
     newButtonSection = (
@@ -79,7 +85,7 @@ const TuringSelector = props => {
                 {props.state.mode === "NUMERIC" ? (
                     <div key={index} className={styles.sampleContainer}>
                         <img src={getIconFromType(props.state.type)} className={styles.listItem} />
-                        <div className={styles.sampleLabel}>{sample}</div>
+                        <div className={styles.sampleLabel}>{sample} {props.state.unit}</div>
                     </div>
                 ) : (
                     <div key={index} className={styles.sampleContainer}>

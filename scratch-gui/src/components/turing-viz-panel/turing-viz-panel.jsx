@@ -7,6 +7,10 @@ import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
+import FontCST from './font--cst.svg'
+import FontDashboard from './font--dashboard.svg'
+import FontScratchTuring from './font--scratchturing.svg'
+import octopusIcon from './icon--octopus.svg'
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
 
 const getIntroOfPage = (label) => {
@@ -55,7 +59,7 @@ const TuringVizPanel = props => (
             <h3>X: {props.data.spriteX}</h3><h3>Y: {props.data.spriteY}</h3>
             <br></br> */}
             <Box className={styles.dataCol}>
-            <h1>Dashboard</h1>
+                <img src={FontDashboard} className={styles.dashboard} />
 
                 <Box className={styles.keyStats}>
                     <b>Number of Samples:</b> {props.data.samples.length}

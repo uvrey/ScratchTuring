@@ -6,6 +6,24 @@
     width: 40em;
 }
 
+
+/* @font-face {
+    font-family: "ScratchFont";
+    src: url("./scratch-font.ttf") format("truetype");
+  }
+
+.dashboard-font {
+    font-family: "ScratchFont";
+    font-size: 10rem;
+    color: white;
+    -webkit-text-stroke: 5px $looks-secondary;
+} */
+
+.dashboard {
+    width: 40%;
+    padding: 1em;
+}
+
 .header {
     background-color: $pen-tertiary;
 }

@@ -38,7 +38,7 @@ const COLOR = 5
 const NONE = 6
 
 const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE']
-const UNITS = ['sec', '', '', '', 'sec', 'decibals', '',, '']
+const UNITS = ['s', '', '', '', 'db', '', '',, '']
 const RANDOM_VAR_NAMES = ['TIME', 'SIZE', 'X', 'Y', 'LOUDNESS', 'COLOR', 'NONE']
 
 class Scratch3Turing {
@@ -188,7 +188,7 @@ class Scratch3Turing {
                         },
                         PRIOR: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 0
+                            defaultValue: 10
                         }
                     }
                 },
@@ -303,6 +303,7 @@ class Scratch3Turing {
     }
 
     takeSample (args, util) {
+
         console.log("Taking a sample!")
         // Slightly buffer requests
         const currentTime = Date.now(); 
@@ -364,18 +365,31 @@ class Scratch3Turing {
         console.log("---------->")
         var newSample;
 
-        if (this.state.mode == "COLOR") {
+        if (this.state.random_var == COLOR) {
             color = TuringSensing.fetchColor(util.target)
             console.log("we extracted this color: ")
             console.log(color)
             newSample = Color.rgbToHex(color)
-            console.log(            )
             this.samples.push(newSample)
-        } else {
+
+        } else if (this.state.random_var == TIME) {
             newSample = this._timer.timeElapsed() / 1000
             this.samples.push(newSample) 
             this._timer.start(); // start a new timer
+
+        } else if (this.state.random_var == SIZE) {
+            this.samples.push(target.util.size)
+
+        } else if (this.state.random_var == X) {
+            this.samples.push(target.util.x)
+
+        } else if (this.state.random_var == Y) {
+            this.samples.push(target.util.y)
+
+        } else if (this.state.random_var == LOUDNESS) {
+            this.samples.push(10) // TODO implement this
         }
+
         this._updateObservedData(newSample)
         data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
         this._runtime.emit('TURING_DATA', data)
@@ -441,18 +455,28 @@ class Scratch3Turing {
     }
       
     _updateObservedData() {
+
         var m, s
 
         if (this.state.mode === "COLOR") {
           m = 10
           s = 4
+
         } else {
           [m, s] = this._getMeanAndVariance(this.samples); // Numeric random variables here
+
         }
+
+        // update our observed and posterior distributions
+        var randomConstant = Math.random()
         this.state.observed = m
+        this.state.posterior = m*randomConstant // TODO fetch this from turing
 
         const updatedLineList = [...this.lineList]; 
-        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: m, stdv: s };
+
+        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: s };
+        updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: s}; // TODO update with genuine Turing values
+        
         this.lineList = updatedLineList // update line list
         console.log("UPDATED LINE LIST")
         console.log(this.lineList)
