@@ -72,11 +72,11 @@ const TuringVizPanel = props => (
             <Box className={styles.dataCol}>
               
                 <img src={FontDashboard} className={styles.dashboard} />
-                
+
                 <Box className={styles.keyStats}>
                         <div>
                             <img src={FontType} className={styles.statsHeading} />
-                            <p className={styles.stat}>{props.data.state.type}</p>
+                            {props.data.state.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.state.thing}</p>) : (<p className={styles.stat}>{props.data.state.type}</p>)}
                         </div>
                         <div>
                         <img src={FontCurrentSample} className={styles.statsHeading} />

@@ -53,7 +53,8 @@ class Scratch3Turing {
             posterior: 0,
             random_var: NONE,
             unit: NONE,
-            mode: NONE
+            mode: NONE,
+            thing: ''
         }
 
         this._extensionId = 'turing'
@@ -276,6 +277,7 @@ class Scratch3Turing {
     }
 
     setColourPrior(args, util) {
+        this.state.thing = args.SOMETHING
         this._setRandomVariable(COLOR)
         return this._getAffirmation()
     }
