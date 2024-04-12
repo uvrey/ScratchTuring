@@ -11,7 +11,27 @@ import FontCST from './font--cst.svg'
 import FontDashboard from './font--dashboard.svg'
 import FontScratchTuring from './font--scratchturing.svg'
 import octopusIcon from './icon--octopus.svg'
+import FontBarChart from './font--barChart.svg'
+import FontDist from './font--normalDist.svg'
+import FontCurrentSample from './font--currentSample.svg'
+import FontNumSamples from './font--samples.svg'
+import FontType from './font--value.svg'
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
+
+
+const ThreeColumnLayout = ({ children }) => {
+  return (
+    <div className="three-column-layout">
+      {children}
+    </div>
+  );
+};
+
+const ThreeColumnLayoutItem = ({ children }) => {
+  return (
+    <div className="three-column-layout-item">{children}</div>
+  );
+};
 
 const getIntroOfPage = (label) => {
     if (label === 'Page A') {
@@ -50,20 +70,33 @@ const getIntroOfPage = (label) => {
 const TuringVizPanel = props => (
         <Box className={styles.body}>
             <Box className={styles.dataCol}>
+              
                 <img src={FontDashboard} className={styles.dashboard} />
-
+                
                 <Box className={styles.keyStats}>
-                    <b>We're interested in:</b> {props.data.state.type}<br/>
+                        <div>
+                            <img src={FontType} className={styles.statsHeading} />
+                            <p className={styles.stat}>{props.data.state.type}</p>
+                        </div>
+                        <div>
+                        <img src={FontCurrentSample} className={styles.statsHeading} />
+                          <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.state.unit}</p>
+                        </div>
+                        <div>
+                        <img src={FontNumSamples} className={styles.statsHeading} />
+                          <p className={styles.stat}>{props.data.samples.length}</p>
+                        </div>
+                     
+                    {/* <b>We're interested in:</b> {props.data.state.type}<br/>
                     <b>Current sample: </b> {props.data.samples[props.data.samples.length-1]}<br/>
-                    <b>Number of Samples:</b> {props.data.samples.length}<br/>
+                    <b>Number of Samples:</b> {props.data.samples.length}<br/> */}
                 </Box>
 
                 <Box className={styles.dataRow}>
-       
                 <Box className={styles.dataCol}>
-                <h3>Average Values</h3>
-                <BarChart width={200} height={300} data={props.data.barData} className={styles.chartElement}>
-                    <Bar key={props.data.barData.type} fill="#45BDE5" isAnimationActive={true} dataKey="value" barsize={10} activeBar={{ stroke: 'red', strokeWidth: 2 }}/>
+                <img src={FontBarChart} className={styles.visHeading} />
+                <BarChart width={500} height={300} data={props.data.barData} className={styles.chartElement}>
+                    <Bar key={props.data.barData.type} fill="#855CD6" isAnimationActive={true} dataKey="value" barsize={10}/>
                 <XAxis dataKey="type" />
                 <Tooltip content={<CustomTooltip/>}/>
                 <YAxis />
@@ -71,8 +104,8 @@ const TuringVizPanel = props => (
                 </Box>
 
                 <Box className={styles.dataCol}>
-                <h3>Probability</h3>
-                <LineChart width={730} height={300} data={props.data.distData}>
+                <img src={FontDist} className={styles.visHeading} />
+                <LineChart width={600} height={300} data={props.data.distData}>
                 <XAxis
                     allowDecimals={false}
                     dataKey="input"

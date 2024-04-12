@@ -30,7 +30,7 @@ const MeanPlot = (props) => (
               key={line.id}
               dataKey={line.id}
               type = "monotone"
-              stroke={line.stroke}
+              stroke={"#855CD6"}
               isAnimationActive={true}
               strokeWidth="1.5px"
             />
