@@ -1,28 +1,45 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import classNames from 'classnames';
-import Box from '../box/box.jsx';
-import ActionMenu from '../action-menu/action-menu.jsx';
-import SortableAsset from './sortable-asset.jsx';
-import SortableHOC from '../../lib/sortable-hoc.jsx';
-import DragConstants from '../../lib/drag-constants.js';
-import timeIcon from './icon--time.svg';
+// import PropTypes from 'prop-types';
+// import React from 'react';
+// import classNames from 'classnames';
+// import Box from '../box/box.jsx';
+// import ActionMenu from '../action-menu/action-menu.jsx';
+// import SortableAsset from './sortable-asset.jsx';
+// import SortableHOC from '../../lib/sortable-hoc.jsx';
+// import DragConstants from '../../lib/drag-constants.js';
+// import timeIcon from './icon--time.svg';
 import xIcon from './icon--x.svg';
 import yIcon from './icon--y.svg';
 import loudnessIcon from './icon--loudness.svg';
 import sizeIcon from './icon--size.svg';
 import erasorIcon from './icon--eraser.svg'
-import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
+// import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
+// import styles from './turing-selector.css';
+// import VM from 'scratch-vm';
+// import {ContextMenuTrigger} from 'react-contextmenu';
+// import {DangerousMenuItem, ContextMenu, MenuItem} from '../context-menu/context-menu.jsx';
+// // import {DangerousMenuItem, ContextMenu, MenuItem} from '../context-menu/context-menu.jsx';
+
+import PropTypes from 'prop-types';
+import React from 'react';
+import classNames from 'classnames';
+import TuringSelectorItem from '../../containers/turing-selector-item.jsx';
+import Box from '../box/box.jsx';
+import ActionMenu from '../action-menu/action-menu.jsx';
+import SortableAsset from './turing-sortable-asset.jsx';
+import SortableHOC from '../../lib/sortable-hoc.jsx';
+import DragConstants from '../../lib/drag-constants';
+import VM from 'scratch-vm'
+
 import styles from './turing-selector.css';
-import VM from 'scratch-vm';
 
 const TuringSelector = props => {
     const {
         buttons,
         containerRef,
         dragType,
-        samples,
-        selectedSampleIndex,
+        isRtl,
+        items,
+        selectedItemIndex,
         draggingIndex,
         draggingType,
         ordering,
@@ -54,11 +71,6 @@ const TuringSelector = props => {
       }
   }
 
-  const setScroll = () => { // keep scrolling to bottom of sample area
-      // const listArea = document.getElementById('list-area');
-      // listArea.scrollTop = listArea.scrollHeight;
-  }
-
   const onClearSamples = () => {
     props.vm.runtime.emit('CLEAR_SAMPLES');
   }
@@ -67,7 +79,6 @@ const TuringSelector = props => {
       <Box className={styles.newButtons}>
           <ActionMenu
               img={erasorIcon}
-              // moreButtons={sampleButton}
               title={"Clear Samples"}
               onClick={onClearSamples}
           />
@@ -76,40 +87,68 @@ const TuringSelector = props => {
 
     return (
         <Box
-          className={styles.wrapper}
-          componentRef={containerRef}
-        >
-          <Box className={styles.listArea}>
-            {props.samples.map((sample, index) => (
-                <Box className={styles.sampleInfo}>
-                {props.state.mode === "NUMERIC" ? (
-                    <div key={index} className={styles.sampleContainer}>
-                        <img src={getIconFromType(props.state.type)} className={styles.listItem} />
-                        <div className={styles.sampleLabel}>{sample} {props.state.unit}</div>
-                    </div>
-                ) : (
-                    <div key={index} className={styles.sampleContainer}>
-                      <div className={styles.colorSwatch} style={{ backgroundColor: sample }}>
-                      <div className="square-rectangle"></div>
-                      </div>
-                      <div className={styles.sampleLabel}>{sample}</div>
-                    </div>
-                )}
-                </Box>
+        className={styles.wrapper}
+        componentRef={containerRef}
+    >
+        <Box className={styles.listArea}>
+            {props.data.samples.map((sample, index) => (
+                <SortableAsset
+                    id={sample}
+                    index={isRelevantDrag ? ordering.indexOf(index) : index}
+                    key={sample}
+                    onAddSortable={onAddSortable}
+                    onRemoveSortable={onRemoveSortable}
+                >
+                    <TuringSelectorItem
+                        className={classNames(styles.listItem, {
+                            [styles.placeholder]: isRelevantDrag && index === draggingIndex
+                        })}
+                        // dragPayload={item.dragPayload}
+                        dragType={dragType}
+                        id={index}
+                        index={index}
+                        name={sample}
+                        number={index + 1}
+                        selected={index === selectedItemIndex}
+                        onClick={onItemClick}
+                        onDeleteButtonClick={onDeleteClick}
+                        data={data}
+                        sample={sample}
+                    />
+                </SortableAsset>
             ))}
-          </Box>
-          {newButtonSection}
         </Box>
+        {newButtonSection}
+    </Box>
       ); 
 };
 
 TuringSelector.propTypes = {
-    samples: PropTypes.array,
-    state: PropTypes.object,
-    vm: PropTypes.instanceOf(VM).isRequired
+    buttons: PropTypes.arrayOf(PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        img: PropTypes.string.isRequired,
+        onClick: PropTypes.func
+    })),
+    containerRef: PropTypes.func,
+    dragType: PropTypes.oneOf(Object.keys(DragConstants)),
+    draggingIndex: PropTypes.number,
+    draggingType: PropTypes.oneOf(Object.keys(DragConstants)),
+    isRtl: PropTypes.bool,
+    data: PropTypes.object,
+    // samples: PropTypes.array,
+    vm: PropTypes.instanceOf(VM),
+    onAddSortable: PropTypes.func,
+    onDeleteClick: PropTypes.func,
+    onDuplicateClick: PropTypes.func,
+    onExportClick: PropTypes.func,
+    onItemClick: PropTypes.func.isRequired,
+    onRemoveSortable: PropTypes.func,
+    ordering: PropTypes.arrayOf(PropTypes.number),
+    selectedItemIndex: PropTypes.number.isRequired,
+    items: PropTypes.array,
 };
 
-export default TuringSelector; // make sortable at some point? TODO
+export default SortableHOC(TuringSelector); // make sortable at some point? TODO
 
 
 {/* <SortableAsset

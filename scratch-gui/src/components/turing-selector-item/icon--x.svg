@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="80.21" height="111.05" viewBox="0 0 80.21 111.05">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #3f3f3f;
+        font-family: Blackboysonmopeds, 'Black boys on mopeds';
+        font-size: 104.49px;
+        stroke: #3f3f3f;
+        stroke-miterlimit: 10;
+        stroke-width: 4px;
+      }
+    </style>
+  </defs>
+  <text class="cls-1" transform="translate(2 88.46) scale(1.34 1)"><tspan x="0" y="0">x</tspan></text>
+</svg>

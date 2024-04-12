@@ -41,7 +41,6 @@ const getIntroOfPage = (label) => {
         <div className={styles.customTooltip}>
           <p className={styles.chartLabel}>{`Average: ${payload[0].value} sec`}</p>
           <p className="intro">{getIntroOfPage(label)}</p>
-          {/* <p className="desc">Anything you want can be displayed here.</p> */}
         </div>
       );
     }
@@ -50,19 +49,13 @@ const getIntroOfPage = (label) => {
 
 const TuringVizPanel = props => (
         <Box className={styles.body}>
-            {/* <FormattedMessage
-                defaultMessage="Sprite Coordinates"
-                description="sprite coords"
-                id="gui.turingModal.spriteCoords"
-            />
-            <br></br>
-            <h3>X: {props.data.spriteX}</h3><h3>Y: {props.data.spriteY}</h3>
-            <br></br> */}
             <Box className={styles.dataCol}>
                 <img src={FontDashboard} className={styles.dashboard} />
 
                 <Box className={styles.keyStats}>
-                    <b>Number of Samples:</b> {props.data.samples.length}
+                    <b>We're interested in:</b> {props.data.state.type}<br/>
+                    <b>Current sample: </b> {props.data.samples[props.data.samples.length-1]}<br/>
+                    <b>Number of Samples:</b> {props.data.samples.length}<br/>
                 </Box>
 
                 <Box className={styles.dataRow}>
@@ -104,8 +97,7 @@ const TuringVizPanel = props => (
                 </Box>
                 </Box>
                 </Box>
-            </Box>
-        // </Box>
+      </Box>
 );
 
 TuringVizPanel.propTypes = {

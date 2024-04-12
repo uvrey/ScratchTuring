@@ -7,7 +7,7 @@ import ActionMenu from '../action-menu/action-menu.jsx';
 import SortableAsset from './sortable-asset.jsx';
 import SortableHOC from '../../lib/sortable-hoc.jsx';
 import DragConstants from '../../lib/drag-constants';
-
+import VM from 'scratch-vm';
 import styles from './selector.css';
 
 const Selector = props => {

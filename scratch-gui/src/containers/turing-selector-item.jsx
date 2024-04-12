@@ -124,33 +124,40 @@ class TuringSelectorItem extends React.PureComponent {
             ...props
         } = this.props;
         return (
-            <Box>
-                HELLO
-            </Box>
-            // <TuringSelectorItemComponent
-            //     componentRef={this.setRef}
-            //     preventContextMenu={this.dragRecognizer.gestureInProgress()}
-            //     onClick={this.handleClick}
-            //     onDeleteButtonClick={onDeleteButtonClick ? this.handleDelete : null}
-            //     onMouseDown={this.handleMouseDown}
-            //     onMouseEnter={this.handleMouseEnter}
-            //     onMouseLeave={this.handleMouseLeave}
-            //     {...props}
-            // />
+            <TuringSelectorItemComponent
+                componentRef={this.setRef}
+                preventContextMenu={this.dragRecognizer.gestureInProgress()}
+                onClick={this.handleClick}
+                onDeleteButtonClick={onDeleteButtonClick ? this.handleDelete : null}
+                onMouseDown={this.handleMouseDown}
+                onMouseEnter={this.handleMouseEnter}
+                onMouseLeave={this.handleMouseLeave}
+                {...props}
+            />
         );
     }
 }
 
 TuringSelectorItem.propTypes = {
     asset: PropTypes.instanceOf(storage.Asset),
+    costumeURL: PropTypes.string,
+    dispatchSetHoveredSprite: PropTypes.func.isRequired,
+    dragPayload: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    dragType: PropTypes.string,
+    dragging: PropTypes.bool,
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     index: PropTypes.number,
     name: PropTypes.string,
     onClick: PropTypes.func,
     onDeleteButtonClick: PropTypes.func,
+    onDrag: PropTypes.func.isRequired,
+    onDuplicateButtonClick: PropTypes.func,
+    onExportButtonClick: PropTypes.func,
     receivedBlocks: PropTypes.bool.isRequired,
     selected: PropTypes.bool,
-    vm: PropTypes.instanceOf(VM).isRequired
+    vm: PropTypes.instanceOf(VM).isRequired,
+    data: PropTypes.object.isRequired,
+    sample: PropTypes.node.isRequired,
 };
 
 const mapStateToProps = (state, {id}) => ({

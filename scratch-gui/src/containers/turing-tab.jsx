@@ -54,25 +54,17 @@ class TuringTab extends React.Component {
 
     componentWillReceiveProps (nextProps) {
         const {
-            editingTarget,
-            sprites,
-            stage
+            editingTarget
         } = nextProps;
-
-        const target = editingTarget && sprites[editingTarget] ? sprites[editingTarget] : stage;
-        if (!target || !target.sounds) {
-            return;
-        }
 
         // If switching editing targets, reset the sound index
         if (this.props.editingTarget !== editingTarget) {
             this.setState({selectedSampleIndex: 0});
-        } else if (this.state.selectedSampleIndex > target.sounds.length - 1) {
-            this.setState({selectedSampleIndex: Math.max(target.sounds.length - 1, 0)});
-        }
+        } 
     }
 
     handleSelectSample (sampleIndex) {
+        console.log("Selecting sample!")
         this.setState({selectedSampleIndex: sampleIndex});
     }
 
@@ -99,8 +91,6 @@ class TuringTab extends React.Component {
             intl,
             isRtl,
             vm,
-            onNewSampleFromLibraryClick,
-            onNewSampleFromRecordingClick
         } = this.props;
 
         if (!vm.editingTarget) {
@@ -143,11 +133,14 @@ class TuringTab extends React.Component {
 
         return (
                 <TuringAssetPanel
+                    dragType={DragConstants.SAMPLE}
                     selectedSampleIndex={this.state.selectedSampleIndex}
                     onDeleteClick={this.handleDeleteSample}
                     samples={this.props.data.samples}
-                    state={this.props.data.state}
+                    data={this.props.data}
                     vm={this.props.vm}
+                    onItemClick={this.handleSelectSample}
+                    items={this.props.data.samples}
                 >
                 <TuringVizPanel
                     vm={this.props.vm}
@@ -163,27 +156,12 @@ TuringTab.propTypes = {
     editingTarget: PropTypes.string,
     intl: intlShape,
     isRtl: PropTypes.bool,
-    onActivateCostumesTab: PropTypes.func.isRequired,
-    sprites: PropTypes.shape({
-        id: PropTypes.shape({
-            sounds: PropTypes.arrayOf(PropTypes.shape({
-                name: PropTypes.string.isRequired
-            }))
-        })
-    }),
-    stage: PropTypes.shape({
-        sounds: PropTypes.arrayOf(PropTypes.shape({
-            name: PropTypes.string.isRequired
-        }))
-    }),
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
 const mapStateToProps = state => ({
     editingTarget: state.scratchGui.targets.editingTarget,
     isRtl: state.locales.isRtl,
-    sprites: state.scratchGui.targets.sprites,
-    stage: state.scratchGui.targets.stage,
     data: state.scratchGui.turingData.data
 });
 

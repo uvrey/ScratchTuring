@@ -28,7 +28,6 @@ const OBSERVED_INDEX = 2
 
 const messagesOfAffirmation = []
 
-
 const TIME = 0
 const SIZE = 1
 const X = 2
@@ -400,13 +399,13 @@ class Scratch3Turing {
             this._timer.start(); // start a new timer
 
         } else if (this.state.random_var == SIZE) {
-            this.samples.push(target.util.size)
+            this.samples.push(util.target.size)
 
         } else if (this.state.random_var == X) {
-            this.samples.push(target.util.x)
+            this.samples.push(util.target.x)
 
         } else if (this.state.random_var == Y) {
-            this.samples.push(target.util.y)
+            this.samples.push(util.target.y)
 
         } else if (this.state.random_var == LOUDNESS) {
             this.samples.push(10) // TODO implement this
@@ -446,7 +445,7 @@ class Scratch3Turing {
             distLines: this.lineList,
             spriteX: x,
             spriteY: y,
-            mode: this.state.mode
+            mode: this.state.mode,
         }
     }
 
