@@ -73,6 +73,11 @@ class Scratch3Turing {
         this._addCurve(0, 0, 'prior') // standard normal
         this._addCurve(0, 0, 'posterior') // standard normal
         this._addCurve(0, 0, 'observed') // standard normal
+
+
+        // Set up signal receipt from the GUI
+        this._onClearSamples = this._onClearSamples.bind(this);
+        this._runtime.on('CLEAR_SAMPLES', this._onClearSamples);
     }
 
     _getColorFromPalette() {
@@ -276,6 +281,28 @@ class Scratch3Turing {
         return this._getAffirmation()
     }
 
+    clearSamples(args, util) {
+        this._onClearSamples()
+        return "Samples cleared :)"
+    }
+
+    _onClearSamples() {
+        this.state.observed = 0
+        this.state.posterior = 0
+
+        const updatedLineList = [...this.lineList]; 
+
+        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: 0};
+        updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: 0}; // TODO update with genuine Turing values
+        
+        this.lineList = updatedLineList // update line list
+
+        this.samples = []
+
+        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
+        this._runtime.emit('TURING_DATA', data)
+    }
+
     setPrior(args, util) {
         var prior = args.PRIOR
         var random_var_idx = args.RANDOM_VAR - 1
@@ -294,16 +321,11 @@ class Scratch3Turing {
         // set the new prior in the line charts
         this.state.prior = Number(prior)
         this._updatePrior(prior)
-        
-        // Clear visualised data 
-        this.samples = []  // TODO also reset charts
-        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
-        this._runtime.emit('TURING_DATA', data)
+        this._onClearSamples()
         return  this._getAffirmation()
     }
 
     takeSample (args, util) {
-
         console.log("Taking a sample!")
         // Slightly buffer requests
         const currentTime = Date.now(); 

@@ -14,6 +14,7 @@ import sizeIcon from './icon--size.svg';
 import erasorIcon from './icon--eraser.svg'
 import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
 import styles from './turing-selector.css';
+import VM from 'scratch-vm';
 
 const TuringSelector = props => {
     const {
@@ -58,9 +59,8 @@ const TuringSelector = props => {
       // listArea.scrollTop = listArea.scrollHeight;
   }
 
-  const onClick = () => {
-    console.log("clearing samples with erasor button - TODO")
-    // this.props.vm.runtime.emit('COLOR_FROM_STAGE', this.getColorInfo(data_x, data_y));
+  const onClearSamples = () => {
+    props.vm.runtime.emit('CLEAR_SAMPLES');
   }
   
     newButtonSection = (
@@ -69,7 +69,7 @@ const TuringSelector = props => {
               img={erasorIcon}
               // moreButtons={sampleButton}
               title={"Clear Samples"}
-              onClick={onClick}
+              onClick={onClearSamples}
           />
       </Box>
   );
@@ -105,7 +105,8 @@ const TuringSelector = props => {
 
 TuringSelector.propTypes = {
     samples: PropTypes.array,
-    state: PropTypes.object
+    state: PropTypes.object,
+    vm: PropTypes.instanceOf(VM).isRequired
 };
 
 export default TuringSelector; // make sortable at some point? TODO

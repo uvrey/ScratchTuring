@@ -147,6 +147,7 @@ class TuringTab extends React.Component {
                     onDeleteClick={this.handleDeleteSample}
                     samples={this.props.data.samples}
                     state={this.props.data.state}
+                    vm={this.props.vm}
                 >
                 <TuringVizPanel
                     vm={this.props.vm}
