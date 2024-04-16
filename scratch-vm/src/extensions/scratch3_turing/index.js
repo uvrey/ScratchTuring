@@ -169,6 +169,15 @@ class Scratch3Turing {
                     })
                 },
                 {
+                    opcode: 'showMean',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.showMean',
+                        default:  'average',
+                        description: 'turing.showMean'
+                    })
+                },
+                {
                     opcode: 'showRandomVariable',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
@@ -241,6 +250,10 @@ class Scratch3Turing {
                 },
             }
         };
+    }
+
+    showMean(args, util) {
+        return this.state.observed
     }
 
     showRandomVariable() {
