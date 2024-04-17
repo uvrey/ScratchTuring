@@ -57,6 +57,8 @@ class Scratch3Turing {
             thing: ''
         }
 
+        this.api_host = "http://127.0.0.1:8080"
+
         this._extensionId = 'turing'
 
         this._runtime.emit('TURING_ACTIVE')
@@ -160,6 +162,15 @@ class Scratch3Turing {
                     })
                 },
                 {
+                    opcode: 'greet',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.greet',
+                        default:  'greet...',
+                        description: 'turing.greet'
+                    })
+                },
+                {
                     opcode: 'showLastSample',
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
@@ -252,6 +263,37 @@ class Scratch3Turing {
         };
     }
 
+    // greet() {
+    //     const url = this.api_host + "/api/turing/v1/greet"; 
+    //     const payload = {
+    //         method: 'GET', 
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         // body: JSON.stringify(modelDict)
+    //     };
+    //     return this._sendRequesttoServer(url, payload)
+    //     .then(message => {
+    //         console.log("Server responded: ", message);
+    //         return message; // You can optionally return the message here for further use
+    //     });
+    // }
+
+
+    async greet() {
+        const url = this.api_host + "/api/turing/v1/greet";
+        const payload = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+      
+        const message = await this._sendRequesttoServer(url, payload);
+        console.log("Server responded: ", message);
+        return message;
+      }
+
     showMean(args, util) {
         return this.state.observed
     }
@@ -298,6 +340,54 @@ class Scratch3Turing {
     clearSamples(args, util) {
         this._onClearSamples()
         return "Samples cleared :)"
+    }
+
+    
+    /**
+     * Send a request to the Turing API of a particular type
+     * @param {string} url - API destination
+     * @param {object} payload - body of information to be sent
+     * @returns response code from the server
+     */
+    async _sendRequesttoServer(url, payload) {
+        try {
+          const response = await fetch(url, payload);
+          const copy = response.clone();
+          const text = await response.text();
+          if (text) {
+            return await this._fixJson(text); // Assuming _fixJson returns the fixed message
+          } else {
+            return await copy.json();
+          }
+        } catch (err) {
+          if (err instanceof SyntaxError) {
+            // Handle syntax errors
+            const data = await copy.json();
+            return this._fixJson(data);
+          } else {
+            throw err;
+          }
+        }
+      }
+
+    _fixJson(text) {
+        return text
+    }
+      
+
+    _createModelinTuring(modelDict) {
+        console.log("Sending model information to Turing to create it :)")
+
+        // build request to Turing
+        const url = this.api_host + "/api/turing/v1/createModel"; 
+        const payload = {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(modelDict)
+        };
+        this._sendRequesttoServer(url, payload)
     }
 
     _onClearSamples() {
