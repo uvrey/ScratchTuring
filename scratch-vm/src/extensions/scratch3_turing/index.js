@@ -23,8 +23,8 @@ const palette = [
   ];
   
 const PRIOR_INDEX = 0
-const POSTERIOR_INDEX = 1
-const OBSERVED_INDEX = 2
+const OBSERVED_INDEX = 1
+const POSTERIOR_INDEX = 2
 
 const messagesOfAffirmation = []
 
@@ -40,6 +40,14 @@ const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', '
 const UNITS = ['s', '', '', '', 'db', '', '',, '']
 const RANDOM_VAR_NAMES = ['TIME', 'SIZE', 'X', 'Y', 'LOUDNESS', 'COLOR', 'NONE']
 
+window.addEventListener("beforeunload", (event) => {
+    // User might be closing the app
+    console.log("Session might have ended");
+    // Send session end signal or handle cleanup here
+  });
+
+  
+  
 class Scratch3Turing {
     constructor (runtime) {
         /**
@@ -50,7 +58,7 @@ class Scratch3Turing {
         this.state = {
             prior: 0,
             observed: 0,
-            posterior: 0,
+            // posterior: 0,
             random_var: NONE,
             unit: NONE,
             mode: NONE,
@@ -61,32 +69,86 @@ class Scratch3Turing {
 
         this._extensionId = 'turing'
 
+        this.TARGET_PROPERTIES = [
+            (util) => this._timer.timeElapsed() / 1000, // TIME
+            (util) => util.target.size, 
+            (util) => util.target.x,
+            (util) => util.target.y,
+            (util) => 10, // LOUDNESS TODO
+            (util) => TuringSensing.fetchColor(util.target),
+            (util) => NONE,
+        ];
+          
+
         this._runtime.emit('TURING_ACTIVE')
         this._runtime.registerTuringExtension(this._extensionId, this);
 
+        this.username = this._initAPI()
+
         this.samples = []
+        this.prior_samples = []
         this.lastSampleTime = 0;
         this._timer = new Timer();
         this._timer.start(); // TODO start this when the program's runtim begins (green flag)
         this.palette_idx = 0;
 
+        sessionStorage.setItem("username", this.username);
+
         // Build line list
         this.lineList = []
-        this._addCurve(0, 0, 'prior') // standard normal
-        this._addCurve(0, 0, 'posterior') // standard normal
-        this._addCurve(0, 0, 'observed') // standard normal
+        this._addCurve(0, 1, 'what we expect') // standard normal
+        // this._addCurve(0, 0, 'posterior') // standard normal
+        this._addCurve(0, 0, 'what we see') // standard normal
 
 
         // Set up signal receipt from the GUI
         this._onClearSamples = this._onClearSamples.bind(this);
         this._runtime.on('CLEAR_SAMPLES', this._onClearSamples);
+        this._onResetTimer = this._onResetTimer.bind(this);
+        this._runtime.on('PROJECT_START', this._onResetTimer);
     }
+
+    // addPosteriorData() {
+    //     const updatedLineList = [...this.lineList]; 
+    //     updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.posterior, stdv: 0};
+    //     // updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: 0}; // TODO update with genuine Turing values
+    //     this.lineList = updatedLineList // update line list
+    //     this._addCurve(0, 0, 'posterior') // standard normal
+    // }
 
     _getColorFromPalette() {
         this.palette_idx = (this.palette_idx + 1) % palette.length
         return palette[this.palette_idx]
     }
 
+    _generateRandomUserName(length) {
+        // Use crypto.getRandomValues for secure random generation
+        const randomBytes = new Uint8Array(length);
+        window.crypto.getRandomValues(randomBytes);
+      
+        // Convert the bytes to a random string
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+          const index = Math.floor(randomBytes[i] / 256 * chars.length);
+          result += chars[index];
+        }
+        return result;
+      }
+      
+
+    _initAPI() {
+        console.log("initialising Turing API")
+        const userName = this._generateRandomUserName(16);
+        console.log(userName); // Output: a random string of length 16
+
+        if (sessionStorage.getItem("username")) {
+            // delete this data from the API
+            alert('we had already stored a username for this person!');
+        }
+
+        return userName
+    }
     /**
      * Create data for a menu in scratch-blocks format, consisting of an array of objects with text and
      * value properties. The text is a translated string, and the value is one-indexed.
@@ -108,7 +170,7 @@ class Scratch3Turing {
             {
                 name: formatMessage({
                     id: 'turing.randomVarsMenu.timeTaken',
-                    default: 'TIME',
+                    default: 'TIME TAKEN (sec)',
                     description: 'Amount of time taken.'
                 }),
             },
@@ -245,12 +307,46 @@ class Scratch3Turing {
                     })
                 },
                 {
+                    opcode: 'startStopwatch',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.startStopwatch',
+                        default:  'start stopwatch',
+                        description: 'turing.startStopwatch'
+                    })
+                },
+                {
+                    opcode: 'buildUpPrior',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.buildUpPrior',
+                        default:  'add to belief about [RANDOM_VAR]',
+                        description: 'turing.buildUpPrior'
+                    }),
+                    arguments: {
+                        RANDOM_VAR: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1,
+                            menu: 'NUMERIC_MENU',
+                        }
+                    }
+                },
+                {
                     opcode: 'clearSamples',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.clearSamples',
                         default:  'clear samples',
                         description: 'turing.clearSamples'
+                    })
+                },
+                {
+                    opcode: 'clearPriorSamples',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.clearPriorSamples',
+                        default:  'clear prior samples',
+                        description: 'turing.clearPriorSamples'
                     })
                 },
             ],
@@ -263,22 +359,9 @@ class Scratch3Turing {
         };
     }
 
-    // greet() {
-    //     const url = this.api_host + "/api/turing/v1/greet"; 
-    //     const payload = {
-    //         method: 'GET', 
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         // body: JSON.stringify(modelDict)
-    //     };
-    //     return this._sendRequesttoServer(url, payload)
-    //     .then(message => {
-    //         console.log("Server responded: ", message);
-    //         return message; // You can optionally return the message here for further use
-    //     });
-    // }
-
+    startStopwatch(args, util) {
+        this._onResetTimer()
+    }
 
     async greet() {
         const url = this.api_host + "/api/turing/v1/greet";
@@ -293,6 +376,106 @@ class Scratch3Turing {
         console.log("Server responded: ", message);
         return message;
       }
+
+          
+    async buildQuery(util, url_path, method, model_type, mean = -1, variance = -1, n = -1, data = []) {
+        const url = this.api_host + "/api/turing/v1/" + url_path;
+
+        const dict = {
+            "username": this.username,
+            "target": util.target.getName(),
+            "model_type": model_type,
+            "model_params": {
+                "mean": mean,
+                "var": variance
+            }, 
+            "n": n,
+            "data": data,
+        }
+        const payload = {
+            method: method, 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };      
+        const message = await this._sendRequesttoServer(url, payload);
+        console.log("Server responded: ", message);
+        return message;
+    }
+
+    turing_sample(args, util) {
+        const distribution = args.DIST // convert this
+        const mean = 1 // logic here to get appropriate mean
+        const variance = 2 // logic here to get appropriate variance
+        message = this.buildQuery(util, "sample", 'POST', distribution, mean, variance, n = args.N) // logic to check number args
+    }
+
+    turing_definePrior(args, util) {
+        const distribution = args.DIST // convert this
+        const mean = 1 // logic here to get appropriate mean
+        const variance = 2 // logic here to get appropriate variance
+        message = this.buildQuery(util, "defineModel", 'POST', "prior", mean, variance, n = args.N) // logic to check number args
+        return message
+    }
+
+    
+    turing_defineObserved(args, util) {
+        const distribution = args.DIST // convert this
+        const mean = 1 // logic here to get appropriate mean
+        const variance = 2 // logic here to get appropriate variance
+        message = this.buildQuery(util, "defineModel", 'POST', "observed", mean, variance, n = args.N) // logic to check number args
+        return message
+    }
+
+    turing_definePosterior(args, util) {
+        message = this.buildQuery(util, "defineModel", 'POST', "posterior") // logic to check number args
+        // TODO define posterior here
+        return message
+    }
+
+    turing_conditionPriorOnData(args, util) {
+        const distribution = args.DIST // convert this
+        const mean = 1 // logic here to get appropriate mean
+        const variance = 2 // logic here to get appropriate variance
+        const data = this.samples
+        message = this.buildQuery(util, "condition", 'POST', distribution, data, n = args.N) // logic to check number args
+    }
+
+    async turing_createUser() {
+        const url = this.api_host + "/api/turing/v1/createUser";
+        const dict = {
+            "username": this.username
+        }
+        const payload = {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };      
+        const message = await this._sendRequesttoServer(url, payload);
+        console.log("Server responded: ", message);
+        return message;
+    }
+
+    async turing_deleteUser() {
+        const url = this.api_host + "/api/turing/v1/deleteUser";
+        const dict = {
+            "username": this.username
+        }
+        const payload = {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };      
+        const message = await this._sendRequesttoServer(url, payload);
+        console.log("Server responded: ", message);
+        return message;
+    }
+
 
     showMean(args, util) {
         return this.state.observed
@@ -342,6 +525,10 @@ class Scratch3Turing {
         return "Samples cleared :)"
     }
 
+    clearPriorBelief(args, util) {
+        this._onClearPriorSamples()
+        return "Prior samples cleared :)"
+    }
     
     /**
      * Send a request to the Turing API of a particular type
@@ -374,7 +561,6 @@ class Scratch3Turing {
         return text
     }
       
-
     _createModelinTuring(modelDict) {
         console.log("Sending model information to Turing to create it :)")
 
@@ -392,16 +578,36 @@ class Scratch3Turing {
 
     _onClearSamples() {
         this.state.observed = 0
-        this.state.posterior = 0
+        // this.state.posterior = 0
 
         const updatedLineList = [...this.lineList]; 
 
         updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: 0};
-        updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: 0}; // TODO update with genuine Turing values
+        // updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: 0}; // TODO update with genuine Turing values
         
         this.lineList = updatedLineList // update line list
 
         this.samples = []
+
+        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
+        this._runtime.emit('TURING_DATA', data)
+    }
+
+    clearPriorSamples(args, util) {
+        this._onClearPriorSamples
+    }
+
+    _onClearPriorSamples() {
+        console.log("CLEARING PRIOR SAMPLES???")
+        this.state.prior = 0
+
+        const updatedLineList = [...this.lineList]; 
+
+        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: 0, stdv: 0};
+        
+        this.lineList = updatedLineList // update line list
+
+        this.prior_samples = []
 
         data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
         this._runtime.emit('TURING_DATA', data)
@@ -426,7 +632,11 @@ class Scratch3Turing {
         this.state.prior = Number(prior)
         this._updatePrior(prior)
         this._onClearSamples()
-        return  this._getAffirmation()
+
+        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
+        this._runtime.emit('TURING_DATA', data)
+
+        return this._getAffirmation()
     }
 
     takeSample (args, util) {
@@ -442,7 +652,37 @@ class Scratch3Turing {
         console.log(util.target)
 
         if (typeof util.target != undefined) {
-            this._getThenSendSample(args, util)
+            this._getThenSendSample(util)
+        } else {
+            return "I can't do this alone ;) Add me to your code!"
+        }
+    }
+
+    _onResetTimer () {
+        this._timer.start(); 
+    }
+
+    buildUpPrior (args, util) {
+        console.log("Adding a sample to our prior!")
+
+        var random_var_idx = args.RANDOM_VAR - 1
+
+        if (this.state.random_var != random_var_idx) {
+            this._setRandomVariable(random_var_idx)
+        }
+
+        // Slightly buffer requests
+        const currentTime = Date.now(); 
+        if (currentTime - this.lastSampleTime < 400) {
+          return; 
+        }
+        this.lastSampleTime = currentTime;
+
+        // Check if we can get a sample
+        console.log(util.target)
+
+        if (typeof util.target != undefined) {
+            this._getThenSendSample(util, buildPrior = true)
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
@@ -462,7 +702,6 @@ class Scratch3Turing {
 
 
     /* Helper Utilities */
-
     _getAffirmation() {
         const randomWords = ["Epic! ^_^", "Okay!", "Done!", "Noted :))", "Excellent!", "Got it :)", "Awesome! :D", "Okey dokey!", "Splendid!", "Looks good!"];
         const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
@@ -487,36 +726,34 @@ class Scratch3Turing {
         return randomCautionaryMessage; // Output a random cautionary message
     }
 
-    _getThenSendSample(args, util) {
+    extractSample = (util, buildPrior) => {
+        var sample = this.TARGET_PROPERTIES[this.state.random_var](util);
+        if (this.state.random_var == COLOR) {
+            sample = Color.rgbToHex(sample)
+        }
+        if (!buildPrior) {
+          this.samples.push(sample);
+        } else {
+          this.prior_samples.push(sample);
+        }
+        if (this.state.random_var === TIME) {
+          this._timer.start(); // Start a new timer only for TIME
+        }
+      };
+
+    _getThenSendSample(util, buildPrior = false) {
         console.log("---------->")
         var newSample;
+        this.extractSample(util, buildPrior) 
 
-        if (this.state.random_var == COLOR) {
-            color = TuringSensing.fetchColor(util.target)
-            console.log("we extracted this color: ")
-            console.log(color)
-            newSample = Color.rgbToHex(color)
-            this.samples.push(newSample)
-
-        } else if (this.state.random_var == TIME) {
-            newSample = this._timer.timeElapsed() / 1000
-            this.samples.push(newSample) 
-            this._timer.start(); // start a new timer
-
-        } else if (this.state.random_var == SIZE) {
-            this.samples.push(util.target.size)
-
-        } else if (this.state.random_var == X) {
-            this.samples.push(util.target.x)
-
-        } else if (this.state.random_var == Y) {
-            this.samples.push(util.target.y)
-
-        } else if (this.state.random_var == LOUDNESS) {
-            this.samples.push(10) // TODO implement this
+        if (!buildPrior) {
+            this._updateObservedData(newSample)
+        } else {
+            console.log("updating prior data")
+            console.log(this.prior_samples)
+            this._updatePriorData(newSample)
         }
 
-        this._updateObservedData(newSample)
         data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
         this._runtime.emit('TURING_DATA', data)
     }
@@ -579,19 +816,39 @@ class Scratch3Turing {
           }
         }
     }
-      
-    _updateObservedData() {
 
+    _updatePriorData() {
         var m, s
 
         if (this.state.mode === "COLOR") {
           m = 10
           s = 4
+        } else {
+          [m, s] = this._getMeanAndVariance(this.prior_samples); // Numeric random variables here
+        }
 
+        // update our observed and posterior distributions
+        this.state.prior = m
+
+        const updatedLineList = [...this.lineList]; 
+
+        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: this.state.prior, stdv: s}; // we give the prior the same standard deviation as the observed data - TODO
+        
+        this.lineList = updatedLineList // update line list
+      }
+      
+    _updateObservedData() {
+        var m, s
+
+        if (this.state.mode === "COLOR") {
+          m = 10
+          s = 4
         } else {
           [m, s] = this._getMeanAndVariance(this.samples); // Numeric random variables here
-
         }
+
+        console.log("OBSERVED SAMPLES!")
+        console.log(this.state.observed)
 
         // update our observed and posterior distributions
         var randomConstant = Math.random()
@@ -600,19 +857,25 @@ class Scratch3Turing {
 
         const updatedLineList = [...this.lineList]; 
 
-        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: this.state.prior, stdv: s}; // we give the prior the same standard deviation as the observed data - TODO
-        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: s};
-        updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: s}; // TODO update with genuine Turing values
+        // updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: this.state.prior, stdv: s}; // we give the prior the same standard deviation as the observed data - TODO
+        console.log("Updating line list with mean " + m + "and stdv " + s)
+        Object.assign(updatedLineList[OBSERVED_INDEX], { mean: this.state.observed, stdv: s });
+
+        // updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: s};
+       // updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: s}; // TODO update with genuine Turing values
         
         this.lineList = updatedLineList // update line list
         console.log("UPDATED LINE LIST")
         console.log(this.lineList)
       }
 
-    _updatePrior(newPrior) {
-        console.log("setting prior to ZERO")
+    _updatePrior(new_mean = 0, new_stdv = -1) {
         const updatedLineList = [...this.lineList]; 
-        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: newPrior};
+        if (new_stdv != -1) {
+            updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: new_mean, stdv: new_stdv};
+        } else {
+            updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: new_mean};
+        }
         this.lineList = updatedLineList // update line list
     }
 
@@ -653,11 +916,58 @@ class Scratch3Turing {
 
     _getBarChartData(param) {
         return [
-            { type: "prior", value: this.state.prior},
-            { type: "observed", value: this.state.observed}, // this.lineList[OBSERVED_INDEX][param] 
-            { type: "posterior", value: this.state.posterior},
+            { type: "what we expected", value: this.state.prior},
+            { type: "what we got", value: this.state.observed}, // this.lineList[OBSERVED_INDEX][param] 
+            // { type: "posterior", value: this.state.posterior},
             ];
     }
 }
 module.exports = Scratch3Turing;
 
+        // if (this.state.random_var == COLOR) {
+        //     color = TuringSensing.fetchColor(util.target)
+        //     console.log("we extracted this color: ")
+        //     console.log(color)
+        //     newSample = Color.rgbToHex(color)
+        //     if (!buildPrior) {
+        //         this.samples.push(newSample)
+        //     } else {
+        //         this.prior_samples.push(newSample)
+        //     }
+        // } else if (this.state.random_var == TIME) {
+        //     newSample = this._timer.timeElapsed() / 1000
+        //     if (!buildPrior) {
+        //         this.samples.push(newSample)
+        //     } else {
+        //         this.prior_samples.push(newSample)
+        //     }
+        //     this._timer.start(); // start a new timer
+
+        // } else if (this.state.random_var == SIZE) {
+
+        //     if (!buildPrior) {
+        //         this.samples.push(util.target.size)
+        //     } else {
+        //         this.prior_samples.push(util.target.size)
+        //     }
+
+        // } else if (this.state.random_var == X) {
+            
+        //     if (!buildPrior) {
+        //         this.samples.push(util.target.x)
+        //     } else {
+        //         this.prior_samples.push(util.target.x)
+        //     }
+        // } else if (this.state.random_var == Y) {
+            
+        //     if (!buildPrior) {
+        //         this.samples.push(util.target.y)
+        //     } else {
+        //         this.prior_samples.push(util.target.y)
+        //     }
+
+        //     this.samples.push(util.target.y)
+
+        // } else if (this.state.random_var == LOUDNESS) {
+        //     this.samples.push(10) // TTODO implement this
+        // }
