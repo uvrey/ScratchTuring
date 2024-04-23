@@ -316,7 +316,7 @@ class Scratch3Turing {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.defineCustomRandomVariable',
-                        default:  '1. model [NAME] using [RANDOM_VAR]',
+                        default:  'model [NAME] as [RANDOM_VAR]',
                         description: 'turing.defineCustomRandomVariable'
                     }),
                     arguments: {
@@ -336,7 +336,7 @@ class Scratch3Turing {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.definePrior',
-                        default:  '2. model expectation as [DISTRIBUTION]',
+                        default:  'set expectation as [DISTRIBUTION]',
                         description: 'turing.definePrior'
                     }),
                     arguments: {
@@ -473,7 +473,7 @@ class Scratch3Turing {
         var random_var_idx = args.RANDOM_VAR - 1
         var modelName = args.NAME
         this.defineTargetModel(util, random_var_idx, modelName)
-        return util.target.getName() + " is modelling " + modelName + " using " + RANDOM_VAR_NAMES[random_var_idx]
+        return util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
     }
 
     defineTargetModel(util, rv, modelName) {
@@ -484,18 +484,27 @@ class Scratch3Turing {
                     model: null,
                     params: null,
                     barValue: null,
+                    data: null,
+                    mean: null,
+                    stdv: null,
                     defined: false
                 },
                 posterior: {
                     model: null,
                     params: null,
                     barValue: null,
+                    data: null,
+                    mean: null,
+                    stdv: null,
                     defined: false
                 },
                 groundTruth: {
                     model: null,
                     params: null,
                     barValue: null,
+                    data: null,
+                    mean: null,
+                    stdv: null,
                     defined: false
                 },
                 modelName: modelName,
@@ -510,22 +519,26 @@ class Scratch3Turing {
             };
         }
 
-    definePrior(args, util) {
+    async definePrior(args, util) {
         var dist = DISTRIBUTIONS[args.DISTRIBUTION - 1]
 
         if (this.user_models[util.target.getName()] == null) {
             return "No model found."
         }
-        this.turing_definePrior(util, dist) 
-        return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
+
+        // emit loading screen ask
+        message = this.turing_definePrior(util, dist) 
+        // close loading screen
+        return message
+      //  return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
     }
 
-    turing_definePrior(util, dist) {
+    async turing_definePrior(util, dist) {
         message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist) // logic to check number args
         return message
     }
 
-    takeSampleFromSprite (args, util) {
+    async takeSampleFromSprite (args, util) {
         console.log("Taking a sample!")
         // Slightly buffer requests
         const currentTime = Date.now(); 
@@ -540,11 +553,37 @@ class Scratch3Turing {
         if (typeof util.target != undefined) {
             user_model = this.user_models[util.target.getName()]
             message = this._getThenSendSample(util, user_model)
-            return message
+            this.conditionOnPrior(util, user_model)
+                    .then(response => this.updateInternals(user_model, response, "posterior"));            
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
     }
+
+    _processChainMessage(message) {
+        try {        
+            return JSON.parse(JSON.parse(message)); // parse twice, first to remove escapes and second time to read into a JSON
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+        }
+    }
+
+    updateInternals(user_model, response, model_type) {
+        console.log("Internals:")
+        responseJSON = JSON.parse(JSON.parse(response))
+        summary = responseJSON["summary"]
+        chain = responseJSON["chain"]
+        data = chain["data"]
+        user_model[model_type]['data'] = data
+        user_model[model_type]['params'] = summary["parameters"]
+        user_model[model_type]['mean'] = summary["mean"]
+        user_model[model_type]['stdv'] = summary["stdv"]
+        user_model[model_type]['defined'] = true
+
+        // data = this._toJSON(user_model.data, this._getBarChartData(user_model), this._getDistributionData(user_model))
+        // this._runtime.emit('TURING_DATA', data) TODO get this data as probabilities and represent in the GUI
+    }
+
 
     takeSampleAsNumber (args, util) {
         if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
@@ -556,6 +595,8 @@ class Scratch3Turing {
         if (typeof util.target != undefined &&  typeof this.user_models[util.target.getName()] != undefined ) {
             user_model = this.user_models[util.target.getName()]
             this.user_models[util.target.getName()].data.push(observation);
+            this.conditionOnPrior(util, user_model) // updates posterior
+
             data = this._toJSON(user_model.data, this._getBarChartData(user_model), this._getDistributionData(user_model))
             this._runtime.emit('TURING_DATA', data)
             return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
@@ -590,19 +631,11 @@ class Scratch3Turing {
         var newSample;
         observation = this.extractSample(util, user_model, groundTruth) 
 
-        // if (!groundTruth) {
-        //     this._updateObservedData(newSample)
-        // } else {
-        //     console.log("updating prior data")
-        //     console.log(this.truth_data)
-        //     this._updateGroundTruth(newSample)
-        // }
-
+        // TTODO update line list visualisations... Can I get turing to do this for me?
         data = this._toJSON(user_model, this.observations, this._getBarChartData(user_model), this._getDistributionData(user_model))
         this._runtime.emit('TURING_DATA', data)
         return  util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
     }
-
 
     _getDistributionData(user_model) {
         // TODO if statement here so that you can use other things 
@@ -616,6 +649,14 @@ class Scratch3Turing {
           { type: "ground truth", value: user_model.groundTruth.barValue ? user_model.groundTruth.barValue : null },
         ];
       }
+
+    async conditionOnPrior(util, user_model) {
+        const newData = user_model['data']
+        message = this.buildQuery(util, "condition", 'POST', distribution = distribution, data = newData, n = 100) // logic to check number args
+        console.log("Server responded:")
+        console.log(message)
+        return message
+    }
 
     /* Prepare a JSON of relevant data */
     _toJSON(target, samples, bcD, pdfD) {
@@ -650,7 +691,7 @@ class Scratch3Turing {
       }
 
           
-    async buildQuery(util, url_path, method, model_type, distribution = '', mean = -1, variance = -1, n = -1, data = []) {
+    async buildQuery(util, url_path, method, model_type, distribution = '', n='', data = []) {
         const url = this.api_host + "/api/turing/v1/" + url_path;
 
         const dict = {
@@ -704,8 +745,6 @@ class Scratch3Turing {
 
     turing_conditionPriorOnData(args, util) {
         const distribution = args.DIST // convert this
-        const mean = 1 // logic here to get appropriate mean
-        const variance = 2 // logic here to get appropriate variance
         const data = this.observations
         message = this.buildQuery(util, "condition", 'POST', distribution, data, n = args.N) // logic to check number args
     }
@@ -906,24 +945,24 @@ class Scratch3Turing {
         return this._getAffirmation()
     }
 
-    takeSample (args, util) {
-        console.log("Taking a sample!")
-        // Slightly buffer requests
-        const currentTime = Date.now(); 
-        if (currentTime - this.lastSampleTime < 400) {
-          return; 
-        }
-        this.lastSampleTime = currentTime;
+    // takeSample (args, util) {
+    //     console.log("Taking a sample!")
+    //     // Slightly buffer requests
+    //     const currentTime = Date.now(); 
+    //     if (currentTime - this.lastSampleTime < 400) {
+    //       return; 
+    //     }
+    //     this.lastSampleTime = currentTime;
 
-        // Check if we can get a sample
-        console.log(util.target)
+    //     // Check if we can get a sample
+    //     console.log(util.target)
 
-        if (typeof util.target != undefined) {
-            this._getThenSendSample(util)
-        } else {
-            return "I can't do this alone ;) Add me to your code!"
-        }
-    }
+    //     if (typeof util.target != undefined) {
+    //         this._getThenSendSample(util)
+    //     } else {
+    //         return "I can't do this alone ;) Add me to your code!"
+    //     }
+    // }
 
     _onResetTimer () {
         this._timer.start(); 
