@@ -23,7 +23,7 @@ const palette = [
   ];
   
 const PRIOR_INDEX = 0
-const OBSERVED_INDEX = 1
+const GROUND_TRUTH_INDEX = 1
 const POSTERIOR_INDEX = 2
 
 const messagesOfAffirmation = []
@@ -33,12 +33,14 @@ const SIZE = 1
 const X = 2
 const Y = 3
 const LOUDNESS = 4
-const COLOR = 5
-const NONE = 6
+const NUMBER = 5
+const COLOR = 6
+const NONE = 7
 
-const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE']
-const UNITS = ['s', '', '', '', 'db', '', '',, '']
-const RANDOM_VAR_NAMES = ['TIME', 'SIZE', 'X', 'Y', 'LOUDNESS', 'COLOR', 'NONE']
+const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE']
+const UNITS = ['s', '', '', '', 'db', '', '', '', '']
+const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'LOUDNESS', 'NUMBER', 'COLOR', 'NONE']
+const DISTRIBUTIONS = ['gaussian', 'poisson', 'binomial']
 
 window.addEventListener("beforeunload", (event) => {
     // User might be closing the app
@@ -56,9 +58,9 @@ class Scratch3Turing {
          */
         this._runtime = runtime;
         this.state = {
-            prior: 0,
-            observed: 0,
-            // posterior: 0,
+            prior_mu: null,
+            ground_truth_mu: null,
+            posterior_mu: null,
             random_var: NONE,
             unit: NONE,
             mode: NONE,
@@ -78,15 +80,16 @@ class Scratch3Turing {
             (util) => TuringSensing.fetchColor(util.target),
             (util) => NONE,
         ];
-          
+
+        this.user_models = {} // each target has its own model
 
         this._runtime.emit('TURING_ACTIVE')
         this._runtime.registerTuringExtension(this._extensionId, this);
 
         this.username = this._initAPI()
 
-        this.samples = []
-        this.prior_samples = []
+        this.observations = []
+        this.truth_data = []
         this.lastSampleTime = 0;
         this._timer = new Timer();
         this._timer.start(); // TODO start this when the program's runtim begins (green flag)
@@ -96,10 +99,10 @@ class Scratch3Turing {
 
         // Build line list
         this.lineList = []
+
         this._addCurve(0, 1, 'what we expect') // standard normal
         // this._addCurve(0, 0, 'posterior') // standard normal
         this._addCurve(0, 0, 'what we see') // standard normal
-
 
         // Set up signal receipt from the GUI
         this._onClearSamples = this._onClearSamples.bind(this);
@@ -142,10 +145,10 @@ class Scratch3Turing {
         const userName = this._generateRandomUserName(16);
         console.log(userName); // Output: a random string of length 16
 
-        if (sessionStorage.getItem("username")) {
-            // delete this data from the API
-            alert('we had already stored a username for this person!');
-        }
+        // if (sessionStorage.getItem("username")) {
+        //     // delete this data from the API
+        //     alert('we had already stored a username for this person!');
+        // }
 
         return userName
     }
@@ -202,6 +205,39 @@ class Scratch3Turing {
                     description: 'loudness'
                 }),
             },
+            {
+                name: formatMessage({
+                    id: 'turing.randomVarsMenu.number',
+                    default: 'NUMBER',
+                    description: 'number'
+                }),
+            },
+        ]
+    }
+
+    get DISTRIBUTION_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'turing.distInfo.gaussian',
+                    default: 'GAUSSIAN',
+                    description: 'Gaussian distribution.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.distInfo.poisson',
+                    default: 'POISSON',
+                    description: 'poisson'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.distInfo.binomial',
+                    default: 'BINOMIAL',
+                    description: 'binomial'
+                }),
+            }
         ]
     }
 
@@ -214,151 +250,387 @@ class Scratch3Turing {
             name: 'Turing',
 
             blocks: [
+                // {
+                //     opcode: 'showPrior',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.showPrior',
+                //         default:  'our expectation',
+                //         description: 'turing.pinLocation'
+                //     })
+                // },
+                // {
+                //     opcode: 'greet',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.greet',
+                //         default:  'greet...',
+                //         description: 'turing.greet'
+                //     })
+                // },
+                // {
+                //     opcode: 'showLastSample',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.lastSample',
+                //         default:  'most recent sample',
+                //         description: 'turing.lastSample'
+                //     })
+                // },
+                // {
+                //     opcode: 'showMean',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.showMean',
+                //         default:  'average',
+                //         description: 'turing.showMean'
+                //     })
+                // },
+                // {
+                //     opcode: 'showRandomVariable',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.showRandomVariable',
+                //         default:  'random variable',
+                //         description: 'turing.showRandomVariable'
+                //     })
+                // },
+                // {
+                //     opcode: 'defineRandomVariableToModel',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.defineRandomVariableToModel',
+                //         default:  'Create a [RANDOM_VAR] model',
+                //         description: 'turing.defineRandomVariableToModel'
+                //     }),
+                //     arguments: {
+                //         RANDOM_VAR: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 1,
+                //             menu: 'NUMERIC_MENU',
+                //         }
+                //     }
+                // },
                 {
-                    opcode: 'showPrior',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.showPrior',
-                        default:  'our expectation',
-                        description: 'turing.pinLocation'
-                    })
-                },
-                {
-                    opcode: 'greet',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.greet',
-                        default:  'greet...',
-                        description: 'turing.greet'
-                    })
-                },
-                {
-                    opcode: 'showLastSample',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.lastSample',
-                        default:  'most recent sample',
-                        description: 'turing.lastSample'
-                    })
-                },
-                {
-                    opcode: 'showMean',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.showMean',
-                        default:  'average',
-                        description: 'turing.showMean'
-                    })
-                },
-                {
-                    opcode: 'showRandomVariable',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.showRandomVariable',
-                        default:  'random variable',
-                        description: 'turing.showRandomVariable'
-                    })
-                },
-                {
-                    opcode: 'setPrior',
+                    opcode: 'defineModel',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.setPrior',
-                        default:  'I think [RANDOM_VAR] will be [PRIOR]',
-                        description: 'turing.setPrior'
+                        id: 'turing.defineCustomRandomVariable',
+                        default:  '1. model [NAME] using [RANDOM_VAR]',
+                        description: 'turing.defineCustomRandomVariable'
                     }),
                     arguments: {
-                        RANDOM_VAR: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 1,
-                            menu: 'NUMERIC_MENU',
-                        },
-                        PRIOR: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 10
-                        }
-                    }
-                },
-                {
-                    opcode: 'setColourPrior',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.setColourPrior',
-                        default:  'I think [SOMETHING] is [COLOR]',
-                        description: 'turing.setRandomVariable'
-                    }),
-                    arguments: {
-                        SOMETHING: {
+                        NAME: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'a field',
+                            defaultValue: "height",
                         },
-                        COLOR: {
-                            type: ArgumentType.COLOR,
-                        }
-                    }
-                },
-                {
-                    opcode: 'takeSample',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.sample',
-                        default:  'take sample',
-                        description: 'turing.takeSample'
-                    })
-                },
-                {
-                    opcode: 'startStopwatch',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.startStopwatch',
-                        default:  'start stopwatch',
-                        description: 'turing.startStopwatch'
-                    })
-                },
-                {
-                    opcode: 'buildUpPrior',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.buildUpPrior',
-                        default:  'add to belief about [RANDOM_VAR]',
-                        description: 'turing.buildUpPrior'
-                    }),
-                    arguments: {
                         RANDOM_VAR: {
-                            type: ArgumentType.NUMBER,
+                            type: ArgumentType.STRING,
                             defaultValue: 1,
                             menu: 'NUMERIC_MENU',
                         }
                     }
                 },
                 {
-                    opcode: 'clearSamples',
+                    opcode: 'definePrior',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.clearSamples',
-                        default:  'clear samples',
-                        description: 'turing.clearSamples'
+                        id: 'turing.definePrior',
+                        default:  '2. model expectation as [DISTRIBUTION]',
+                        description: 'turing.definePrior'
+                    }),
+                    arguments: {
+                        NAME: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "height",
+                        },
+                        DISTRIBUTION: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1,
+                            menu: 'DISTRIBUTION_MENU',
+                        }
+                    }
+                },
+                // {
+                //     opcode: 'setPrior',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.setPrior',
+                //         default:  'I think [RANDOM_VAR] will be [PRIOR]',
+                //         description: 'turing.setPrior'
+                //     }),
+                //     arguments: {
+                //         RANDOM_VAR: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 1,
+                //             menu: 'NUMERIC_MENU',
+                //         },
+                //         PRIOR: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 10
+                //         }
+                //     }
+                // },
+                // {
+                //     opcode: 'setColourPrior',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.setColourPrior',
+                //         default:  'I think [SOMETHING] is [COLOR]',
+                //         description: 'turing.setRandomVariable'
+                //     }),
+                //     arguments: {
+                //         SOMETHING: {
+                //             type: ArgumentType.STRING,
+                //             defaultValue: 'a field',
+                //         },
+                //         COLOR: {
+                //             type: ArgumentType.COLOR,
+                //         }
+                //     }
+                // },
+                {
+                    opcode: 'takeSampleFromSprite',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.takeSampleFromSprite',
+                        default:  'take sample from sprite',
+                        description: 'turing.takeSampleFromSprite'
                     })
                 },
                 {
-                    opcode: 'clearPriorSamples',
+                    opcode: 'takeSampleAsNumber',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.clearPriorSamples',
-                        default:  'clear prior samples',
-                        description: 'turing.clearPriorSamples'
-                    })
+                        id: 'turing.takeSampleAsNumber',
+                        default:  'take my sample [OBSERVATION]',
+                        description: 'turing.takeSampleAsNumber'
+                    }),
+                    arguments: {
+                        OBSERVATION: {
+                            type: ArgumentType.NUMBER
+                        }
+                    }
                 },
+                // {
+                //     opcode: 'startStopwatch',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.startStopwatch',
+                //         default:  'start stopwatch',
+                //         description: 'turing.startStopwatch'
+                //     })
+                // },
+                // {
+                //     opcode: 'labelGroundTruth',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.labelGroundTruth',
+                //         default:  'label [RANDOM_VAR]',
+                //         description: 'turing.labelGroundTruth'
+                //     }),
+                //     arguments: {
+                //         RANDOM_VAR: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 1,
+                //             menu: 'NUMERIC_MENU',
+                //         }
+                //     }
+                // },
+                // {
+                //     opcode: 'clearSamples',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.clearSamples',
+                //         default:  'clear samples',
+                //         description: 'turing.clearSamples'
+                //     })
+                // },
+                // {
+                //     opcode: 'clearGroundTruth',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.clearGroundTruth',
+                //         default:  'clear ground truth',
+                //         description: 'turing.clearGroundTruth'
+                //     })
+                // },
             ],
             menus: {
                 NUMERIC_MENU: {
                     acceptReporters: true,
                     items: this._buildMenu(this.NUMERIC_MENU_INFO)
                 },
+                DISTRIBUTION_MENU: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.DISTRIBUTION_INFO)
+                },
             }
         };
     }
 
+    defineModel(args, util) {
+        var random_var_idx = args.RANDOM_VAR - 1
+        var modelName = args.NAME
+        this.defineTargetModel(util, random_var_idx, modelName)
+        return util.target.getName() + " is modelling " + modelName + " using " + RANDOM_VAR_NAMES[random_var_idx]
+    }
+
+    defineTargetModel(util, rv, modelName) {
+        this.state.type = RANDOM_VAR_NAMES[rv]
+
+        this.user_models[util.target.getName()] = {
+                prior: {
+                    model: null,
+                    params: null,
+                    barValue: null,
+                    defined: false
+                },
+                posterior: {
+                    model: null,
+                    params: null,
+                    barValue: null,
+                    defined: false
+                },
+                groundTruth: {
+                    model: null,
+                    params: null,
+                    barValue: null,
+                    defined: false
+                },
+                modelName: modelName,
+                randomVar: RANDOM_VAR_NAMES[rv], 
+                rvIndex: rv, 
+                unit: UNITS[rv],  
+                mode: MODES[rv],
+                data: [],
+                labels: [],
+                distLines: [],
+                timer:  new Timer()
+            };
+        }
+
+    definePrior(args, util) {
+        var dist = DISTRIBUTIONS[args.DISTRIBUTION - 1]
+
+        if (this.user_models[util.target.getName()] == null) {
+            return "No model found."
+        }
+        this.turing_definePrior(util, dist) 
+        return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
+    }
+
+    turing_definePrior(util, dist) {
+        message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist) // logic to check number args
+        return message
+    }
+
+    takeSampleFromSprite (args, util) {
+        console.log("Taking a sample!")
+        // Slightly buffer requests
+        const currentTime = Date.now(); 
+        if (currentTime - this.lastSampleTime < 400) {
+          return; 
+        }
+        this.lastSampleTime = currentTime;
+
+        // Check if we can get a sample
+        console.log(util.target)
+
+        if (typeof util.target != undefined) {
+            user_model = this.user_models[util.target.getName()]
+            message = this._getThenSendSample(util, user_model)
+            return message
+        } else {
+            return "I can't do this alone ;) Add me to your code!"
+        }
+    }
+
+    takeSampleAsNumber (args, util) {
+        if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
+            return "The observation must be a number";
+          }
+          
+        observation = Number(args.OBSERVATION);
+
+        if (typeof util.target != undefined &&  typeof this.user_models[util.target.getName()] != undefined ) {
+            user_model = this.user_models[util.target.getName()]
+            this.user_models[util.target.getName()].data.push(observation);
+            data = this._toJSON(user_model.data, this._getBarChartData(user_model), this._getDistributionData(user_model))
+            this._runtime.emit('TURING_DATA', data)
+            return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
+        } else {
+            return "I can't do this alone ;) Add me to your code!"
+        }
+    }
+
+    extractSample = (util, user_model, groundTruth) => {
+
+        var sample = this.TARGET_PROPERTIES[user_model['rvIndex']](util);
+
+        console.log("got sample as " + sample)
+
+        if (user_model.randomVar == COLOR) {
+            sample = Color.rgbToHex(sample)
+        }
+
+        if (!groundTruth) {
+          user_model.data.push(sample);
+        } else {
+          user_model.labels.push(sample);
+        }
+        if (user_model.rvIndex === TIME) {
+            user_model.timer.start(); // Start a new timer only for TIME
+        }
+        return sample
+      };
+
+    _getThenSendSample(util, user_model, groundTruth = false) {
+        console.log("---------->")
+        var newSample;
+        observation = this.extractSample(util, user_model, groundTruth) 
+
+        // if (!groundTruth) {
+        //     this._updateObservedData(newSample)
+        // } else {
+        //     console.log("updating prior data")
+        //     console.log(this.truth_data)
+        //     this._updateGroundTruth(newSample)
+        // }
+
+        data = this._toJSON(user_model, this.observations, this._getBarChartData(user_model), this._getDistributionData(user_model))
+        this._runtime.emit('TURING_DATA', data)
+        return  util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
+    }
+
+
+    _getDistributionData(user_model) {
+        // TODO if statement here so that you can use other things 
+        return Distributions.generateProbabilityData(user_model.distLines)
+    }
+
+    _getBarChartData(user_model) {
+        return [
+          { type: "what we expected", value: user_model.prior.barValue },
+          { type: "updated expectation", value: user_model.posterior.barValue},
+          { type: "ground truth", value: user_model.groundTruth.barValue ? user_model.groundTruth.barValue : null },
+        ];
+      }
+
+    /* Prepare a JSON of relevant data */
+    _toJSON(target, samples, bcD, pdfD) {
+        return {
+            target: user_model.modelName,
+            samples: samples, // updates the samples list
+            barData: bcD, // plots bar chart data
+            distData: pdfD, // plots normal distribution TTODO update this with other distribution types
+            distLines: user_model.distLines
+        }
+    }
+
+    /**
+     *  TBC
+     */
     startStopwatch(args, util) {
         this._onResetTimer()
     }
@@ -378,17 +650,14 @@ class Scratch3Turing {
       }
 
           
-    async buildQuery(util, url_path, method, model_type, mean = -1, variance = -1, n = -1, data = []) {
+    async buildQuery(util, url_path, method, model_type, distribution = '', mean = -1, variance = -1, n = -1, data = []) {
         const url = this.api_host + "/api/turing/v1/" + url_path;
 
         const dict = {
             "username": this.username,
             "target": util.target.getName(),
             "model_type": model_type,
-            "model_params": {
-                "mean": mean,
-                "var": variance
-            }, 
+            "distribution": distribution,
             "n": n,
             "data": data,
         }
@@ -411,13 +680,12 @@ class Scratch3Turing {
         message = this.buildQuery(util, "sample", 'POST', distribution, mean, variance, n = args.N) // logic to check number args
     }
 
-    turing_definePrior(args, util) {
-        const distribution = args.DIST // convert this
-        const mean = 1 // logic here to get appropriate mean
-        const variance = 2 // logic here to get appropriate variance
-        message = this.buildQuery(util, "defineModel", 'POST', "prior", mean, variance, n = args.N) // logic to check number args
-        return message
-    }
+    // turing_definePrior(util, distribution) {
+    //     const mean = 1 // logic here to get appropriate mean
+    //     const variance = 2 // logic here to get appropriate variance
+    //     message = this.buildQuery(util, "defineModel", 'POST', "prior", mean, variance) // logic to check number args
+    //     return message
+    // }
 
     
     turing_defineObserved(args, util) {
@@ -438,7 +706,7 @@ class Scratch3Turing {
         const distribution = args.DIST // convert this
         const mean = 1 // logic here to get appropriate mean
         const variance = 2 // logic here to get appropriate variance
-        const data = this.samples
+        const data = this.observations
         message = this.buildQuery(util, "condition", 'POST', distribution, data, n = args.N) // logic to check number args
     }
 
@@ -486,7 +754,7 @@ class Scratch3Turing {
     }
 
     showLastSample() {
-        if (this.samples.length < 1) {
+        if (this.observations.length < 1) {
             return "No samples yet..."
         } 
         return this.state.observed + ' ' + this.state.unit
@@ -587,29 +855,28 @@ class Scratch3Turing {
         
         this.lineList = updatedLineList // update line list
 
-        this.samples = []
+        this.observations = []
 
-        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
+        data = this._toJSON(this.observations, this._getBarChartData('mean'), this._getDistributionData())
         this._runtime.emit('TURING_DATA', data)
     }
 
-    clearPriorSamples(args, util) {
-        this._onClearPriorSamples
+    clearGroundTruth(args, util) {
+        this._onClearGroundTruth()
     }
 
-    _onClearPriorSamples() {
-        console.log("CLEARING PRIOR SAMPLES???")
-        this.state.prior = 0
+    _onClearGroundTruth() {
+        this.state.ground_truth_mu = 0
 
         const updatedLineList = [...this.lineList]; 
 
-        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: 0, stdv: 0};
+        updatedLineList[GROUND_TRUTH_INDEX] = { ...updatedLineList[GROUND_TRUTH_INDEX], mean: 0, stdv: 0};
         
         this.lineList = updatedLineList // update line list
 
-        this.prior_samples = []
+        this.truth_data = []
 
-        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
+        data = this._toJSON(this.observations, this._getBarChartData('mean'), this._getDistributionData())
         this._runtime.emit('TURING_DATA', data)
     }
 
@@ -633,7 +900,7 @@ class Scratch3Turing {
         this._updatePrior(prior)
         this._onClearSamples()
 
-        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
+        data = this._toJSON(this.observations, this._getBarChartData('mean'), this._getDistributionData())
         this._runtime.emit('TURING_DATA', data)
 
         return this._getAffirmation()
@@ -662,8 +929,8 @@ class Scratch3Turing {
         this._timer.start(); 
     }
 
-    buildUpPrior (args, util) {
-        console.log("Adding a sample to our prior!")
+    labelGroundTruth (args, util) {
+        console.log("Adding a sample to our ground truth!")
 
         var random_var_idx = args.RANDOM_VAR - 1
 
@@ -682,7 +949,7 @@ class Scratch3Turing {
         console.log(util.target)
 
         if (typeof util.target != undefined) {
-            this._getThenSendSample(util, buildPrior = true)
+            this._getThenSendSample(util, groundTruth = true)
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
@@ -726,38 +993,6 @@ class Scratch3Turing {
         return randomCautionaryMessage; // Output a random cautionary message
     }
 
-    extractSample = (util, buildPrior) => {
-        var sample = this.TARGET_PROPERTIES[this.state.random_var](util);
-        if (this.state.random_var == COLOR) {
-            sample = Color.rgbToHex(sample)
-        }
-        if (!buildPrior) {
-          this.samples.push(sample);
-        } else {
-          this.prior_samples.push(sample);
-        }
-        if (this.state.random_var === TIME) {
-          this._timer.start(); // Start a new timer only for TIME
-        }
-      };
-
-    _getThenSendSample(util, buildPrior = false) {
-        console.log("---------->")
-        var newSample;
-        this.extractSample(util, buildPrior) 
-
-        if (!buildPrior) {
-            this._updateObservedData(newSample)
-        } else {
-            console.log("updating prior data")
-            console.log(this.prior_samples)
-            this._updatePriorData(newSample)
-        }
-
-        data = this._toJSON(this.samples, this._getBarChartData('mean'), this._getDistributionData())
-        this._runtime.emit('TURING_DATA', data)
-    }
-
     _checkCompatibility(prior) {
         switch (RANDOM_VAR_NAMES[this.state.random_var]) {
             case 'X':
@@ -774,20 +1009,6 @@ class Scratch3Turing {
                 return true;
             default:
                 return false; 
-        }
-    }
-
-    /* Prepare a JSON of relevant data */
-    _toJSON(samples, bcD, pdfD, x, y) {
-        return {
-            state: this.state, // type of problem (ie. time taken, proportion, likelihood - affects visualisations)
-            samples: samples, // updates the samples list
-            barData: bcD, // plots bar chart data
-            distData: pdfD, // plots normal distribution
-            distLines: this.lineList,
-            spriteX: x,
-            spriteY: y,
-            mode: this.state.mode,
         }
     }
 
@@ -817,14 +1038,14 @@ class Scratch3Turing {
         }
     }
 
-    _updatePriorData() {
+    _updateGroundTruth() {
         var m, s
 
         if (this.state.mode === "COLOR") {
           m = 10
           s = 4
         } else {
-          [m, s] = this._getMeanAndVariance(this.prior_samples); // Numeric random variables here
+          [m, s] = this._getMeanAndVariance(this.truth_data); // Numeric random variables here
         }
 
         // update our observed and posterior distributions
@@ -832,7 +1053,7 @@ class Scratch3Turing {
 
         const updatedLineList = [...this.lineList]; 
 
-        updatedLineList[PRIOR_INDEX] = { ...updatedLineList[PRIOR_INDEX], mean: this.state.prior, stdv: s}; // we give the prior the same standard deviation as the observed data - TODO
+        updatedLineList[GROUND_TRUTH_INDEX] = { ...updatedLineList[GROUND_TRUTH_INDEX], mean: this.state.prior, stdv: s}; // we give the prior the same standard deviation as the observed data - TODO
         
         this.lineList = updatedLineList // update line list
       }
@@ -844,7 +1065,7 @@ class Scratch3Turing {
           m = 10
           s = 4
         } else {
-          [m, s] = this._getMeanAndVariance(this.samples); // Numeric random variables here
+          [m, s] = this._getMeanAndVariance(this.observations); // Numeric random variables here
         }
 
         console.log("OBSERVED SAMPLES!")
@@ -909,18 +1130,6 @@ class Scratch3Turing {
           }
         this.lineList.push(newCurve)
     }
-
-    _getDistributionData() {
-        return Distributions.generateProbabilityData(this.lineList)
-    }
-
-    _getBarChartData(param) {
-        return [
-            { type: "what we expected", value: this.state.prior},
-            { type: "what we got", value: this.state.observed}, // this.lineList[OBSERVED_INDEX][param] 
-            // { type: "posterior", value: this.state.posterior},
-            ];
-    }
 }
 module.exports = Scratch3Turing;
 
@@ -930,44 +1139,44 @@ module.exports = Scratch3Turing;
         //     console.log(color)
         //     newSample = Color.rgbToHex(color)
         //     if (!buildPrior) {
-        //         this.samples.push(newSample)
+        //         this.observations.push(newSample)
         //     } else {
-        //         this.prior_samples.push(newSample)
+        //         this.truth_data.push(newSample)
         //     }
         // } else if (this.state.random_var == TIME) {
         //     newSample = this._timer.timeElapsed() / 1000
         //     if (!buildPrior) {
-        //         this.samples.push(newSample)
+        //         this.observations.push(newSample)
         //     } else {
-        //         this.prior_samples.push(newSample)
+        //         this.truth_data.push(newSample)
         //     }
         //     this._timer.start(); // start a new timer
 
         // } else if (this.state.random_var == SIZE) {
 
         //     if (!buildPrior) {
-        //         this.samples.push(util.target.size)
+        //         this.observations.push(util.target.size)
         //     } else {
-        //         this.prior_samples.push(util.target.size)
+        //         this.truth_data.push(util.target.size)
         //     }
 
         // } else if (this.state.random_var == X) {
             
         //     if (!buildPrior) {
-        //         this.samples.push(util.target.x)
+        //         this.observations.push(util.target.x)
         //     } else {
-        //         this.prior_samples.push(util.target.x)
+        //         this.truth_data.push(util.target.x)
         //     }
         // } else if (this.state.random_var == Y) {
             
         //     if (!buildPrior) {
-        //         this.samples.push(util.target.y)
+        //         this.observations.push(util.target.y)
         //     } else {
-        //         this.prior_samples.push(util.target.y)
+        //         this.truth_data.push(util.target.y)
         //     }
 
-        //     this.samples.push(util.target.y)
+        //     this.observations.push(util.target.y)
 
         // } else if (this.state.random_var == LOUDNESS) {
-        //     this.samples.push(10) // TTODO implement this
+        //     this.observations.push(10) // TTODO implement this
         // }

@@ -129,6 +129,10 @@ const TuringVizPanel = props => (
                 </LineChart>
                 </Box>
                 </Box>
+                <button
+                    className={styles.mapOptionsButton}
+                    onClick={props.onCoords}
+                >Get posterior from Turing (10000 samples)</button>
                 </Box>
       </Box>
 );
