@@ -351,6 +351,15 @@ class Scratch3Turing {
                         }
                     }
                 },
+                {
+                    opcode: 'labelGroundTruth',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.labelGroundTruth',
+                        default:  'label ground truth',
+                        description: 'turing.labelGroundTruth'
+                    }),
+                },
                 // {
                 //     opcode: 'setPrior',
                 //     blockType: BlockType.COMMAND,
@@ -412,6 +421,15 @@ class Scratch3Turing {
                         }
                     }
                 },
+                {
+                    opcode: 'viewModel',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.viewModel',
+                        default:  'model',
+                        description: 'turing.viewModel' 
+                    })
+                }
                 // {
                 //     opcode: 'startStopwatch',
                 //     blockType: BlockType.COMMAND,
@@ -469,6 +487,70 @@ class Scratch3Turing {
         };
     }
 
+    // Function to calculate the probability density function (PDF) of a normal distribution
+    normalPDF(x, mean, stdDev) {
+        const constant = 1 / (stdDev * Math.sqrt(2 * Math.PI));
+        const exponent = Math.exp(-Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2)));
+        return constant * exponent;
+    }
+
+    createPoissonCurveData(samples) {
+         // Choose the maximum number of events to display (can be adjusted based on data)
+        const maxEvents = Math.ceil(Math.max(...samples)) + 2;
+
+        // Generate Poisson probability data
+        const poissonData = [];
+        for (let i = 0; i <= maxEvents; i++) {
+            const probability = Math.exp(-lambda) * Math.pow(lambda, i) / factorial(i);
+            poissonData.push({ x: i, y: probability });
+        }
+
+        // Function to calculate factorial (used for Poisson probability)
+        function factorial(n) {
+            return n === 0 ? 1 : n * factorial(n - 1);
+        }
+        return poissonData
+    }
+
+    getDistributionData(user_model) {
+        const modelTypes = ["prior", "posterior"]
+        var plotData = {}
+
+        for (const modelType of modelTypes) {
+            if (user_model[modelType].data != null) {
+                plotData[modelType] = user_model[modelType.data]  // just use raw samples for now
+                }
+            }
+        // Choose number of bins for the histogram
+        return plotData
+    }
+
+
+
+    // Function to create histogram data for plotting
+    createHistogramData(samples, binCount) {
+        console.log("iterating through:")
+        console.log(samples)
+
+        const min = Math.min(...samples);
+        const max = Math.max(...samples);
+        const binWidth = (max - min) / binCount;
+        
+        const histogram = [];
+        for (let i = 0; i < binCount; i++) {
+        const binStart = min + i * binWidth;
+        const binEnd = binStart + binWidth;
+        let count = 0;
+        for (const sample of samples) {
+            if (sample >= binStart && sample < binEnd) {
+            count++;
+            }
+        }
+        histogram.push({ x: binStart + binWidth / 2, count });
+        }
+        return histogram;
+    }
+
     defineModel(args, util) {
         var random_var_idx = args.RANDOM_VAR - 1
         var modelName = args.NAME
@@ -476,7 +558,17 @@ class Scratch3Turing {
         return util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
     }
 
-    defineTargetModel(util, rv, modelName) {
+    viewModel(args, util) {
+
+        if (typeof this.user_models[util.target.getName()] != undefined) {
+            var user_model = this.user_models[util.target.getName()]
+            return JSON.stringify({"Model Name": user_model.modelName, "Type": user_model.modelType, "Prior": user_model.prior, "Posterior": user_model.posterior}, null, 2)
+        } else {
+            return "No model found."
+        }
+    }
+
+    defineTargetModel(util, rv, modelName, modelType) {
         this.state.type = RANDOM_VAR_NAMES[rv]
 
         this.user_models[util.target.getName()] = {
@@ -508,6 +600,7 @@ class Scratch3Turing {
                     defined: false
                 },
                 modelName: modelName,
+                modelType: modelType,
                 randomVar: RANDOM_VAR_NAMES[rv], 
                 rvIndex: rv, 
                 unit: UNITS[rv],  
@@ -525,17 +618,23 @@ class Scratch3Turing {
         if (this.user_models[util.target.getName()] == null) {
             return "No model found."
         }
-
         // emit loading screen ask
-        message = this.turing_definePrior(util, dist) 
+
+        var message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist).then(response => 
+                this.updateInternals(this.user_models[util.target.getName()], response, ["prior"], distribution = dist)); // unpacks the new data using the turing samples
+        console.log(this.user_models[util.target.getName()])
+
         // close loading screen
         return message
-      //  return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
+        // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
     }
 
-    async turing_definePrior(util, dist) {
-        message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist) // logic to check number args
-        return message
+    parseResponse(response) {
+        const responseJSON = JSON.parse(JSON.parse(response))
+        summary = responseJSON["summary"]
+        chain = responseJSON["chain"]
+        data = chain["data"]
+        return {'data': data, 'chain': chain, 'summary': summary}
     }
 
     async takeSampleFromSprite (args, util) {
@@ -554,7 +653,7 @@ class Scratch3Turing {
             user_model = this.user_models[util.target.getName()]
             message = this._getThenSendSample(util, user_model)
             this.conditionOnPrior(util, user_model)
-                    .then(response => this.updateInternals(user_model, response, "posterior"));            
+                    .then(response => this.updateInternals(user_model, response, ["posterior"]));            
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
@@ -568,22 +667,28 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, model_type) {
+    updateInternals(user_model, response, model_type, keys, distribution = null) {
         console.log("Internals:")
-        responseJSON = JSON.parse(JSON.parse(response))
-        summary = responseJSON["summary"]
-        chain = responseJSON["chain"]
-        data = chain["data"]
-        user_model[model_type]['data'] = data
-        user_model[model_type]['params'] = summary["parameters"]
-        user_model[model_type]['mean'] = summary["mean"]
-        user_model[model_type]['stdv'] = summary["stdv"]
+        dict = this.parseResponse(response)
+
+        if (distribution != null) {
+            user_model[model_type]['distribution'] = distribution 
+        }
+        user_model[model_type]['data'] = dict['data']
+        user_model[model_type]['params'] = dict['summary']["parameters"]
+        user_model[model_type]['mean'] = dict['summary']["mean"]
+        user_model[model_type]['stdv'] = dict['summary']["stdv"]
         user_model[model_type]['defined'] = true
 
-        // data = this._toJSON(user_model.data, this._getBarChartData(user_model), this._getDistributionData(user_model))
-        // this._runtime.emit('TURING_DATA', data) TODO get this data as probabilities and represent in the GUI
+        data = this._toJSON(user_model, data, this.getDummyBar(user_model), this.distributionData(user_model), keys)
+        this._runtime.emit('TURING_DATA', data) // ODO get this data as probabilities and represent in the GUI
     }
 
+    distributionData(user_model) {
+        return [{type: "prior", value: user_model.prior.data}, {type: "posterior", value: user_model.posterior.data}]
+    }
+
+    // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
 
     takeSampleAsNumber (args, util) {
         if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
@@ -597,7 +702,7 @@ class Scratch3Turing {
             this.user_models[util.target.getName()].data.push(observation);
             this.conditionOnPrior(util, user_model) // updates posterior
 
-            data = this._toJSON(user_model.data, this._getBarChartData(user_model), this._getDistributionData(user_model))
+            data = this._toJSON(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
             this._runtime.emit('TURING_DATA', data)
             return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
         } else {
@@ -632,7 +737,7 @@ class Scratch3Turing {
         observation = this.extractSample(util, user_model, groundTruth) 
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
-        data = this._toJSON(user_model, this.observations, this._getBarChartData(user_model), this._getDistributionData(user_model))
+        data = this._toJSON(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
         this._runtime.emit('TURING_DATA', data)
         return  util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
     }
@@ -650,6 +755,15 @@ class Scratch3Turing {
         ];
       }
 
+    getDummyBar (user_model) {
+        return [
+                {
+                    type: "something", value: 10,
+                    type: "else", value: 2
+                }
+            ]
+    }
+
     async conditionOnPrior(util, user_model) {
         const newData = user_model['data']
         message = this.buildQuery(util, "condition", 'POST', distribution = distribution, data = newData, n = 100) // logic to check number args
@@ -657,16 +771,46 @@ class Scratch3Turing {
         console.log(message)
         return message
     }
-
     /* Prepare a JSON of relevant data */
-    _toJSON(target, samples, bcD, pdfD) {
+
+    _toJSON(user_model, data, barData, distData, keys) {
         return {
             target: user_model.modelName,
-            samples: samples, // updates the samples list
-            barData: bcD, // plots bar chart data
-            distData: pdfD, // plots normal distribution TTODO update this with other distribution types
+            user_model: user_model,
+            model_type_keys: keys,
+            samples: data, // updates the samples list
+            barData: barData, // plots bar chart data
+            distData: distData, // plots normal distribution TTODO update this with other distribution types
             distLines: user_model.distLines
         }
+    }
+
+    async buildQuery(util, url_path, method, model_type, distribution = '', n='', data = []) {
+        const url = this.api_host + "/api/turing/v1/" + url_path;
+
+        const dict = {
+            "username": this.username,
+            "target": util.target.getName(),
+            "model_type": model_type,
+            "distribution": distribution,
+            "n": n,
+            "data": data,
+        }
+        const payload = {
+            method: method, 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };      
+        const message = await this._sendRequesttoServer(url, payload);
+        console.log("Server responded: ", message);
+        return message;
+    }
+
+
+    turing_sample(util, distribution, n) {
+        return this.buildQuery(util, "sample", 'POST', distribution, n) // logic to check number args
     }
 
     /**
@@ -691,35 +835,7 @@ class Scratch3Turing {
       }
 
           
-    async buildQuery(util, url_path, method, model_type, distribution = '', n='', data = []) {
-        const url = this.api_host + "/api/turing/v1/" + url_path;
 
-        const dict = {
-            "username": this.username,
-            "target": util.target.getName(),
-            "model_type": model_type,
-            "distribution": distribution,
-            "n": n,
-            "data": data,
-        }
-        const payload = {
-            method: method, 
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dict)
-        };      
-        const message = await this._sendRequesttoServer(url, payload);
-        console.log("Server responded: ", message);
-        return message;
-    }
-
-    turing_sample(args, util) {
-        const distribution = args.DIST // convert this
-        const mean = 1 // logic here to get appropriate mean
-        const variance = 2 // logic here to get appropriate variance
-        message = this.buildQuery(util, "sample", 'POST', distribution, mean, variance, n = args.N) // logic to check number args
-    }
 
     // turing_definePrior(util, distribution) {
     //     const mean = 1 // logic here to get appropriate mean

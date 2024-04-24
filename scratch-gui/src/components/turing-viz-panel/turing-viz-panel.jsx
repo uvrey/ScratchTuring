@@ -76,7 +76,7 @@ const TuringVizPanel = props => (
                 <Box className={styles.keyStats}>
                         <div>
                             <img src={FontType} className={styles.statsHeading} />
-                            {props.data.state.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.state.thing}</p>) : (<p className={styles.stat}>{props.data.state.type}</p>)}
+                            {props.data.user_model.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.thing}</p>) : (<p className={styles.stat}>{props.data.user_model.type}</p>)}
                         </div>
                         <div>
                         <img src={FontCurrentSample} className={styles.statsHeading} />
@@ -113,12 +113,12 @@ const TuringVizPanel = props => (
                 />
                 <YAxis allowDecimals={true} />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                {props.data.distLines.map((line) => (
+                {props.data.modelTypeKeys.map((key) => (
                     <Line
-                    key={line.id}
-                    dataKey={line.id}
+                    key={key}
+                    dataKey={key}
                     type = "monotone"
-                    stroke={line.stroke}
+                    stroke={"#de4414"}
                     dot={false}
                     isAnimationActive={true}
                     strokeWidth="1.5px"
