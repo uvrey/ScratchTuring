@@ -611,7 +611,8 @@ class Scratch3Turing {
                 targetSprite: util.target.getName(),
                 hasDistData: false,
                 modelName: modelName,
-                modelType: modelType,
+                modelType: modelType, // distribution
+                distribution: null, 
                 randomVar: RANDOM_VAR_NAMES[rv], 
                 rvIndex: rv, 
                 unit: UNITS[rv],  
@@ -680,13 +681,16 @@ class Scratch3Turing {
         dict = this.parseResponse(response)
 
         if (distribution != null) {
-            user_model.models[modelType]['distribution'] = distribution 
+            user_model['distribution'] = distribution 
         }
+
+        console.log("Updating internals...")
+        console.log(dict['summary'])
 
         user_model.models[modelType]['data'] = dict['data'][0]
         user_model.models[modelType]['params'] = dict['summary']["parameters"]
         user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
-        user_model.models[modelType]['stdv'] = dict['summary']["stdv"]
+        user_model.models[modelType]['stdv'] = dict['summary']["std"][1]
         user_model.models[modelType]['defined'] = true
         user_model['hasDistData'] = true
 
@@ -706,25 +710,16 @@ class Scratch3Turing {
         if (names.length !== valuesLists.length) {
           throw new Error("Number of names must match the number of value lists");
         }
-        
         const plotData = []
-
-        for (let i = 0; i < valuesLists.length; i++) {
-          for (let i = 0; i < valuesLists[i].length; i++) {
-            for (const name in names) {
-                const dataPoint = {};
-                dataPoint[name] = valuesLists[i];
-                dataPoint[name] = valuesLists[i];
-            }
+        for (let i = 0; i < valuesLists[0].length; i++) {
+            const dataPoint = {};
+            dataPoint['prior'] = valuesLists[0][i];
             plotData.push(dataPoint);
         }
-        console.log("RETURINING FORMATTED PLOT??")
-        console.log(plotData)
         return data;
-      }
-      
-    // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
+    }
 
+    // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
     takeSampleAsNumber (args, util) {
         if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
             return "The observation must be a number";
@@ -780,9 +775,26 @@ class Scratch3Turing {
         return  util.target.getName() + " took sample " + observation + this.user_models[util.target.getName()]['unit']
     }
 
+    _getDistLines (user_model) {
+        distLines = []
+        for (const model in user_model.models) {
+            dss = {}
+            dss.id = model
+            dss.mean = user_model.models[model].mean
+            dss.stdv = user_model.models[model].stdv
+            distLines.push(dss)
+        }
+        return distLines
+    }
+
     _getDistributionData(user_model) {
         // TODO if statement here so that you can use other things 
-        return Distributions.generateProbabilityData(user_model.distLines)
+        console.log(user_model)
+        if (user_model.distribution != null) { // TTODO add compatibility for other distributions
+            // console.log("getting dist data for ....")
+            // console.log(user_model.distribution)
+            return Distributions.generateProbabilityData(this._getDistLines(user_model))
+        }
     }
 
     _getBarChartData(user_model) {
@@ -837,7 +849,7 @@ class Scratch3Turing {
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list
                 barData: this._getBarChartData(user_model), // plots bar chart data
-                distData:this.distributionData(user_model), // plots normal distribution TTODO update this with other distribution types
+                distData:this._getDistributionData(user_model), // plots normal distribution TTODO update this with other distribution types
                 distLines: user_model.distLines
             }
             this.visualisationData[user_model.targetSprite] = newJSON

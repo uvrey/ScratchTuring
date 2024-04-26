@@ -70,6 +70,8 @@ const generateProbabilityData = (lines) => {
     });
   });
 
+  console.log("????????????probability dataa? ")
+  console.log(data)
   return data;
 };
 
