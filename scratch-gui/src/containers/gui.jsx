@@ -187,7 +187,7 @@ const mapDispatchToProps = dispatch => ({
     onActivateTuringControlPanel: () => dispatch(activateTab(TURING_TAB_INDEX)),
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
-    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal())
+    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
 });
 
 const ConnectedGUI = injectIntl(connect(

@@ -73,7 +73,6 @@ const TuringVizPanel = props => (
               
                 <img src={FontDashboard} className={styles.dashboard} />
 
-
                 <h1>{props.data.user_model.targetSprite}</h1>
                 <h1>{props.data.user_model.modelName}</h1>
 
@@ -122,6 +121,7 @@ const TuringVizPanel = props => (
                 />
                 <YAxis allowDecimals={true} />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+
                 {props.data.activeDists.map((key) => (
                     <Line
                     key={key}

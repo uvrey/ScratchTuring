@@ -12,11 +12,9 @@ class SortableAsset extends React.Component {
     }
     componentDidMount () {
         this.props.onAddSortable(this.ref);
-        // console.log("adding sortable - TTODO")
     }
     componentWillUnmount () {
         this.props.onRemoveSortable(this.ref);
-        // console.log("adding sortable - TTODO")
     }
     setRef (ref) {
         this.ref = ref;
@@ -40,8 +38,8 @@ SortableAsset.propTypes = {
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
     index: PropTypes.number.isRequired,
-    onAddSortable: PropTypes.func,
-    onRemoveSortable: PropTypes.func
+    onAddSortable: PropTypes.func.isRequired,
+    onRemoveSortable: PropTypes.func.isRequired
 };
 
 export default SortableAsset;

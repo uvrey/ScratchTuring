@@ -151,6 +151,12 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.TURING_DATA_STATE, state =>
             this.sendTuringDataState(state)
         );
+        this.runtime.on(Runtime.TURING_SHOW_LOAD, () =>
+            this.emit(Runtime.TURING_SHOW_LOAD)
+        );
+        this.runtime.on(Runtime.TURING_CLOSE_LOAD, () =>
+            this.emit(Runtime.TURING_CLOSE_LOAD)
+        );
         this.runtime.on(Runtime.TURING_ACTIVE, () => 
             this.emit(Runtime.TURING_ACTIVE)
         ); 

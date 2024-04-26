@@ -297,22 +297,22 @@ class Scratch3Turing {
                 //         description: 'turing.showRandomVariable'
                 //     })
                 // },
-                // {
-                //     opcode: 'defineRandomVariableToModel',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.defineRandomVariableToModel',
-                //         default:  'Create a [RANDOM_VAR] model',
-                //         description: 'turing.defineRandomVariableToModel'
-                //     }),
-                //     arguments: {
-                //         RANDOM_VAR: {
-                //             type: ArgumentType.NUMBER,
-                //             defaultValue: 1,
-                //             menu: 'NUMERIC_MENU',
-                //         }
-                //     }
-                // },
+                {
+                    opcode: 'defineGroundTruth',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.defineGroundTruth',
+                        default:  'define ground truth as [DISTRIBUTION]',
+                        description: 'turing.defineGroundTruth'
+                    }),
+                    arguments: {
+                        DISTRIBUTION: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1,
+                            menu: 'DISTRIBUTION_MENU',
+                        }
+                    }
+                },
                 {
                     opcode: 'defineModel',
                     blockType: BlockType.COMMAND,
@@ -487,6 +487,10 @@ class Scratch3Turing {
                 },
             }
         };
+    }
+
+    defineGroundTruth (args, util) {
+        return "defined"
     }
 
     // Function to calculate the probability density function (PDF) of a normal distribution
@@ -698,8 +702,10 @@ class Scratch3Turing {
         console.log("updated internals, emitting...")
         console.log(this.visualisationData)
 
+        this._runtime.emit('TURING_SHOW_LOAD')
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+        this._runtime.emit('TURING_CLOSE_LOAD')
     }
 
     distributionData(user_model) {
@@ -733,9 +739,10 @@ class Scratch3Turing {
             this.conditionOnPrior(util, user_model) // updates posterior
 
             this.addVisualisationData(user_model, 'posterior')
+            this._runtime.emit('TURING_SHOW_LOAD')
             this._runtime.emit('TURING_DATA', this.visualisationData)
             this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-
+            this._runtime.emit('TURING_CLOSE_LOAD')
             return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
         } else {
             return "I can't do this alone ;) Add me to your code!"
@@ -769,8 +776,10 @@ class Scratch3Turing {
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
         this.addVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
+        this._runtime.emit('TURING_SHOW_LOAD')
         this._runtime.emit('TURING_DATA', this.visualisationData)
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+        this._runtime.emit('TURING_CLOSE_LOAD')
 
         return  util.target.getName() + " took sample " + observation + this.user_models[util.target.getName()]['unit']
     }
@@ -804,6 +813,17 @@ class Scratch3Turing {
           { type: "ground truth", value:  user_model.models.groundTruth.defined ? user_model.models.groundTruth.mean : null },
         ];
       }
+
+    _getSampleSpace(user_model) {
+        label = user_model.showRandomVariable // gets first character for the labels
+        var sampleSpace = []
+        for (let s = 0; s < user_model.data.length; s++) {
+            const l = label + ' ' + (s + 1);
+            const dataPoint = { name: l, value: s };
+            sampleSpace.push(dataPoint)
+          }
+        return sampleSpace
+    }
 
     async conditionOnPrior(util, user_model) {
         const newData = user_model['data']
@@ -850,6 +870,7 @@ class Scratch3Turing {
                 samples: user_model.data, // updates the samples list
                 barData: this._getBarChartData(user_model), // plots bar chart data
                 distData:this._getDistributionData(user_model), // plots normal distribution TTODO update this with other distribution types
+                sampleSpace: this._getSampleSpace(user_model),
                 distLines: user_model.distLines
             }
             this.visualisationData[user_model.targetSprite] = newJSON

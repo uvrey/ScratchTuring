@@ -13,6 +13,7 @@ import {setTuringData, setTuringDataState, setTuringActive} from '../reducers/tu
 import {setRunningState, setTurboState, setStartedState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
+import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
 
 /*
  * Higher Order Component to manage events emitted by the VM
@@ -50,6 +51,8 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('TURING_DATA', (data) => this.handleTuringData(data));
             this.props.vm.on('TURING_DATA_STATE', (state) => this.handleTuringDataState(state));
             this.props.vm.on('TURING_ACTIVE', this.props.onTuringActive);
+            this.props.vm.on('TURING_SHOW_LOAD', () => this.handleTuringLoad());
+            this.props.vm.on('TURING_CLOSE_LOAD', this.props.onCloseTuringLoad);
             console.log("inside listener HOC")
         }
         componentDidMount () {
@@ -81,6 +84,10 @@ const vmListenerHOC = function (WrappedComponent) {
             if (this.props.shouldUpdateProjectChanged && !this.props.projectChanged) {
                 this.props.onProjectChanged();
             }
+        }
+        handleTuringLoad() {
+            console.log("we want to load this data...")
+            this.props.onShowTuringLoad();
         }
         handleTuringData (data) {
             console.log("WE GOT SOME TURING DATA!")
@@ -141,6 +148,8 @@ const vmListenerHOC = function (WrappedComponent) {
                 onProjectChanged,
                 onProjectRunStart,
                 onProjectRunStop,
+                onShowTuringLoad,
+                onCloseTuringLoad,
                 onProjectSaved,
                 onRuntimeStarted,
                 onTurboModeOff,
@@ -208,6 +217,8 @@ const vmListenerHOC = function (WrappedComponent) {
         onRuntimeStarted: () => dispatch(setStartedState(true)),
         onTurboModeOn: () => dispatch(setTurboState(true)),
         onTurboModeOff: () => dispatch(setTurboState(false)),
+        onShowTuringLoad: () => dispatch(showStandardAlert('fetchingFromTuring')),
+        onCloseTuringLoad: () => dispatch(closeAlertWithId('fetchingFromTuring')),
         onShowExtensionAlert: data => {
             dispatch(showExtensionAlert(data));
         },
