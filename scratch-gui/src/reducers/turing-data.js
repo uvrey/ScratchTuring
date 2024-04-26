@@ -4,7 +4,7 @@ const SET_DATA_STATE = 'scratch-gui/turing-data/setDataState'; // Define a type 
 
 const initialState = {
   // Build data for the Turing Control panel
-  dataIsSet: false, // TODO
+  dataIsSet: {}, // TODO
   data: {},
   turingActive: false // TODO set this to false and then trigger when extension opens
 };
@@ -28,7 +28,7 @@ const reducer = function (state, action) {
       });
     case SET_DATA_STATE:
       return Object.assign({}, state, {
-        initialState: action.dataIsSet, // Update the data with the new JSON
+        dataIsSet: action.dataIsSet, // Update the data with the new JSON
       });
     case SET_TURING_ACTIVE:
         return Object.assign({}, state, {
@@ -57,6 +57,7 @@ const setTuringData = function (data) {
 
 const setTuringDataState = function (state) {
   console.log("the reducer is updating the dataIsSet state... (turing data): " + state)
+  console.log(state)
   return {
     type: SET_DATA_STATE,
     dataIsSet: state // Include the data in the action

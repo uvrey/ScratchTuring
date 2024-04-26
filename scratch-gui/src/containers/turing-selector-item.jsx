@@ -157,7 +157,7 @@ TuringSelectorItem.propTypes = {
     selected: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired,
     data: PropTypes.object.isRequired,
-    sample: PropTypes.node.isRequired,
+    item: PropTypes.node.isRequired,
 };
 
 const mapStateToProps = (state, {id}) => ({

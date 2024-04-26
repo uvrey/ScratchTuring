@@ -519,11 +519,13 @@ class Scratch3Turing {
         var plotData = {}
 
         for (const modelType of modelTypes) {
-            if (user_model[modelType].data != null) {
-                plotData[modelType] = user_model[modelType.data]  // just use raw samples for now
+            if (user_model.models[modelType].data != null) {
+                plotData[modelType] = user_model.models[modelType.data]  // just use raw samples for now
                 }
             }
         // Choose number of bins for the histogram
+        console.log("distribution data??")
+        console.log(plotData)
         return plotData
     }
 
@@ -564,7 +566,10 @@ class Scratch3Turing {
 
         if (typeof this.user_models[util.target.getName()] != undefined) {
             var user_model = this.user_models[util.target.getName()]
-            return JSON.stringify({"Model Name": user_model.modelName, "Type": user_model.modelType, "Prior": user_model.prior, "Posterior": user_model.posterior}, null, 2)
+            return JSON.stringify({"Model Name": user_model.modelName, 
+            "Type": user_model.modelType, 
+            "Prior": user_model.models.prior, 
+            "Posterior": user_model.models.posterior}, null, 2)
         } else {
             return "No model found."
         }
@@ -577,34 +582,34 @@ class Scratch3Turing {
         console.log(util.target.getName())
 
         this.user_models[util.target.getName()] = {
-                prior: {
-                    model: null,
-                    params: null,
-                    barValue: null,
-                    data: null,
-                    mean: null,
-                    stdv: null,
-                    defined: false
-                },
-                posterior: {
-                    model: null,
-                    params: null,
-                    barValue: null,
-                    data: null,
-                    mean: null,
-                    stdv: null,
-                    defined: false
-                },
-                groundTruth: {
-                    model: null,
-                    params: null,
-                    barValue: null,
-                    data: null,
-                    mean: null,
-                    stdv: null,
-                    defined: false
+                models: {
+                    prior: {
+                        params: null,
+                        // barValue: null,
+                        data: null,
+                        mean: null,
+                        stdv: null,
+                        defined: false
+                    },
+                    posterior: {
+                        params: null,
+                        // barValue: null,
+                        data: null,
+                        mean: null,
+                        stdv: null,
+                        defined: false
+                    },
+                    groundTruth: {
+                        params: null,
+                        // barValue: null,
+                        data: null,
+                        mean: null,
+                        stdv: null,
+                        defined: false
+                    },
                 },
                 targetSprite: util.target.getName(),
+                hasDistData: false,
                 modelName: modelName,
                 modelType: modelType,
                 randomVar: RANDOM_VAR_NAMES[rv], 
@@ -627,9 +632,7 @@ class Scratch3Turing {
         // emit loading screen ask
 
         var message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist).then(response => 
-                this.updateInternals(this.user_models[util.target.getName()], response, ["prior"], distribution = dist)); // unpacks the new data using the turing samples
-        console.log(this.user_models[util.target.getName()])
-
+                this.updateInternals(this.user_models[util.target.getName()], response, 'prior', ['prior'], distribution = dist)); // unpacks the new data using the turing samples
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -659,7 +662,7 @@ class Scratch3Turing {
             user_model = this.user_models[util.target.getName()]
             message = this._getThenSendSample(util, user_model)
             this.conditionOnPrior(util, user_model)
-                    .then(response => this.updateInternals(user_model, response, ["posterior"]));            
+                    .then(response => this.updateInternals(user_model, response, 'posterior', ['posterior']));            
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
@@ -673,29 +676,53 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, model_type, keys, distribution = null) {
+    updateInternals(user_model, response, modelType, keys, distribution = null) {
         dict = this.parseResponse(response)
 
         if (distribution != null) {
-            user_model[model_type]['distribution'] = distribution 
+            user_model.models[modelType]['distribution'] = distribution 
         }
-        user_model[model_type]['data'] = dict['data']
-        user_model[model_type]['params'] = dict['summary']["parameters"]
-        user_model[model_type]['mean'] = dict['summary']["mean"]
-        user_model[model_type]['stdv'] = dict['summary']["stdv"]
-        user_model[model_type]['defined'] = true
 
+        user_model.models[modelType]['data'] = dict['data'][0]
+        user_model.models[modelType]['params'] = dict['summary']["parameters"]
+        user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
+        user_model.models[modelType]['stdv'] = dict['summary']["stdv"]
+        user_model.models[modelType]['defined'] = true
+        user_model['hasDistData'] = true
 
-        this.addVisualisationData(user_model, data, this.getDummyBar(user_model), this.distributionData(user_model), keys)
+        this.addVisualisationData(user_model, modelType)
         console.log("updated internals, emitting...")
         console.log(this.visualisationData)
+
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
     }
 
     distributionData(user_model) {
-        return [{type: "prior", value: user_model.prior.data}, {type: "posterior", value: user_model.posterior.data}]
+        return this.formatChartData(['prior', 'posterior'], [user_model.models.prior.data, user_model.models.posterior.data])
     }
 
+    formatChartData(names, valuesLists) {      
+        if (names.length !== valuesLists.length) {
+          throw new Error("Number of names must match the number of value lists");
+        }
+        
+        const plotData = []
+
+        for (let i = 0; i < valuesLists.length; i++) {
+          for (let i = 0; i < valuesLists[i].length; i++) {
+            for (const name in names) {
+                const dataPoint = {};
+                dataPoint[name] = valuesLists[i];
+                dataPoint[name] = valuesLists[i];
+            }
+            plotData.push(dataPoint);
+        }
+        console.log("RETURINING FORMATTED PLOT??")
+        console.log(plotData)
+        return data;
+      }
+      
     // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
 
     takeSampleAsNumber (args, util) {
@@ -710,8 +737,10 @@ class Scratch3Turing {
             this.user_models[util.target.getName()].data.push(observation);
             this.conditionOnPrior(util, user_model) // updates posterior
 
-            this.addVisualisationData(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
+            this.addVisualisationData(user_model, 'posterior')
             this._runtime.emit('TURING_DATA', this.visualisationData)
+            this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+
             return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
         } else {
             return "I can't do this alone ;) Add me to your code!"
@@ -744,9 +773,11 @@ class Scratch3Turing {
         observation = this.extractSample(util, user_model, groundTruth) 
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
-        this.addVisualisationData(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
+        this.addVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
         this._runtime.emit('TURING_DATA', this.visualisationData)
-        return  util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+
+        return  util.target.getName() + " took sample " + observation + this.user_models[util.target.getName()]['unit']
     }
 
     _getDistributionData(user_model) {
@@ -756,20 +787,11 @@ class Scratch3Turing {
 
     _getBarChartData(user_model) {
         return [
-          { type: "what we expected", value: user_model.prior.barValue },
-          { type: "updated expectation", value: user_model.posterior.barValue},
-          { type: "ground truth", value: user_model.groundTruth.barValue ? user_model.groundTruth.barValue : null },
+          { type: "prior", value: user_model.models.prior.defined ? user_model.models.prior.mean : null },
+          { type: "posterior", value: user_model.models.posterior.defined ? user_model.models.posterior.mean : null },
+          { type: "ground truth", value:  user_model.models.groundTruth.defined ? user_model.models.groundTruth.mean : null },
         ];
       }
-
-    getDummyBar (user_model) {
-        return [
-                {
-                    type: "something", value: 10,
-                    type: "else", value: 2
-                }
-            ]
-    }
 
     async conditionOnPrior(util, user_model) {
         const newData = user_model['data']
@@ -779,18 +801,49 @@ class Scratch3Turing {
         return message
     }
 
-    /* Prepare a JSON of relevant data */
-    addVisualisationData(user_model, data, barData, distData, keys) {
-        newJSON = {
-            modelName: user_model.modelName,
-            user_model: user_model,
-            modelTypeKeys: keys,
-            samples: data, // updates the samples list
-            barData: barData, // plots bar chart data
-            distData: distData, // plots normal distribution TTODO update this with other distribution types
-            distLines: user_model.distLines
+    getActiveDists(models) {
+        var defined = []
+        for (const model in models) {
+            if (models[model].defined) {
+                defined.push(model)
+            }
         }
-        this.visualisationData[user_model.targetSprite] = newJSON
+        return defined
+    }
+
+    getTargetsWithDistsAsDict() {        
+        var defined = {}
+        for (const user_model in this.user_models) {
+            console.log("do we have a user model yet?")
+            console.log(user_model)
+
+            if ( this.user_models[user_model].hasDistData) {
+                defined[this.user_models[user_model].targetSprite] = true
+            } else {
+                defined[this.user_models[user_model].targetSprite] = false
+            }
+        }
+        console.log("sending this to be our new sprite data states:")
+        console.log(defined)
+        return defined
+    }
+
+    /* Prepare a JSON of relevant data */
+    addVisualisationData(user_model, type) {
+        if (type != 'observed') {
+            newJSON = {
+                modelName: user_model.modelName,
+                activeDists: this.getActiveDists(user_model.models),
+                user_model: user_model,
+                samples: user_model.data, // updates the samples list
+                barData: this._getBarChartData(user_model), // plots bar chart data
+                distData:this.distributionData(user_model), // plots normal distribution TTODO update this with other distribution types
+                distLines: user_model.distLines
+            }
+            this.visualisationData[user_model.targetSprite] = newJSON
+        } else {
+            console.log("taking an observation ... how to add it to the visualisation?")
+        }
     }
 
     async buildQuery(util, url_path, method, model_type, distribution = '', n='', data = []) {
@@ -1020,7 +1073,7 @@ class Scratch3Turing {
 
         this.observations = []
 
-        this.addVisualisationData(this.observations, this._getBarChartData('mean'), this.getDistributionData())
+        this.addVisualisationData(this.observations) // TTODO BUG add keys needed
         this._runtime.emit('TURING_DATA', this.visualisationData)
     }
 
@@ -1039,8 +1092,9 @@ class Scratch3Turing {
 
         this.truth_data = []
 
-        this.addVisualisationData(this.observations, this._getBarChartData('mean'), this.getDistributionData())
+        this.addVisualisationData(this.observations, 'observed')
         this._runtime.emit('TURING_DATA', this.visualisationData)
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
     }
 
     setPrior(args, util) {
@@ -1063,12 +1117,13 @@ class Scratch3Turing {
         this._updatePrior(prior)
         this._onClearSamples()
 
-        this.addVisualisationData(this.observations, this._getBarChartData('mean'), this.getDistributionData())
+        this.addVisualisationData(this.observations, 'prior')
 
         console.log("emitting ")
         console.log(this.visualisationData)
-        this._runtime.emit('TURING_DATA', this.visualisationData)
 
+        this._runtime.emit('TURING_DATA', this.visualisationData)
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         return this._getAffirmation()
     }
 

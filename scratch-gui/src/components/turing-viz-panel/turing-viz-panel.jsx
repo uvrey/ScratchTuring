@@ -73,21 +73,26 @@ const TuringVizPanel = props => (
               
                 <img src={FontDashboard} className={styles.dashboard} />
 
+
+                <h1>{props.data.user_model.targetSprite}</h1>
+                <h1>{props.data.user_model.modelName}</h1>
+
                 {props.dataIsSet ? (
-                          <Box className={styles.keyStats}>
-                          <div>
-                              <img src={FontType} className={styles.statsHeading} />
-                              {props.data.user_model.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.thing}</p>) : (<p className={styles.stat}>{props.data.user_model.type}</p>)}
-                          </div>
-                          <div>
-                          <img src={FontCurrentSample} className={styles.statsHeading} />
-                            <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.state.unit}</p>
-                          </div>
-                          <div>
-                          <img src={FontNumSamples} className={styles.statsHeading} />
-                            <p className={styles.stat}>{props.data.samples.length}</p>
-                          </div>
-                          </Box>      
+                  // <div>data is set</div>
+                  <Box className={styles.keyStats}>
+                  <div>
+                      <img src={FontType} className={styles.statsHeading} />
+                      {props.data.user_model.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.modelName}</p>) : (<p className={styles.stat}>{props.data.user_model.type}</p>)}
+                  </div>
+                  <div>
+                  <img src={FontCurrentSample} className={styles.statsHeading} />
+                    <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.user_model.unit}</p>
+                  </div>
+                  <div>
+                  <img src={FontNumSamples} className={styles.statsHeading} />
+                    <p className={styles.stat}>{props.data.samples.length}</p>
+                  </div>
+                  </Box>    
                 ): (null)}
 
                 <Box className={styles.dataRow}>
@@ -100,11 +105,14 @@ const TuringVizPanel = props => (
                   <XAxis dataKey="type" />
                   <Tooltip content={<CustomTooltip/>}/>
                   <YAxis />
-                  </BarChart>) : (null)}
+                  </BarChart>) 
+                  : (null)}
                 </Box>
 
                 <Box className={styles.dataCol}>
                 <img src={FontDist} className={styles.visHeading} />
+                {console.log("We want to potentially plot this stuff...")}
+                {console.log(props.data.distData)}
                 {props.dataIsSet ? (
                 <LineChart width={600} height={300} data={props.data.distData}>
                 <XAxis
@@ -114,7 +122,7 @@ const TuringVizPanel = props => (
                 />
                 <YAxis allowDecimals={true} />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                {props.data.modelTypeKeys.map((key) => (
+                {props.data.activeDists.map((key) => (
                     <Line
                     key={key}
                     dataKey={key}

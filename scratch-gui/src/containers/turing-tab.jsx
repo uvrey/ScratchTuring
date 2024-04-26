@@ -85,6 +85,29 @@ class TuringTab extends React.Component {
         this.setState({selectedSampleIndex: Math.max(props.samples.length - 1, 0)});
     }
 
+    getDataForTarget = (targetName) => {
+        console.log("trying to get data for a target " + this.props.vm.editingTarget.getName())
+        if (this.props.dataIsSet[targetName]) { // TODO we need to set data FOR A TARGET, not for the GUI in general
+            var targetData = this.props.data[this.props.vm.editingTarget.getName()]
+            console.log("returning: ")
+            console.log(targetData)
+            return targetData
+        } else {
+            return {}
+        }
+    }
+
+    getSamplesForTarget = (targetName) => {
+        if (this.props.dataIsSet[targetName]) {
+            var targetData = this.getDataForTarget()
+            console.log("potentially sortable items (ie samples) are...")
+            console.log(targetData.samples)
+            return targetData['samples']
+        } else {
+            return []
+        }
+    }
+
     render () {
         const {
             dispatchUpdateRestore, // eslint-disable-line no-unused-vars
@@ -103,39 +126,14 @@ class TuringTab extends React.Component {
 
         console.log("inside turing tab, editing target name is: " + targetName)
 
-        const sounds = sprite.sounds ? sprite.sounds.map(sound => (
-            {
-                url: isRtl ? soundIconRtl : soundIcon,
-                name: sound.name,
-                details: (sound.sampleCount / sound.rate).toFixed(2),
-                dragPayload: sound
-            }
-        )) : [];
-
-        const getDataForTarget = (targetName, props, dataIsSet) => {
-            if (dataIsSet) {
-                var targetData = props.data[targetName]
-                console.log("Target data:")
-                console.log(targetData)
-                return targetData
-            } else {
-                return {}
-            }
-        }
-
-        const getSamplesForTarget = (targetName, props, dataIsSet) => {
-
-            if (dataIsSet) {
-                console.log("received:")
-                console.log(props.data[targetName])
-                var samplesData = props.data[targetName]['samples']
-                console.log("Target samples:")
-                console.log(samplesData)
-                return samplesData
-            } else {
-                return []
-            }
-        }
+        // const sounds = sprite.sounds ? sprite.sounds.map(sound => (
+        //     {
+        //         url: isRtl ? soundIconRtl : soundIcon,
+        //         name: sound.name,
+        //         details: (sound.sampleCount / sound.rate).toFixed(2),
+        //         dragPayload: sound
+        //     }
+        // )) : [];
 
         const messages = defineMessages({
             fileUploadSample: {
@@ -165,18 +163,18 @@ class TuringTab extends React.Component {
                     dragType={DragConstants.SAMPLE}
                     selectedSampleIndex={this.state.selectedSampleIndex}
                     onDeleteClick={this.handleDeleteSample}
-                    samples={getSamplesForTarget(targetName, this.props, this.props.dataIsSet)}
-                    data={getDataForTarget(targetName, this.props, this.props.dataIsSet)} // gets dictionary of data for the specific target
+                    samples={this.getSamplesForTarget(targetName)} // list of observed samples
+                    data={this.getDataForTarget(targetName)} // gets dictionary of all distribution data for the specific target
                     vm={this.props.vm}
                     onItemClick={this.handleSelectSample}
-                    items={getSamplesForTarget(targetName, this.props, this.props.dataIsSet)}
-                    dataIsSet={this.props.dataIsSet}
+                    items={this.getSamplesForTarget(targetName)}
+                    dataIsSet={this.props.dataIsSet[targetName]}
                 >
                 <TuringVizPanel
                     vm={this.props.vm}
-                    data={getDataForTarget(targetName, this.props.data)}
+                    data={this.getDataForTarget(targetName)}
                     targetName={targetName}
-                    dataIsSet={this.props.dataIsSet}
+                    dataIsSet={this.props.dataIsSet[targetName]}
                 />
                 </TuringAssetPanel>
         );

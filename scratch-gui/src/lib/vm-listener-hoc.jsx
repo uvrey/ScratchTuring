@@ -48,6 +48,7 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('PERIPHERAL_CONNECTION_LOST_ERROR', this.props.onShowExtensionAlert);
             this.props.vm.on('MIC_LISTENING', this.props.onMicListeningUpdate);
             this.props.vm.on('TURING_DATA', (data) => this.handleTuringData(data));
+            this.props.vm.on('TURING_DATA_STATE', (state) => this.handleTuringDataState(state));
             this.props.vm.on('TURING_ACTIVE', this.props.onTuringActive);
             console.log("inside listener HOC")
         }
@@ -82,9 +83,11 @@ const vmListenerHOC = function (WrappedComponent) {
             }
         }
         handleTuringData (data) {
-            console.log("WE GOT SOME TURING DATA! setting states...")
+            console.log("WE GOT SOME TURING DATA!")
             this.props.onSetTuringData(data)
-            this.props.onSetTuringDataState(true)
+        }
+        handleTuringDataState (state) {
+            this.props.onSetTuringDataState(state)
         }
         handleTargetsUpdate (data) {
             if (this.props.shouldUpdateTargets) {

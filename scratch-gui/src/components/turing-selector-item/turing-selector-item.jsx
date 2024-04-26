@@ -76,7 +76,6 @@ const TuringSelectorItem = props => {
     }
 
 TuringSelectorItem.propTypes = {
-    sample: PropTypes.node,
     state: PropTypes.object,
     className: PropTypes.string,
     componentRef: PropTypes.func,

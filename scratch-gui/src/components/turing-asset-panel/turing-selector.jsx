@@ -89,9 +89,10 @@ const TuringSelector = props => {
         <Box
         className={styles.wrapper}
         componentRef={containerRef}
-    >
+        >
         <Box className={styles.listArea}>
-            {props.data.samples.map((sample, index) => (
+        <h1> SAMPLES GO HERE!!!</h1>
+            {props.samples.map((sample, index) => (                
                 <SortableAsset
                     id={sample}
                     index={isRelevantDrag ? ordering.indexOf(index) : index}
@@ -109,16 +110,16 @@ const TuringSelector = props => {
                         index={index}
                         name={sample}
                         number={index + 1}
-                        selected={index === selectedItemIndex}
+                        selected={index === selectedSampleIndex}
                         onClick={onItemClick}
                         onDeleteButtonClick={onDeleteClick}
                         data={data}
-                        sample={sample}
+                        item={sample}
                     />
                 </SortableAsset>
             ))}
         </Box>
-        {newButtonSection}
+        {/* {newButtonSection} */}
     </Box>
       ); 
 };
@@ -144,8 +145,8 @@ TuringSelector.propTypes = {
     onItemClick: PropTypes.func.isRequired,
     onRemoveSortable: PropTypes.func,
     ordering: PropTypes.arrayOf(PropTypes.number),
-    selectedItemIndex: PropTypes.number.isRequired,
-    items: PropTypes.array,
+    selectedSampleIndex: PropTypes.number.isRequired,
+    samples: PropTypes.array,
 };
 
 export default SortableHOC(TuringSelector); // make sortable at some point? TODO

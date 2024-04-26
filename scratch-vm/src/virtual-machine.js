@@ -148,6 +148,9 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.TURING_DATA, data =>
             this.sendTuringData(data)
         );
+        this.runtime.on(Runtime.TURING_DATA_STATE, state =>
+            this.sendTuringDataState(state)
+        );
         this.runtime.on(Runtime.TURING_ACTIVE, () => 
             this.emit(Runtime.TURING_ACTIVE)
         ); 
@@ -176,6 +179,10 @@ class VirtualMachine extends EventEmitter {
 
     sendTuringData (data) {
         this.emit(Runtime.TURING_DATA, data)
+    }
+
+    sendTuringDataState (state) {
+        this.emit(Runtime.TURING_DATA_STATE, state)
     }
     /**
      * Start running the VM - do this before anything else.
