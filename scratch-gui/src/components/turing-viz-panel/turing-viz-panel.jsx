@@ -73,38 +73,39 @@ const TuringVizPanel = props => (
               
                 <img src={FontDashboard} className={styles.dashboard} />
 
-                <Box className={styles.keyStats}>
-                        <div>
-                            <img src={FontType} className={styles.statsHeading} />
-                            {props.data.user_model.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.thing}</p>) : (<p className={styles.stat}>{props.data.user_model.type}</p>)}
-                        </div>
-                        <div>
-                        <img src={FontCurrentSample} className={styles.statsHeading} />
-                          <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.state.unit}</p>
-                        </div>
-                        <div>
-                        <img src={FontNumSamples} className={styles.statsHeading} />
-                          <p className={styles.stat}>{props.data.samples.length}</p>
-                        </div>
-                     
-                    {/* <b>We're interested in:</b> {props.data.state.type}<br/>
-                    <b>Current sample: </b> {props.data.samples[props.data.samples.length-1]}<br/>
-                    <b>Number of Samples:</b> {props.data.samples.length}<br/> */}
-                </Box>
+                {props.dataIsSet ? (
+                          <Box className={styles.keyStats}>
+                          <div>
+                              <img src={FontType} className={styles.statsHeading} />
+                              {props.data.user_model.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.thing}</p>) : (<p className={styles.stat}>{props.data.user_model.type}</p>)}
+                          </div>
+                          <div>
+                          <img src={FontCurrentSample} className={styles.statsHeading} />
+                            <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.state.unit}</p>
+                          </div>
+                          <div>
+                          <img src={FontNumSamples} className={styles.statsHeading} />
+                            <p className={styles.stat}>{props.data.samples.length}</p>
+                          </div>
+                          </Box>      
+                ): (null)}
 
                 <Box className={styles.dataRow}>
                 <Box className={styles.dataCol}>
                 <img src={FontBarChart} className={styles.visHeading} />
-                <BarChart width={500} height={300} data={props.data.barData} className={styles.chartElement}>
-                    <Bar key={props.data.barData.type} fill="#855CD6" isAnimationActive={true} dataKey="value" barsize={10}/>
-                <XAxis dataKey="type" />
-                <Tooltip content={<CustomTooltip/>}/>
-                <YAxis />
-                </BarChart>
+
+                {props.dataIsSet ? (
+                  <BarChart width={500} height={300} data={props.data.barData} className={styles.chartElement}>
+                      <Bar key={props.data.barData.type} fill="#855CD6" isAnimationActive={true} dataKey="value" barsize={10}/>
+                  <XAxis dataKey="type" />
+                  <Tooltip content={<CustomTooltip/>}/>
+                  <YAxis />
+                  </BarChart>) : (null)}
                 </Box>
 
                 <Box className={styles.dataCol}>
                 <img src={FontDist} className={styles.visHeading} />
+                {props.dataIsSet ? (
                 <LineChart width={600} height={300} data={props.data.distData}>
                 <XAxis
                     allowDecimals={false}
@@ -127,6 +128,7 @@ const TuringVizPanel = props => (
                 <Legend />
                 <Tooltip />
                 </LineChart>
+                ) : (null)}
                 </Box>
                 </Box>
                 <button
@@ -140,6 +142,7 @@ const TuringVizPanel = props => (
 TuringVizPanel.propTypes = {
     data: PropTypes.object,
     vm: PropTypes.instanceOf(VM),
+    dataIsSet: PropTypes.bool
 };
 
 TuringVizPanel.defaultProps = {

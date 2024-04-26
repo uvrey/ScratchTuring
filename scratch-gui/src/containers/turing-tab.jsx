@@ -98,6 +98,10 @@ class TuringTab extends React.Component {
         }
 
         const sprite = vm.editingTarget.sprite;
+        const targetId = this.props.vm.editingTarget.id;
+        const targetName = this.props.vm.editingTarget.getName();
+
+        console.log("inside turing tab, editing target name is: " + targetName)
 
         const sounds = sprite.sounds ? sprite.sounds.map(sound => (
             {
@@ -107,6 +111,31 @@ class TuringTab extends React.Component {
                 dragPayload: sound
             }
         )) : [];
+
+        const getDataForTarget = (targetName, props, dataIsSet) => {
+            if (dataIsSet) {
+                var targetData = props.data[targetName]
+                console.log("Target data:")
+                console.log(targetData)
+                return targetData
+            } else {
+                return {}
+            }
+        }
+
+        const getSamplesForTarget = (targetName, props, dataIsSet) => {
+
+            if (dataIsSet) {
+                console.log("received:")
+                console.log(props.data[targetName])
+                var samplesData = props.data[targetName]['samples']
+                console.log("Target samples:")
+                console.log(samplesData)
+                return samplesData
+            } else {
+                return []
+            }
+        }
 
         const messages = defineMessages({
             fileUploadSample: {
@@ -136,15 +165,18 @@ class TuringTab extends React.Component {
                     dragType={DragConstants.SAMPLE}
                     selectedSampleIndex={this.state.selectedSampleIndex}
                     onDeleteClick={this.handleDeleteSample}
-                    samples={this.props.data.samples}
-                    data={this.props.data}
+                    samples={getSamplesForTarget(targetName, this.props, this.props.dataIsSet)}
+                    data={getDataForTarget(targetName, this.props, this.props.dataIsSet)} // gets dictionary of data for the specific target
                     vm={this.props.vm}
                     onItemClick={this.handleSelectSample}
-                    items={this.props.data.samples}
+                    items={getSamplesForTarget(targetName, this.props, this.props.dataIsSet)}
+                    dataIsSet={this.props.dataIsSet}
                 >
                 <TuringVizPanel
                     vm={this.props.vm}
-                    data={this.props.data}
+                    data={getDataForTarget(targetName, this.props.data)}
+                    targetName={targetName}
+                    dataIsSet={this.props.dataIsSet}
                 />
                 </TuringAssetPanel>
         );
@@ -162,8 +194,9 @@ TuringTab.propTypes = {
 const mapStateToProps = state => ({
     editingTarget: state.scratchGui.targets.editingTarget,
     isRtl: state.locales.isRtl,
-    data: state.scratchGui.turingData.data
-});
+    data: state.scratchGui.turingData.data,
+    dataIsSet: state.scratchGui.turingData.dataIsSet 
+}); // TTODO why is this not being changed by my emitter?
 
 const mapDispatchToProps = dispatch => ({
     onActivateCostumesTab: () => dispatch(activateTab(COSTUMES_TAB_INDEX)),

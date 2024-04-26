@@ -9,7 +9,7 @@ import {updateTargets} from '../reducers/targets';
 import {updateBlockDrag} from '../reducers/block-drag';
 import {updateMonitors} from '../reducers/monitors';
 import {setProjectChanged, setProjectUnchanged} from '../reducers/project-changed';
-import {setTuringData, setTuringActive} from '../reducers/turing-data';
+import {setTuringData, setTuringDataState, setTuringActive} from '../reducers/turing-data';
 import {setRunningState, setTurboState, setStartedState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
@@ -82,7 +82,9 @@ const vmListenerHOC = function (WrappedComponent) {
             }
         }
         handleTuringData (data) {
+            console.log("WE GOT SOME TURING DATA! setting states...")
             this.props.onSetTuringData(data)
+            this.props.onSetTuringDataState(true)
         }
         handleTargetsUpdate (data) {
             if (this.props.shouldUpdateTargets) {
@@ -207,6 +209,7 @@ const vmListenerHOC = function (WrappedComponent) {
             dispatch(showExtensionAlert(data));
         },
         onSetTuringData: data => dispatch(setTuringData(data)),
+        onSetTuringDataState: state => dispatch(setTuringDataState(state)),
         onTuringActive: () => dispatch(setTuringActive()),
         onMicListeningUpdate: listening => {
             dispatch(updateMicIndicator(listening));

@@ -97,6 +97,8 @@ class Scratch3Turing {
 
         sessionStorage.setItem("username", this.username);
 
+        this.visualisationData = {}
+       // this._runtime.emit('TURING_DATA', this.visualisationData) Potentially initialise turing data here
         // Build line list
         this.lineList = []
 
@@ -571,6 +573,9 @@ class Scratch3Turing {
     defineTargetModel(util, rv, modelName, modelType) {
         this.state.type = RANDOM_VAR_NAMES[rv]
 
+        console.log("DEFINING TARGET MODEL?")
+        console.log(util.target.getName())
+
         this.user_models[util.target.getName()] = {
                 prior: {
                     model: null,
@@ -599,6 +604,7 @@ class Scratch3Turing {
                     stdv: null,
                     defined: false
                 },
+                targetSprite: util.target.getName(),
                 modelName: modelName,
                 modelType: modelType,
                 randomVar: RANDOM_VAR_NAMES[rv], 
@@ -668,7 +674,6 @@ class Scratch3Turing {
     }
 
     updateInternals(user_model, response, model_type, keys, distribution = null) {
-        console.log("Internals:")
         dict = this.parseResponse(response)
 
         if (distribution != null) {
@@ -680,8 +685,11 @@ class Scratch3Turing {
         user_model[model_type]['stdv'] = dict['summary']["stdv"]
         user_model[model_type]['defined'] = true
 
-        data = this._toJSON(user_model, data, this.getDummyBar(user_model), this.distributionData(user_model), keys)
-        this._runtime.emit('TURING_DATA', data) // ODO get this data as probabilities and represent in the GUI
+
+        this.addVisualisationData(user_model, data, this.getDummyBar(user_model), this.distributionData(user_model), keys)
+        console.log("updated internals, emitting...")
+        console.log(this.visualisationData)
+        this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
     }
 
     distributionData(user_model) {
@@ -702,8 +710,8 @@ class Scratch3Turing {
             this.user_models[util.target.getName()].data.push(observation);
             this.conditionOnPrior(util, user_model) // updates posterior
 
-            data = this._toJSON(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
-            this._runtime.emit('TURING_DATA', data)
+            this.addVisualisationData(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
+            this._runtime.emit('TURING_DATA', this.visualisationData)
             return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
         } else {
             return "I can't do this alone ;) Add me to your code!"
@@ -711,7 +719,6 @@ class Scratch3Turing {
     }
 
     extractSample = (util, user_model, groundTruth) => {
-
         var sample = this.TARGET_PROPERTIES[user_model['rvIndex']](util);
 
         console.log("got sample as " + sample)
@@ -737,8 +744,8 @@ class Scratch3Turing {
         observation = this.extractSample(util, user_model, groundTruth) 
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
-        data = this._toJSON(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
-        this._runtime.emit('TURING_DATA', data)
+        this.addVisualisationData(user_model, user_model.data, this.getDummyBar(user_model), this.distributionData(user_model), ["posterior"])
+        this._runtime.emit('TURING_DATA', this.visualisationData)
         return  util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
     }
 
@@ -771,18 +778,19 @@ class Scratch3Turing {
         console.log(message)
         return message
     }
-    /* Prepare a JSON of relevant data */
 
-    _toJSON(user_model, data, barData, distData, keys) {
-        return {
-            target: user_model.modelName,
+    /* Prepare a JSON of relevant data */
+    addVisualisationData(user_model, data, barData, distData, keys) {
+        newJSON = {
+            modelName: user_model.modelName,
             user_model: user_model,
-            model_type_keys: keys,
+            modelTypeKeys: keys,
             samples: data, // updates the samples list
             barData: barData, // plots bar chart data
             distData: distData, // plots normal distribution TTODO update this with other distribution types
             distLines: user_model.distLines
         }
+        this.visualisationData[user_model.targetSprite] = newJSON
     }
 
     async buildQuery(util, url_path, method, model_type, distribution = '', n='', data = []) {
@@ -1012,8 +1020,8 @@ class Scratch3Turing {
 
         this.observations = []
 
-        data = this._toJSON(this.observations, this._getBarChartData('mean'), this._getDistributionData())
-        this._runtime.emit('TURING_DATA', data)
+        this.addVisualisationData(this.observations, this._getBarChartData('mean'), this.getDistributionData())
+        this._runtime.emit('TURING_DATA', this.visualisationData)
     }
 
     clearGroundTruth(args, util) {
@@ -1031,8 +1039,8 @@ class Scratch3Turing {
 
         this.truth_data = []
 
-        data = this._toJSON(this.observations, this._getBarChartData('mean'), this._getDistributionData())
-        this._runtime.emit('TURING_DATA', data)
+        this.addVisualisationData(this.observations, this._getBarChartData('mean'), this.getDistributionData())
+        this._runtime.emit('TURING_DATA', this.visualisationData)
     }
 
     setPrior(args, util) {
@@ -1055,8 +1063,11 @@ class Scratch3Turing {
         this._updatePrior(prior)
         this._onClearSamples()
 
-        data = this._toJSON(this.observations, this._getBarChartData('mean'), this._getDistributionData())
-        this._runtime.emit('TURING_DATA', data)
+        this.addVisualisationData(this.observations, this._getBarChartData('mean'), this.getDistributionData())
+
+        console.log("emitting ")
+        console.log(this.visualisationData)
+        this._runtime.emit('TURING_DATA', this.visualisationData)
 
         return this._getAffirmation()
     }
