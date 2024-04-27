@@ -38,7 +38,6 @@ const TuringSelector = props => {
         containerRef,
         dragType,
         isRtl,
-        items,
         selectedItemIndex,
         draggingIndex,
         draggingType,
@@ -112,8 +111,8 @@ const TuringSelector = props => {
                         selected={index === selectedItemIndex}
                         onClick={onItemClick}
                         onDeleteButtonClick={onDeleteClick}
-                        data={data}
-                        sample={sample}
+                        data={props.data}
+                        item={sample}
                     />
                 </SortableAsset>
             ))}
@@ -134,8 +133,8 @@ TuringSelector.propTypes = {
     draggingIndex: PropTypes.number,
     draggingType: PropTypes.oneOf(Object.keys(DragConstants)),
     isRtl: PropTypes.bool,
-    data: PropTypes.object,
-    items: PropTypes.array,
+    data: PropTypes.object.isRequired,
+    // samples: PropTypes.array,
     vm: PropTypes.instanceOf(VM),
     onAddSortable: PropTypes.func,
     onDeleteClick: PropTypes.func,
@@ -144,7 +143,8 @@ TuringSelector.propTypes = {
     onItemClick: PropTypes.func.isRequired,
     onRemoveSortable: PropTypes.func,
     ordering: PropTypes.arrayOf(PropTypes.number),
-    selectedItemIndex: PropTypes.number.isRequired
+    selectedItemIndex: PropTypes.number.isRequired,
+    items: PropTypes.array,
 };
 
 export default SortableHOC(TuringSelector); // make sortable at some point? TODO

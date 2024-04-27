@@ -56,20 +56,20 @@ const TuringSelectorItem = props => {
             <div className={styles.spriteImageOuter}>
               <div className={styles.spriteImageInner}>
               {/* Display swatch or icon */}
-              {props.data.state.type === 'COLOR' ? (
-                <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}>
+              {props.data.type === 'COLOR' ? (
+                <div className={styles.colorSwatch} style={{ backgroundColor: props.item }}>
                 </div>
               ) : (
                  <img
                  className={styles.spriteImage}
                  draggable={false}
-                 src={getIconFromType(props.data.state.type)}
+                 src={getIconFromType(props.data.type)}
                />
               )}
               </div>
             </div>
             <div className={styles.spriteInfo}>
-              <div className={styles.spriteName}>{props.sample} {props.data.state.unit}</div>
+              <div className={styles.spriteName}>{props.item} {props.data.unit}</div>
             </div>
       </ContextMenuTrigger>
         );
@@ -93,7 +93,7 @@ TuringSelectorItem.propTypes = {
     preventContextMenu: PropTypes.bool,
     selected: PropTypes.bool.isRequired,
     data: PropTypes.object.isRequired,
-    sample: PropTypes.node.isRequired,
+    item: PropTypes.node.isRequired,
 };
 
 export default TuringSelectorItem;

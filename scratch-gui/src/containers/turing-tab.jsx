@@ -49,7 +49,7 @@
 //             'handleDeleteSample',
 //             'handleNewSample',
 //         ]);
-//         this.state = {selectedSampleIndex: 0};
+//         this.state = {selectedItemIndex: 0};
 //     }
 
 //     componentWillReceiveProps (nextProps) {
@@ -59,19 +59,19 @@
 
 //         // If switching editing targets, reset the sound index
 //         if (this.props.editingTarget !== editingTarget) {
-//             this.setState({selectedSampleIndex: 0});
+//             this.setState({selectedItemIndex: 0});
 //         } 
 //     }
 
 //     handleSelectSample (sampleIndex) {
 //         console.log("Selecting sample!")
-//         this.setState({selectedSampleIndex: sampleIndex});
+//         this.setState({selectedItemIndex: sampleIndex});
 //     }
 
 //     handleDeleteSample (sampleIndex) {
 //         const restoreFun = this.props.vm.deleteSample(sampleIndex); // TODO to implement
-//         if (sampleIndex >= this.state.selectedSampleIndex) {
-//             this.setState({selectedSampleIndex: Math.max(0, sampleIndex - 1)});
+//         if (sampleIndex >= this.state.selectedItemIndex) {
+//             this.setState({selectedItemIndex: Math.max(0, sampleIndex - 1)});
 //         }
 //         this.props.dispatchUpdateRestore({restoreFun, deletedItem: 'Sample'});
 //     }
@@ -82,7 +82,7 @@
 //         }
 //         // const sprite = this.props.vm.editingTarget.sprite;
 //         const samples = props.data.samples
-//         this.setState({selectedSampleIndex: Math.max(props.samples.length - 1, 0)});
+//         this.setState({selectedItemIndex: Math.max(props.samples.length - 1, 0)});
 //     }
 
 //     render () {
@@ -138,7 +138,7 @@
 //         return (
 //                 <TuringAssetPanel
 //                     dragType={DragConstants.SAMPLE}
-//                     selectedSampleIndex={this.state.selectedSampleIndex}
+//                     selectedItemIndex={this.state.selectedItemIndex}
 //                     onDeleteClick={this.handleDeleteSample}
 //                     samples={this.getSamplesForTarget(targetName)} // list of observed samples
 //                     data={this.getDataForTarget(targetName)} // gets dictionary of all distribution data for the specific target
@@ -238,7 +238,7 @@ class TuringTab extends React.Component {
             'handleDeleteSample',
             'handleNewSample',
         ]);
-        this.state = {selectedSampleIndex: 0};
+        this.state = {selectedItemIndex: 0};
     }
 
     componentWillReceiveProps (nextProps) {
@@ -248,19 +248,19 @@ class TuringTab extends React.Component {
 
         // If switching editing targets, reset the sound index
         if (this.props.editingTarget !== editingTarget) {
-            this.setState({selectedSampleIndex: 0});
+            this.setState({selectedItemIndex: 0});
         } 
     }
 
     handleSelectSample (sampleIndex) {
         console.log("Selecting sample!")
-        this.setState({selectedSampleIndex: sampleIndex});
+        this.setState({selectedItemIndex: sampleIndex});
     }
 
     handleDeleteSample (sampleIndex) {
         const restoreFun = this.props.vm.deleteSample(sampleIndex); // TODO to implement
-        if (sampleIndex >= this.state.selectedSampleIndex) {
-            this.setState({selectedSampleIndex: Math.max(0, sampleIndex - 1)});
+        if (sampleIndex >= this.state.selectedItemIndex) {
+            this.setState({selectedItemIndex: Math.max(0, sampleIndex - 1)});
         }
         this.props.dispatchUpdateRestore({restoreFun, deletedItem: 'Sample'});
     }
@@ -271,7 +271,7 @@ class TuringTab extends React.Component {
         }
         // const sprite = this.props.vm.editingTarget.sprite;
         const samples = props.data.samples
-        this.setState({selectedSampleIndex: Math.max(props.samples.length - 1, 0)});
+        this.setState({selectedItemIndex: Math.max(props.samples.length - 1, 0)});
     }
 
     getDataForTarget = (targetName) => {
@@ -306,12 +306,12 @@ class TuringTab extends React.Component {
             // Check if dataIsSet[targetName] is true
             if (this.props.dataIsSet[targetName]) {
             {console.log("sending this data to the viz panel...")}
-            {console.log(this.props.data)}
+            {console.log(this.props.data[targetName])}
             return (
                 <TuringVizPanel
-                vm={this.props.vm} 
-                data={this.props.data[targetName]}
-                dataIsSet={this.props.dataIsSet[targetName]}
+                    vm={this.props.vm} 
+                    data={this.props.data[targetName]}
+                    dataIsSet={this.props.dataIsSet[targetName]}
                 />
             );
             } else {
@@ -320,6 +320,15 @@ class TuringTab extends React.Component {
         } else {
             // No dataIsSet property or undefined value, return null
             return null;
+        }
+    }
+
+    dataSet = (targetName) => {
+        console.log("dataset type? " + this.props.dataIsSet[targetName])
+        if (this.props.dataIsSet[targetName] === undefined) {
+            return false
+        } else {
+            return this.props.dataIsSet[targetName]
         }
     }
 
@@ -373,18 +382,35 @@ class TuringTab extends React.Component {
         return (
                 <TuringAssetPanel
                     dragType={DragConstants.SAMPLE}
-                    selectedSampleIndex={this.state.selectedSampleIndex}
+                    selectedItemIndex={this.state.selectedItemIndex}
                     onDeleteClick={this.handleDeleteSample}
-                    samples={this.getSamplesForTarget(targetName)}
-                    data={this.getDataForTarget(targetName)}
+                    items={['sample1', 'sample2']}
+                    data={{type: 'TIME', unit: 's'}}
                     vm={this.props.vm}
                     onItemClick={this.handleSelectSample}
-                    items={this.getSamplesForTarget(targetName)}
-                    dataIsSet={this.props.dataIsSet[targetName]}
+                    //items={[{name: 1},{name: 2}]}
                 >
-                {console.log("----------is data set for target" + targetName + "? " + this.props.dataIsSet[targetName])}
-                {this.getVizPanelComponent(targetName)}
+                {/* <TuringVizPanel
+                    vm={this.props.vm}
+                    data={this.props.data}
+                /> */}
                 </TuringAssetPanel>
+                // <TuringAssetPanel
+                //     dragType={DragConstants.SAMPLE}
+                //     selectedItemIndex={this.state.selectedItemIndex}
+                //     onDeleteClick={this.handleDeleteSample}
+                //     samples={this.getSamplesForTarget(targetName)}
+                //     data={this.getDataForTarget(targetName)}
+                //     vm={this.props.vm}
+                //     onItemClick={this.handleSelectSample}
+                //     items={this.getSamplesForTarget(targetName)}
+                //     dataIsSet={this.dataSet(targetName)}
+                // >
+                // {console.log("samples sent: " + this.getSamplesForTarget(targetName))}
+                // {console.log("----------is data set for target" + targetName + "? " + this.dataSet(targetName))}
+                // {console.log(this.getDataForTarget(targetName))}
+                // {this.getVizPanelComponent(targetName)}
+                // </TuringAssetPanel>
         );
     }
 }

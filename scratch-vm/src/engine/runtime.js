@@ -103,6 +103,12 @@ const ArgumentTypeMap = (() => {
         // They are more analagous to the label on a block.
         fieldType: 'field_image'
     };
+    map[ArgumentType.MODEL] = {
+        shadow: {
+            type: 'model_menu',
+            fieldName: 'MODEL'
+        }
+    };
     return map;
 })();
 

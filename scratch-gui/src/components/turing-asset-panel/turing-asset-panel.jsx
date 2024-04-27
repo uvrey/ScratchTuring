@@ -8,18 +8,18 @@ const TuringAssetPanel = props => (
     <Box className={styles.wrapper}>
         {props.dataIsSet ? 
         (<Box>
-        {/* <TuringSelector
+        <TuringSelector
             className={styles.selector}
             {...props}
-        /> */}
+        />
         <Box className={styles.detailArea}>
             {props.children}
         </Box>
         </Box>) :  (<Box>
-        {/* <TuringSelector
+        <TuringSelector
             className={styles.selector}
             {...props}
-        /> */}
+        />
          <h1>Welcome!</h1>
         </Box>) } 
     </Box>
