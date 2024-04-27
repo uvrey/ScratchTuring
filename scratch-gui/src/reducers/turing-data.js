@@ -31,9 +31,9 @@ const reducer = function (state, action) {
         dataIsSet: action.dataIsSet, // Update the data with the new JSON
       });
     case SET_TURING_ACTIVE:
-        return Object.assign({}, state, {
-          turingActive: action.turingActive, // Update the data with the new JSON
-        });
+      return Object.assign({}, state, {
+        turingActive: action.turingActive, // Update the data with the new JSON
+      });
     default:
       return state;
   }

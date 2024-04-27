@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import bindAll from 'lodash.bindall';
-import {defineMessages, intlShape, injectIntl} from 'react-intl';
+import { defineMessages, intlShape, injectIntl } from 'react-intl';
 import VM from 'scratch-vm';
 
 import TuringCarousel from './turing-carousel.jsx';
+import Box from '../components/box/box.jsx';
 import TuringAssetPanel from '../components/turing-asset-panel/turing-asset-panel.jsx';
 import TuringVizPanel from '../components/turing-viz-panel/turing-viz-panel.jsx';
 import soundIcon from '../components/asset-panel/icon--sound.svg';
@@ -21,12 +22,12 @@ import SampleEditor from './sound-editor.jsx';
 import SampleLibrary from './sound-library.jsx';
 
 import soundLibraryContent from '../lib/libraries/sounds.json';
-import {handleFileUpload, soundUpload} from '../lib/file-uploader.js';
+import { handleFileUpload, soundUpload } from '../lib/file-uploader.js';
 import errorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import DragConstants from '../lib/drag-constants';
 import downloadBlob from '../lib/download-blob';
 
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 
 import {
     closeSampleLibrary,
@@ -39,54 +40,67 @@ import {
     COSTUMES_TAB_INDEX
 } from '../reducers/editor-tab';
 
-import {setRestore} from '../reducers/restore-deletion';
-import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
+import { setRestore } from '../reducers/restore-deletion';
+import { showStandardAlert, closeAlertWithId } from '../reducers/alerts';
+import TuringCheckbox from './turing-checkbox.jsx';
 
 class TuringTab extends React.Component {
-    constructor (props) {
+    constructor(props) {
         super(props);
         bindAll(this, [
             'handleSelectSample',
             'handleDeleteSample',
             'handleNewSample',
         ]);
-        this.state = {selectedSampleIndex: 0};
+        this.state = {
+            selectedSampleIndex: 0,
+            activeModelIndex: 0, // Add activeModelIndex here
+          };
+
+        this.handleActivateDashboard = this.handleActivateDashboard.bind(this)
     }
 
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps(nextProps) {
         const {
             editingTarget
         } = nextProps;
 
         // If switching editing targets, reset the sound index
         if (this.props.editingTarget !== editingTarget) {
-            this.setState({selectedSampleIndex: 0});
-        } 
+            this.setState({ selectedSampleIndex: 0 });
+        }
     }
 
-    handleSelectSample (sampleIndex) {
+    handleSelectSample(sampleIndex) {
         console.log("Selecting sample!")
-        this.setState({selectedSampleIndex: sampleIndex});
+        this.setState({ selectedSampleIndex: sampleIndex });
     }
 
-    handleDeleteSample (sampleIndex) {
+    handleDeleteSample(sampleIndex) {
         const restoreFun = this.props.vm.deleteSample(sampleIndex); // TODO to implement
         if (sampleIndex >= this.state.selectedSampleIndex) {
-            this.setState({selectedSampleIndex: Math.max(0, sampleIndex - 1)});
+            this.setState({ selectedSampleIndex: Math.max(0, sampleIndex - 1) });
         }
-        this.props.dispatchUpdateRestore({restoreFun, deletedItem: 'Sample'});
+        this.props.dispatchUpdateRestore({ restoreFun, deletedItem: 'Sample' });
     }
 
-    handleNewSample () {
+    handleNewSample() {
         if (!this.props.vm.editingTarget) {
             return null;
         }
         // const sprite = this.props.vm.editingTarget.sprite;
         const samples = props.data.samples
-        this.setState({selectedSampleIndex: Math.max(props.samples.length - 1, 0)});
+        this.setState({ selectedSampleIndex: Math.max(props.samples.length - 1, 0) });
     }
 
-            
+
+    handleActivateDashboard(key, index) {
+        console.log("(((((((((((((((((((((((");
+        console.log("activate the dashboard for " + key + " at " + index);
+        this.setState({ activeModelIndex: index });
+    }
+
+
     getTargetDataState(targetName) {
         return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[targetName] == undefined) ? (false) : (this.props.dataIsSet[targetName]));
     }
@@ -96,8 +110,8 @@ class TuringTab extends React.Component {
     }
 
     getTargetData(targetName) {
-        return (this.props.dataIsSet == {}) ? ({user_model: {randomVar: 'NONE', unit: ''}}) : ((this.props.dataIsSet[targetName] == undefined) ? 
-        ({user_model: {randomVar: 'NONE', unit: ''}}) : (this.props.data[targetName]));
+        return (this.props.dataIsSet == {}) ? ({ user_model: { randomVar: 'NONE', unit: '' } }) : ((this.props.dataIsSet[targetName] == undefined) ?
+            ({ user_model: { randomVar: 'NONE', unit: '' } }) : (this.props.data[targetName]));
     }
 
     getModelDataState(modelName) {
@@ -109,11 +123,60 @@ class TuringTab extends React.Component {
     }
 
     getModelData(modelName) {
-        return (this.props.dataIsSet == {}) ? ({user_model: {randomVar: 'NONE', unit: ''}}) : ((this.props.dataIsSet[modelName] == undefined) ? 
-        ({user_model: {randomVar: 'NONE', unit: ''}}) : (this.props.data[modelName]));
+        return (this.props.dataIsSet == {}) ? ({ user_model: { randomVar: 'NONE', unit: '' } }) : ((this.props.dataIsSet[modelName] == undefined) ?
+            ({ user_model: { randomVar: 'NONE', unit: '' } }) : (this.props.data[modelName]));
     }
 
-    render () {
+    getActiveModels(models) {
+        var list = []
+        for (const m in models) {
+            list.push(m)
+        }
+        return list
+    }
+
+    getActiveModelName() {
+        return this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]
+    }
+
+    getActiveModelSamples() {
+        var n = this.getActiveModelName()
+        return this.getModelSamples(n)
+    }
+
+    getActiveModelData() {
+        var n = this.getActiveModelName()
+        return this.getModelData(n)
+    }
+
+    getTuringCheckbox(props) {
+        const [selectedKey, setSelectedKey] = useState(null); // Stores the selected key
+
+        const handleCheckboxChange = (event) => {
+            const newSelectedKey = event.target.value;
+            if (newSelectedKey !== selectedKey) { // Only update if different key is selected
+                setSelectedKey(newSelectedKey);
+            }
+        };
+
+        return (
+            <div>
+                {Object.keys(props.items).map((key) => (
+                    <label key={key}>
+                        <input
+                            type="checkbox"
+                            value={key}
+                            checked={selectedKey === key} // Set checked based on selectedKey
+                            onChange={handleCheckboxChange}
+                        />
+                        {key}
+                    </label>
+                ))}
+            </div>
+        );
+    }
+
+    render() {
         const {
             dispatchUpdateRestore, // eslint-disable-line no-unused-vars
             intl,
@@ -128,7 +191,7 @@ class TuringTab extends React.Component {
         const sprite = vm.editingTarget.sprite;
         const targetName = vm.editingTarget.getName();
         const modelName = 'height'; //TTODO
- 
+
         const sounds = sprite.sounds ? sprite.sounds.map(sound => (
             {
                 url: isRtl ? soundIconRtl : soundIcon,
@@ -163,32 +226,40 @@ class TuringTab extends React.Component {
 
 
         return (
-                <TuringAssetPanel
-                    dragType={DragConstants.SAMPLE}
-                    selectedSampleIndex={this.state.selectedSampleIndex}
-                    onDeleteClick={this.handleDeleteSample}
-                    samples={this.getModelSamples(modelName)}
-                    data={this.getModelData(modelName)}
-                    vm={this.props.vm}
-                    onItemClick={this.handleSelectSample}
-                    items={this.getModelSamples(modelName)}
-                    dataIsSet={this.getModelDataState(modelName)}
-                >
+            <TuringAssetPanel
+                dragType={DragConstants.SAMPLE}
+                selectedSampleIndex={this.state.selectedSampleIndex}
+                onDeleteClick={this.handleDeleteSample}
+                samples={this.getActiveModelSamples()}
+                data={this.getActiveModelData()}
+                vm={this.props.vm}
+                onItemClick={this.handleSelectSample}
+                items={this.getActiveModelSamples()}
+                dataIsSet={this.getModelDataState(modelName)}
+                activeModels={this.getActiveModels(this.props.dataIsSet)}
+                activateModelDashboard={this.handleActivateDashboard}
+                activeModelIndex={this.state.activeModelIndex}
+                activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
+            >
 
-                {console.log("Active models??")}
-                {console.log(this.props.dataIsSet)}
+                {/* {console.log("Active models??")}
+                {console.log(this.getActiveModels(this.props.dataIsSet))} */}
 
-                {console.log("******* data set, samples, data: *********")}
+                {/* {console.log("******* data set, samples, data: *********")}
                 {console.log(this.getModelDataState(modelName))}
                 {console.log(this.getModelSamples(modelName))}
-                {console.log(this.getModelData(modelName))}
+                {console.log(this.getModelData(modelName))} */}
 
-                {(this.getModelDataState(modelName)) ? 
-                ( <TuringVizPanel
-                    vm={this.props.vm}
-                    data={this.getModelData(modelName)}
-                />) : (<h1>No model defined for {modelName}... yet!</h1>)}
-                </TuringAssetPanel>
+                {(this.getModelDataState(modelName)) ?
+                    (<TuringVizPanel
+                        vm={this.props.vm}
+                        data={this.getActiveModelData()}
+                        activeModels={this.getActiveModels(this.props.dataIsSet)}
+                        activateModelDashboard={this.handleActivateDashboard}
+                        activeModelIndex={this.state.activeModelIndex}
+                        activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
+                    />) : (<h1>No model defined for {modelName}... yet!</h1>)}
+            </TuringAssetPanel>
         );
     }
 }
@@ -198,7 +269,7 @@ TuringTab.propTypes = {
     editingTarget: PropTypes.string,
     intl: intlShape,
     isRtl: PropTypes.bool,
-    vm: PropTypes.instanceOf(VM).isRequired
+    vm: PropTypes.instanceOf(VM).isRequired,
 };
 
 const mapStateToProps = state => ({

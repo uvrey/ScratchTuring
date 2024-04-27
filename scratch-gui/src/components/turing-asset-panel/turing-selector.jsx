@@ -54,56 +54,57 @@ const TuringSelector = props => {
     const isRelevantDrag = draggingType === dragType;
     let newButtonSection = null;
 
-  function onClearSamples(targetName) {
-    props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
-  }
-  
+    function onClearSamples(targetName) {
+        props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
+    }
+
     newButtonSection = (
-      <Box className={styles.newButtons}>
-          <ActionMenu
-              img={erasorIcon}
-              title={"Clear Samples"}
-              onClick={() => onClearSamples(props.vm.editingTarget.getName())}
-          />
-      </Box>
-  );
+        <Box className={styles.newButtons}>
+            <ActionMenu
+                img={erasorIcon}
+                title={"Clear Samples"}
+                onClick={() => onClearSamples(props.vm.editingTarget.getName())}
+            />
+        </Box>
+    );
 
     return (
         <Box
-        className={styles.wrapper}
-        componentRef={containerRef}
-    >
-        <Box className={styles.listArea}>
-            {props.items.map((sample, index) => (
-                <SortableAsset
-                    id={sample}
-                    index={isRelevantDrag ? ordering.indexOf(index) : index}
-                    key={sample}
-                    onAddSortable={onAddSortable}
-                    onRemoveSortable={onRemoveSortable}
-                >
-                    <TuringSelectorItem
-                        className={classNames(styles.listItem, {
-                            [styles.placeholder]: isRelevantDrag && index === draggingIndex
-                        })}
-                        // dragPayload={item.dragPayload}
-                        dragType={dragType}
-                        id={index}
-                        index={index}
-                        name={sample}
-                        number={index + 1}
-                        selected={index === selectedItemIndex}
-                        onClick={onItemClick}
-                        onDeleteButtonClick={onDeleteClick}
-                        data={props.data}
-                        sample={sample}
-                    />
-                </SortableAsset>
-            ))}
+            className={styles.wrapper}
+            componentRef={containerRef}
+        >
+            <h2>Inside turing selector we want to display... {props.activeModel}</h2>
+            <Box className={styles.listArea}>
+                {props.items.map((sample, index) => (
+                    <SortableAsset
+                        id={sample}
+                        index={isRelevantDrag ? ordering.indexOf(index) : index}
+                        key={sample}
+                        onAddSortable={onAddSortable}
+                        onRemoveSortable={onRemoveSortable}
+                    >
+                        <TuringSelectorItem
+                            className={classNames(styles.listItem, {
+                                [styles.placeholder]: isRelevantDrag && index === draggingIndex
+                            })}
+                            // dragPayload={item.dragPayload}
+                            dragType={dragType}
+                            id={index}
+                            index={index}
+                            name={sample}
+                            number={index + 1}
+                            selected={index === selectedItemIndex}
+                            onClick={onItemClick}
+                            onDeleteButtonClick={onDeleteClick}
+                            data={props.data}
+                            sample={sample}
+                        />
+                    </SortableAsset>
+                ))}
+            </Box>
+            {newButtonSection}
         </Box>
-        {newButtonSection}
-    </Box>
-      ); 
+    );
 };
 
 TuringSelector.propTypes = {
@@ -129,6 +130,7 @@ TuringSelector.propTypes = {
     ordering: PropTypes.arrayOf(PropTypes.number),
     selectedItemIndex: PropTypes.number.isRequired,
     items: PropTypes.array,
+    activeModels: PropTypes.array
 };
 
 export default SortableHOC(TuringSelector); // make sortable at some point? TODO
