@@ -9,7 +9,7 @@ import {updateTargets} from '../reducers/targets';
 import {updateBlockDrag} from '../reducers/block-drag';
 import {updateMonitors} from '../reducers/monitors';
 import {setProjectChanged, setProjectUnchanged} from '../reducers/project-changed';
-import {setTuringData, setTuringActive} from '../reducers/turing-data';
+import {setTuringData, setTuringDataState, setTuringActive} from '../reducers/turing-data';
 import {setRunningState, setTurboState, setStartedState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
@@ -48,7 +48,10 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('PERIPHERAL_CONNECTION_LOST_ERROR', this.props.onShowExtensionAlert);
             this.props.vm.on('MIC_LISTENING', this.props.onMicListeningUpdate);
             this.props.vm.on('TURING_DATA', (data) => this.handleTuringData(data));
+            this.props.vm.on('TURING_DATA_STATE', (state) => this.handleTuringDataState(state));
             this.props.vm.on('TURING_ACTIVE', this.props.onTuringActive);
+            this.props.vm.on('TURING_SHOW_LOAD', () => this.handleTuringLoad());
+            this.props.vm.on('TURING_CLOSE_LOAD', this.props.onCloseTuringLoad);
             console.log("inside listener HOC")
         }
         componentDidMount () {
@@ -83,6 +86,9 @@ const vmListenerHOC = function (WrappedComponent) {
         }
         handleTuringData (data) {
             this.props.onSetTuringData(data)
+        }
+        handleTuringDataState (state) {
+            this.props.onSetTuringDataState(state)
         }
         handleTargetsUpdate (data) {
             if (this.props.shouldUpdateTargets) {
@@ -206,10 +212,14 @@ const vmListenerHOC = function (WrappedComponent) {
         onShowExtensionAlert: data => {
             dispatch(showExtensionAlert(data));
         },
+        onShowTuringLoad: () => dispatch(showStandardAlert('fetchingFromTuring')),
+        onCloseTuringLoad: () => dispatch(closeAlertWithId('fetchingFromTuring')),
         onSetTuringData: data => dispatch(setTuringData(data)),
+        onSetTuringDataState: state => dispatch(setTuringDataState(state)),
         onTuringActive: () => dispatch(setTuringActive()),
         onMicListeningUpdate: listening => {
             dispatch(updateMicIndicator(listening));
+            
         }
     });
     return connect(

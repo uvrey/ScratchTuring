@@ -56,20 +56,20 @@ const TuringSelectorItem = props => {
             <div className={styles.spriteImageOuter}>
               <div className={styles.spriteImageInner}>
               {/* Display swatch or icon */}
-              {props.data.state.type === 'COLOR' ? (
+              {props.data.user_model.randomVar === 'COLOR' ? (
                 <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}>
                 </div>
               ) : (
                  <img
                  className={styles.spriteImage}
                  draggable={false}
-                 src={getIconFromType(props.data.state.type)}
+                 src={getIconFromType(props.data.user_model.randomVar)}
                />
               )}
               </div>
             </div>
             <div className={styles.spriteInfo}>
-              <div className={styles.spriteName}>{props.sample} {props.data.state.unit}</div>
+              <div className={styles.spriteName}>{props.sample} {props.data.user_model.unit}</div>
             </div>
       </ContextMenuTrigger>
         );

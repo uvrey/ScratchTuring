@@ -91,7 +91,7 @@ const TuringSelector = props => {
         componentRef={containerRef}
     >
         <Box className={styles.listArea}>
-            {props.data.samples.map((sample, index) => (
+            {props.items.map((sample, index) => (
                 <SortableAsset
                     id={sample}
                     index={isRelevantDrag ? ordering.indexOf(index) : index}

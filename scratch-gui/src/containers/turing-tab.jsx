@@ -85,6 +85,20 @@ class TuringTab extends React.Component {
         this.setState({selectedSampleIndex: Math.max(props.samples.length - 1, 0)});
     }
 
+            
+    getTargetDataState(targetName) {
+        return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[targetName] == undefined) ? (false) : (this.props.dataIsSet[targetName]));
+    }
+
+    getTargetSamples(targetName) {
+        return (this.props.dataIsSet == {}) ? ([]) : ((this.props.dataIsSet[targetName] == undefined) ? ([]) : (this.props.data[targetName].samples));
+    }
+
+    getTargetData(targetName) {
+        return (this.props.dataIsSet == {}) ? ({user_model: {randomVar: 'NONE', unit: ''}}) : ((this.props.dataIsSet[targetName] == undefined) ? 
+        ({user_model: {randomVar: 'NONE', unit: ''}}) : (this.props.data[targetName]));
+    }
+
     render () {
         const {
             dispatchUpdateRestore, // eslint-disable-line no-unused-vars
@@ -98,6 +112,7 @@ class TuringTab extends React.Component {
         }
 
         const sprite = vm.editingTarget.sprite;
+        const targetName = vm.editingTarget.getName();
 
         const sounds = sprite.sounds ? sprite.sounds.map(sound => (
             {
@@ -131,21 +146,29 @@ class TuringTab extends React.Component {
             }
         });
 
+
         return (
                 <TuringAssetPanel
                     dragType={DragConstants.SAMPLE}
                     selectedSampleIndex={this.state.selectedSampleIndex}
                     onDeleteClick={this.handleDeleteSample}
-                    samples={this.props.data.samples}
-                    data={this.props.data}
+                    samples={this.getTargetSamples(targetName)}
+                    data={this.getTargetData(targetName)}
                     vm={this.props.vm}
                     onItemClick={this.handleSelectSample}
-                    items={this.props.data.samples}
+                    items={this.getTargetSamples(targetName)}
+                    dataIsSet={this.getTargetDataState(targetName)}
                 >
-                <TuringVizPanel
+                {console.log("******* data set, samples, data: *********")}
+                {console.log(this.getTargetDataState(targetName))}
+                {console.log(this.getTargetSamples(targetName))}
+                {console.log(this.getTargetData(targetName))}
+
+                {(this.getTargetDataState(targetName)) ? 
+                ( <TuringVizPanel
                     vm={this.props.vm}
-                    data={this.props.data}
-                />
+                    data={this.getTargetData(targetName)}
+                />) : (<h1>No model defined for {targetName}... yet!</h1>)}
                 </TuringAssetPanel>
         );
     }
@@ -162,7 +185,8 @@ TuringTab.propTypes = {
 const mapStateToProps = state => ({
     editingTarget: state.scratchGui.targets.editingTarget,
     isRtl: state.locales.isRtl,
-    data: state.scratchGui.turingData.data
+    data: state.scratchGui.turingData.data,
+    dataIsSet: state.scratchGui.turingData.dataIsSet
 });
 
 const mapDispatchToProps = dispatch => ({
