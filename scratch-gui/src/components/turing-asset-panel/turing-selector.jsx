@@ -71,8 +71,8 @@ const TuringSelector = props => {
       }
   }
 
-  const onClearSamples = () => {
-    props.vm.runtime.emit('CLEAR_SAMPLES');
+  function onClearSamples(targetName) {
+    props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
   }
   
     newButtonSection = (
@@ -80,7 +80,7 @@ const TuringSelector = props => {
           <ActionMenu
               img={erasorIcon}
               title={"Clear Samples"}
-              onClick={onClearSamples}
+              onClick={() => onClearSamples(props.vm.editingTarget.getName())}
           />
       </Box>
   );
@@ -112,7 +112,7 @@ const TuringSelector = props => {
                         selected={index === selectedItemIndex}
                         onClick={onItemClick}
                         onDeleteButtonClick={onDeleteClick}
-                        data={data}
+                        data={props.data}
                         sample={sample}
                     />
                 </SortableAsset>

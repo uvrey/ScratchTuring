@@ -78,11 +78,11 @@ const TuringVizPanel = props => (
                 <Box className={styles.keyStats}>
                         <div>
                             <img src={FontType} className={styles.statsHeading} />
-                            {props.data.user_model.randomVar === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.randomVar}</p>) : (<p className={styles.stat}>{props.data.user_model.randomVar}</p>)}
+                            <div><p className={styles.stat}>{props.data.user_model.modelName}</p><p>({props.data.user_model.randomVar})</p></div>
                         </div>
                         <div>
                         <img src={FontCurrentSample} className={styles.statsHeading} />
-                          <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.user_model.unit}</p>
+                          {(props.data.samples.length == 0) ? (<p className={styles.stat}>none</p>) : (<p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.user_model.unit}</p>)} 
                         </div>
                         <div>
                         <img src={FontNumSamples} className={styles.statsHeading} />

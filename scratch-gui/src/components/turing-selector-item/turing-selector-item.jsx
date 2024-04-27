@@ -55,6 +55,8 @@ const TuringSelectorItem = props => {
         <div className={styles.number}>{props.number}</div> {/* Display number once */}
             <div className={styles.spriteImageOuter}>
               <div className={styles.spriteImageInner}>
+                {console.log("Inside turing selector, we have... " )}
+                {console.log(props.data)}
               {/* Display swatch or icon */}
               {props.data.user_model.randomVar === 'COLOR' ? (
                 <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}>
@@ -76,7 +78,6 @@ const TuringSelectorItem = props => {
     }
 
 TuringSelectorItem.propTypes = {
-    sample: PropTypes.node,
     state: PropTypes.object,
     className: PropTypes.string,
     componentRef: PropTypes.func,

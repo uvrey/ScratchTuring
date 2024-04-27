@@ -1078,7 +1078,7 @@ class Scratch3Turing {
 
         // Set up signal receipt from the GUI
         this._onClearSamples = this._onClearSamples.bind(this);
-        this._runtime.on('CLEAR_SAMPLES', this._onClearSamples);
+        this._runtime.on('CLEAR_SAMPLES', targetName => this._onClearSamples(targetName));
         this._onResetTimer = this._onResetTimer.bind(this);
         this._runtime.on('PROJECT_START', this._onResetTimer);
     }
@@ -1549,6 +1549,15 @@ class Scratch3Turing {
         }
     }
 
+    getClearedModel () {
+        return { params: null,
+            // barValue: null,
+            data: null,
+            mean: null,
+            stdv: null,
+            defined: false}
+    }
+
     defineTargetModel(util, rv, modelName, modelType) {
         this.state.type = RANDOM_VAR_NAMES[rv]
 
@@ -1635,6 +1644,12 @@ class Scratch3Turing {
 
         if (typeof util.target != undefined) {
             user_model = this.user_models[util.target.getName()]
+
+            if (user_model == undefined) {
+                return "No model defined for this sprite."
+            }
+
+            console.log("we want to take a sample from a sprite... but has a model been defined for this sprite yet?")
             message = this._getThenSendSample(util, user_model)
             this.conditionOnPrior(util, user_model)
                     .then(response => this.updateInternals(user_model, response, 'posterior', ['posterior']));            
@@ -1668,7 +1683,7 @@ class Scratch3Turing {
         user_model.models[modelType]['defined'] = true
         user_model['hasDistData'] = true
 
-        this.addVisualisationData(user_model, modelType)
+        this.updateVisualisationData(user_model, modelType)
         console.log("updated internals, emitting...")
         console.log(this.visualisationData)
 
@@ -1706,9 +1721,10 @@ class Scratch3Turing {
         if (typeof util.target != undefined &&  typeof this.user_models[util.target.getName()] != undefined ) {
             user_model = this.user_models[util.target.getName()]
             this.user_models[util.target.getName()].data.push(observation);
-            this.conditionOnPrior(util, user_model) // updates posterior
 
-            this.addVisualisationData(user_model, 'posterior')
+            this.conditionOnPrior(util, user_model) // updates posterior
+            this.updateVisualisationData(user_model, 'posterior')
+
             this._runtime.emit('TURING_SHOW_LOAD')
             this._runtime.emit('TURING_DATA', this.visualisationData)
             this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
@@ -1720,6 +1736,11 @@ class Scratch3Turing {
     }
 
     extractSample = (util, user_model, groundTruth) => {
+
+        console.log("got user model as " )
+        console.log(user_model)
+
+
         var sample = this.TARGET_PROPERTIES[user_model['rvIndex']](util);
 
         console.log("got sample as " + sample)
@@ -1745,7 +1766,7 @@ class Scratch3Turing {
         observation = this.extractSample(util, user_model, groundTruth) 
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
-        this.addVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
+        this.updateVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
         this._runtime.emit('TURING_SHOW_LOAD')
         this._runtime.emit('TURING_DATA', this.visualisationData)
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
@@ -1777,6 +1798,8 @@ class Scratch3Turing {
     }
 
     _getBarChartData(user_model) {
+        {console.log("when getting bar data, user models is...")}
+        {console.log(user_model)}
         return [
           { type: "prior", value: user_model.models.prior.defined ? user_model.models.prior.mean : null },
           { type: "posterior", value: user_model.models.posterior.defined ? user_model.models.posterior.mean : null },
@@ -1831,8 +1854,10 @@ class Scratch3Turing {
     }
 
     /* Prepare a JSON of relevant data */
-    addVisualisationData(user_model, type) {
-        if (type != 'observed') {
+    updateVisualisationData(user_model, type = null) {
+        {console.log("when updating vis data, we have:")}
+        {console.log(user_model)}
+        if (type != 'observed' && type != null) {
             newJSON = {
                 modelName: user_model.modelName,
                 activeDists: this.getActiveDists(user_model.models),
@@ -2063,20 +2088,17 @@ class Scratch3Turing {
         this._sendRequesttoServer(url, payload)
     }
 
-    _onClearSamples() {
-        this.state.observed = 0
-        // this.state.posterior = 0
-
-        const updatedLineList = [...this.lineList]; 
-
-        updatedLineList[OBSERVED_INDEX] = { ...updatedLineList[OBSERVED_INDEX], mean: this.state.observed, stdv: 0};
-        // updatedLineList[POSTERIOR_INDEX] = { ...updatedLineList[POSTERIOR_INDEX], mean: this.state.posterior, stdv: 0}; // TODO update with genuine Turing values
-        
-        this.lineList = updatedLineList // update line list
-
+    _onClearSamples(targetName) {
+        console.log("clearing samples for " + targetName)
+        this.user_models[targetName].data = []
         this.observations = []
+        this.user_models[targetName].models.posterior = this.getClearedModel()
 
-        this.addVisualisationData(this.observations) // TTODO BUG add keys needed
+        console.log(":0 :0 after clearing, this is usermodels...")
+        console.log(this.user_models)
+        this.user_models[targetName]
+
+        this.updateVisualisationData(this.user_models[targetName]) 
         this._runtime.emit('TURING_DATA', this.visualisationData)
     }
 
@@ -2095,7 +2117,7 @@ class Scratch3Turing {
 
         this.truth_data = []
 
-        this.addVisualisationData(this.observations, 'observed')
+        this.updateVisualisationData(this.observations, 'observed')
         this._runtime.emit('TURING_DATA', this.visualisationData)
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
     }
@@ -2120,7 +2142,7 @@ class Scratch3Turing {
         this._updatePrior(prior)
         this._onClearSamples()
 
-        this.addVisualisationData(this.observations, 'prior')
+        this.updateVisualisationData(this.observations, 'prior')
 
         console.log("emitting ")
         console.log(this.visualisationData)
@@ -2154,7 +2176,7 @@ class Scratch3Turing {
         console.log(util.target)
 
         if (typeof util.target != undefined) {
-            this._getThenSendSample(util, groundTruth = true)
+            this._getThenSendSample(util, this.user_models[util.target.getName()], groundTruth = true)
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
