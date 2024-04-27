@@ -16,6 +16,7 @@ import FontDist from './font--normalDist.svg'
 import FontCurrentSample from './font--currentSample.svg'
 import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
+import Carousel from './carousel.jsx'
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
 
 

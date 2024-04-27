@@ -1734,7 +1734,7 @@ class Scratch3Turing {
     defineTargetModel(util, modelName, modelType) {
         // this.state.type = RANDOM_VAR_NAMES[rv]
         console.log("DEFINING TARGET MODEL?")
-        console.log(util.target.getName())
+        console.log(modelName)
 
         this.user_models[modelName] = {
                 models: {
@@ -2057,9 +2057,9 @@ class Scratch3Turing {
             console.log(modelName)
 
             if ( this.user_models[modelName].hasDistData) {
-                defined[this.user_models[modelName]] = true
+                defined[modelName] = true
             } else {
-                defined[this.user_models[modelName]] = false
+                defined[modelName] = false
             }
         }
         console.log("sending this to be our new sprite data states:")
@@ -2083,7 +2083,7 @@ class Scratch3Turing {
                 sampleSpace: this._getSampleSpace(user_model),
                 distLines: user_model.distLines
             }
-            this.visualisationData[user_model.targetSprite] = newJSON
+            this.visualisationData[user_model.modelName] = newJSON
         } else {
             console.log("taking an observation ... how to add it to the visualisation?")
         }

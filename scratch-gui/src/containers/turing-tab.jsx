@@ -4,6 +4,7 @@ import bindAll from 'lodash.bindall';
 import {defineMessages, intlShape, injectIntl} from 'react-intl';
 import VM from 'scratch-vm';
 
+import TuringCarousel from './turing-carousel.jsx';
 import TuringAssetPanel from '../components/turing-asset-panel/turing-asset-panel.jsx';
 import TuringVizPanel from '../components/turing-viz-panel/turing-viz-panel.jsx';
 import soundIcon from '../components/asset-panel/icon--sound.svg';
@@ -99,6 +100,19 @@ class TuringTab extends React.Component {
         ({user_model: {randomVar: 'NONE', unit: ''}}) : (this.props.data[targetName]));
     }
 
+    getModelDataState(modelName) {
+        return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[modelName] == undefined) ? (false) : (this.props.dataIsSet[modelName]));
+    }
+
+    getModelSamples(modelName) {
+        return (this.props.dataIsSet == {}) ? ([]) : ((this.props.dataIsSet[modelName] == undefined) ? ([]) : (this.props.data[modelName].samples));
+    }
+
+    getModelData(modelName) {
+        return (this.props.dataIsSet == {}) ? ({user_model: {randomVar: 'NONE', unit: ''}}) : ((this.props.dataIsSet[modelName] == undefined) ? 
+        ({user_model: {randomVar: 'NONE', unit: ''}}) : (this.props.data[modelName]));
+    }
+
     render () {
         const {
             dispatchUpdateRestore, // eslint-disable-line no-unused-vars
@@ -113,7 +127,8 @@ class TuringTab extends React.Component {
 
         const sprite = vm.editingTarget.sprite;
         const targetName = vm.editingTarget.getName();
-
+        const modelName = 'height'; //TTODO
+ 
         const sounds = sprite.sounds ? sprite.sounds.map(sound => (
             {
                 url: isRtl ? soundIconRtl : soundIcon,
@@ -152,23 +167,27 @@ class TuringTab extends React.Component {
                     dragType={DragConstants.SAMPLE}
                     selectedSampleIndex={this.state.selectedSampleIndex}
                     onDeleteClick={this.handleDeleteSample}
-                    samples={this.getTargetSamples(targetName)}
-                    data={this.getTargetData(targetName)}
+                    samples={this.getModelSamples(modelName)}
+                    data={this.getModelData(modelName)}
                     vm={this.props.vm}
                     onItemClick={this.handleSelectSample}
-                    items={this.getTargetSamples(targetName)}
-                    dataIsSet={this.getTargetDataState(targetName)}
+                    items={this.getModelSamples(modelName)}
+                    dataIsSet={this.getModelDataState(modelName)}
                 >
-                {console.log("******* data set, samples, data: *********")}
-                {console.log(this.getTargetDataState(targetName))}
-                {console.log(this.getTargetSamples(targetName))}
-                {console.log(this.getTargetData(targetName))}
 
-                {(this.getTargetDataState(targetName)) ? 
+                {console.log("Active models??")}
+                {console.log(this.props.dataIsSet)}
+
+                {console.log("******* data set, samples, data: *********")}
+                {console.log(this.getModelDataState(modelName))}
+                {console.log(this.getModelSamples(modelName))}
+                {console.log(this.getModelData(modelName))}
+
+                {(this.getModelDataState(modelName)) ? 
                 ( <TuringVizPanel
                     vm={this.props.vm}
-                    data={this.getTargetData(targetName)}
-                />) : (<h1>No model defined for {targetName}... yet!</h1>)}
+                    data={this.getModelData(modelName)}
+                />) : (<h1>No model defined for {modelName}... yet!</h1>)}
                 </TuringAssetPanel>
         );
     }
