@@ -21,7 +21,7 @@ let contextMenuId = 0;
 
 function getIconFromType(type) {
   switch (type) {
-      case 'TIME':
+      case 'TIME TAKEN':
           return timeIcon;
       case 'SIZE':
           return sizeIcon;

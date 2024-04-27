@@ -54,23 +54,6 @@ const TuringSelector = props => {
     const isRelevantDrag = draggingType === dragType;
     let newButtonSection = null;
 
-    function getIconFromType(type) {
-      switch (type) {
-          case 'TIME':
-              return timeIcon;
-          case 'SIZE':
-              return sizeIcon;
-          case 'LOUDNESS':
-              return loudnessIcon;
-          case 'X':
-              return xIcon;
-          case 'Y':
-              return yIcon;
-          default:
-              return erasorIcon; // Return null for any other type
-      }
-  }
-
   function onClearSamples(targetName) {
     props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
   }

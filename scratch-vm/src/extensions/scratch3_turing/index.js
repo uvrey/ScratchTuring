@@ -1857,7 +1857,7 @@ class Scratch3Turing {
     updateVisualisationData(user_model, type = null) {
         {console.log("when updating vis data, we have:")}
         {console.log(user_model)}
-        if (type != 'observed' && type != null) {
+        if (type != 'observed') {
             newJSON = {
                 modelName: user_model.modelName,
                 activeDists: this.getActiveDists(user_model.models),

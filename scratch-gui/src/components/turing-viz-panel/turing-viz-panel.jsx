@@ -88,10 +88,6 @@ const TuringVizPanel = props => (
                         <img src={FontNumSamples} className={styles.statsHeading} />
                           <p className={styles.stat}>{props.data.samples.length}</p>
                         </div>
-                     
-                    {/* <b>We're interested in:</b> {props.data.state.type}<br/>
-                    <b>Current sample: </b> {props.data.samples[props.data.samples.length-1]}<br/>
-                    <b>Number of Samples:</b> {props.data.samples.length}<br/> */}
                 </Box>
 
                 <Box className={styles.dataRow}>
@@ -115,15 +111,20 @@ const TuringVizPanel = props => (
                 />
                 <YAxis allowDecimals={true} />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                {props.data.distLines.map((line) => (
+
+
+                {console.log("active distributions??")}
+                {console.log(props.data.activeDists)}
+
+                {props.data.activeDists.map((key) => (
                     <Line
-                    key={line.id}
-                    dataKey={line.id}
-                    type = "monotone"
-                    stroke={line.stroke}
-                    dot={false}
-                    isAnimationActive={true}
-                    strokeWidth="1.5px"
+                      key={key}
+                      dataKey={key}
+                      type = "monotone"
+                      stroke={"#d4e414"}
+                      dot={false}
+                      isAnimationActive={true}
+                      strokeWidth="1.5px"
                     />
                 ))}
                 <Legend />
