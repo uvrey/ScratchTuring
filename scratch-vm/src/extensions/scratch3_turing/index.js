@@ -1006,14 +1006,14 @@ const TIME = 0
 const SIZE = 1
 const X = 2
 const Y = 3
-const LOUDNESS = 4
-const NUMBER = 5
-const COLOR = 6
-const NONE = 7
+const LOUDNESS = 4 // TODO possibly remove.
+const COLOR = 5
+const NONE = 6
+const CUSTOM = 7
 
-const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE']
-const UNITS = ['s', '', '', '', 'db', '', '', '', '']
-const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'LOUDNESS', 'NUMBER', 'COLOR', 'NONE']
+const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC']
+const UNITS = ['s', '', '', '', 'db', '', '', '', '', '']
+const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'LOUDNESS', 'COLOR', 'NONE', 'CUSTOM']
 const DISTRIBUTIONS = ['gaussian', 'poisson', 'binomial']
 
 window.addEventListener("beforeunload", (event) => {
@@ -1145,7 +1145,7 @@ class Scratch3Turing {
             {
                 name: formatMessage({
                     id: 'turing.randomVarsMenu.timeTaken',
-                    default: 'TIME TAKEN (sec)',
+                    default: 'TIME TAKEN',
                     description: 'Amount of time taken.'
                 }),
             },
@@ -1180,8 +1180,8 @@ class Scratch3Turing {
             {
                 name: formatMessage({
                     id: 'turing.randomVarsMenu.number',
-                    default: 'NUMBER',
-                    description: 'number'
+                    default: 'COLOR',
+                    description: 'color'
                 }),
             },
         ]
@@ -1212,6 +1212,106 @@ class Scratch3Turing {
             }
         ]
     }
+
+    getModelNameInfo() {
+        var model_list = []
+
+        if (this.user_models.length < 1) {
+            return [
+                {
+                    name: formatMessage({
+                        id: 'turing.modelList.none',
+                        default: 'no models defined',
+                        description: 'No models defined'
+                    }),
+                },
+            ]
+        } 
+
+        // build up dynamic menu
+        for (const modelName in this.user_models) {
+            item = {
+                name: formatMessage({
+                    id: 'turing.modelList.' + modelName,
+                    default: modelName,
+                    description: modelName + ' model.'
+                }),
+            }
+            model_list.push(item)
+        }
+
+        console.log("trying to return...")
+        console.log(model_list)
+        return model_list
+    }
+
+    test() {
+        console.log("Trying to build up a menu nicely, user_models? ")
+        console.log(this.user_models)
+
+        if (this.user_models == undefined) {
+            console.log("USER MODELS ARE UNDEFINED!!")
+            return [
+                {
+                    name: formatMessage({
+                        id: 'turing.modelList.none',
+                        default: 'no models defined',
+                        description: 'No models defined'
+                    }),
+                },
+            ]
+        }
+        else if (this.user_models.length < 1) {
+            console.log("USER MODELS ARE SHORT!!")
+            return [
+                {
+                    name: formatMessage({
+                        id: 'turing.modelList.none',
+                        default: 'no models defined',
+                        description: 'No models defined'
+                    }),
+                },
+            ]
+        }
+        else if (this.user_models = {}) {
+            console.log("USER MODELS ARE EMPTY!!")
+            return [
+                {
+                    name: formatMessage({
+                        id: 'turing.modelList.none',
+                        default: 'no models defined',
+                        description: 'No models defined'
+                    }),
+                },
+            ]
+        } else {
+            console.log("USER model exists!!")
+            return [
+                {
+                    name: formatMessage({
+                        id: 'turing.distInfo.gaussian',
+                        default: 'GAUSSIAN',
+                        description: 'Gaussian distribution.'
+                    }),
+                },
+                {
+                    name: formatMessage({
+                        id: 'turing.distInfo.poisson',
+                        default: 'POISSON',
+                        description: 'poisson'
+                    }),
+                },
+                {
+                    name: formatMessage({
+                        id: 'turing.distInfo.binomial',
+                        default: 'BINOMIAL',
+                        description: 'binomial'
+                    }),
+                }
+            ]
+        }
+    }
+
 
     /**
      * @returns {object} metadata for this extension and its blocks.
@@ -1267,32 +1367,32 @@ class Scratch3Turing {
                 //         description: 'turing.showRandomVariable'
                 //     })
                 // },
-                {
-                    opcode: 'defineGroundTruth',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.defineGroundTruth',
-                        default:  'define ground truth as [DISTRIBUTION]',
-                        description: 'turing.defineGroundTruth'
-                    }),
-                    arguments: {
-                        DISTRIBUTION: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 1,
-                            menu: 'DISTRIBUTION_MENU',
-                        }
-                    }
-                },
+                // {
+                //     opcode: 'defineGroundTruth',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.defineGroundTruth',
+                //         default:  'define ground truth as [DISTRIBUTION]',
+                //         description: 'turing.defineGroundTruth'
+                //     }),
+                //     arguments: {
+                //         DISTRIBUTION: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 1,
+                //             menu: 'DISTRIBUTION_MENU',
+                //         }
+                //     }
+                // },
                 {
                     opcode: 'defineModel',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.defineCustomRandomVariable',
-                        default:  'model [NAME] as [RANDOM_VAR]',
+                        default:  'model [MODEL] as [DISTRIBUTION]',
                         description: 'turing.defineCustomRandomVariable'
                     }),
                     arguments: {
-                        NAME: {
+                        MODEL: {
                             type: ArgumentType.STRING,
                             defaultValue: "height",
                         },
@@ -1300,21 +1400,6 @@ class Scratch3Turing {
                             type: ArgumentType.STRING,
                             defaultValue: 1,
                             menu: 'NUMERIC_MENU',
-                        }
-                    }
-                },
-                {
-                    opcode: 'definePrior',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.definePrior',
-                        default:  'set expectation as [DISTRIBUTION]',
-                        description: 'turing.definePrior'
-                    }),
-                    arguments: {
-                        NAME: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "height",
                         },
                         DISTRIBUTION: {
                             type: ArgumentType.NUMBER,
@@ -1323,15 +1408,35 @@ class Scratch3Turing {
                         }
                     }
                 },
-                {
-                    opcode: 'labelGroundTruth',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.labelGroundTruth',
-                        default:  'label ground truth',
-                        description: 'turing.labelGroundTruth'
-                    }),
-                },
+                // {
+                //     opcode: 'definePrior',
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.definePrior',
+                //         default:  'set expectation as [DISTRIBUTION]',
+                //         description: 'turing.definePrior'
+                //     }),
+                //     arguments: {
+                //         NAME: {
+                //             type: ArgumentType.STRING,
+                //             defaultValue: "height",
+                //         },
+                //         DISTRIBUTION: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 1,
+                //             menu: 'DISTRIBUTION_MENU',
+                //         }
+                //     }
+                // },
+                // {
+                //     opcode: 'labelGroundTruth', // TTODO consider for colours...
+                //     blockType: BlockType.COMMAND,
+                //     text: formatMessage({
+                //         id: 'turing.labelGroundTruth',
+                //         default:  'label ground truth',
+                //         description: 'turing.labelGroundTruth'
+                //     }),
+                // },
                 // {
                 //     opcode: 'setPrior',
                 //     blockType: BlockType.COMMAND,
@@ -1375,21 +1480,36 @@ class Scratch3Turing {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.takeSampleFromSprite',
-                        default:  'take sample from sprite',
+                        default:  'sample [RANDOM_VAR] for [MODEL]',
                         description: 'turing.takeSampleFromSprite'
-                    })
+                    }),
+                    arguments: {
+                        RANDOM_VAR: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 1,
+                            menu: 'NUMERIC_MENU',
+                        },
+                        MODEL: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "height"
+                        },
+                    }
                 },
                 {
                     opcode: 'takeSampleAsNumber',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.takeSampleAsNumber',
-                        default:  'take my sample [OBSERVATION]',
+                        default:  'sample [OBSERVATION] for [MODEL]',
                         description: 'turing.takeSampleAsNumber'
                     }),
                     arguments: {
                         OBSERVATION: {
                             type: ArgumentType.NUMBER
+                        },
+                        MODEL: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "height"
                         }
                     }
                 },
@@ -1401,6 +1521,21 @@ class Scratch3Turing {
                         default:  'model',
                         description: 'turing.viewModel' 
                     })
+                },
+                {
+                    opcode: 'removeModel',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.removeModel',
+                        default:  'delete model [MODEL]',
+                        description: 'turing.removeModel' 
+                    }),
+                    arguments: {
+                        MODEL: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "height"
+                        },
+                    }
                 }
                 // {
                 //     opcode: 'startStopwatch',
@@ -1455,12 +1590,24 @@ class Scratch3Turing {
                     acceptReporters: true,
                     items: this._buildMenu(this.DISTRIBUTION_INFO)
                 },
+                MODEL_NAME_MENU: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.test())
+                }
             }
         };
     }
+    
+    removeModel(args, util) {
+        var modelToRemove = args.MODEL
 
-    defineGroundTruth (args, util) {
-        return "defined"
+        if (this.user_models[modelToRemove] == undefined) {
+            return "No model called " + modelToRemove
+        } else {
+            delete this.user_models[modelToRemove];
+            return "Model of " + modelToRemove + " deleted"
+        }
+        // TTODO remove the model in Turing also. 
     }
 
     // Function to calculate the probability density function (PDF) of a normal distribution
@@ -1529,24 +1676,34 @@ class Scratch3Turing {
         return histogram;
     }
 
-    defineModel(args, util) {
-        var random_var_idx = args.RANDOM_VAR - 1
-        var modelName = args.NAME
-        this.defineTargetModel(util, random_var_idx, modelName)
-        return util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
+    // defineModel(args, util) {
+    //    // var random_var_idx = args.RANDOM_VAR - 1
+    //     var modelName = args.NAME
+    //     this.defineTargetModel(util, random_var_idx, modelName)
+    //     return util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
+    // }
+
+    buildModelStrings() {
+        var modelList = []
+        for (const m in this.user_models) {
+            var model = this.user_models[m]
+            console.log("DEFINED MODEL: ")
+            console.log(model)
+            modelList.push(JSON.stringify({"Model Name": model.modelName, 
+            "Observations": model.data,
+            "Type": model.modelType, 
+            "Prior": model.models.prior, 
+            "Posterior": model.models.posterior}, null, 2))
+        }
+        if (modelList == []) {
+            return "No models yet"
+        } else {
+            return modelList
+        }
     }
 
     viewModel(args, util) {
-
-        if (typeof this.user_models[util.target.getName()] != undefined) {
-            var user_model = this.user_models[util.target.getName()]
-            return JSON.stringify({"Model Name": user_model.modelName, 
-            "Type": user_model.modelType, 
-            "Prior": user_model.models.prior, 
-            "Posterior": user_model.models.posterior}, null, 2)
-        } else {
-            return "No model found."
-        }
+        return this.buildModelStrings()
     }
 
     getClearedModel () {
@@ -1558,13 +1715,28 @@ class Scratch3Turing {
             defined: false}
     }
 
-    defineTargetModel(util, rv, modelName, modelType) {
-        this.state.type = RANDOM_VAR_NAMES[rv]
+    getClearedSampleSpecs () {
+        return {
+            randomVar: [], 
+            rvIndex: [], 
+            unit: [],  
+            mode: []
+        }
+    }
 
+    updateSampleSpecs(user_model, rv) {
+        user_model.dataSpecs.randomVars.push(RANDOM_VAR_NAMES[rv])
+        user_model.dataSpecs.rvIndices.push(rv)
+        user_model.dataSpecs.units.push(UNITS[rv])
+        user_model.dataSpecs.modes.push(MODES[rv])
+    }
+
+    defineTargetModel(util, modelName, modelType) {
+        // this.state.type = RANDOM_VAR_NAMES[rv]
         console.log("DEFINING TARGET MODEL?")
         console.log(util.target.getName())
 
-        this.user_models[util.target.getName()] = {
+        this.user_models[modelName] = {
                 models: {
                     prior: {
                         params: null,
@@ -1596,10 +1768,12 @@ class Scratch3Turing {
                 modelName: modelName,
                 modelType: modelType, // distribution
                 distribution: null, 
-                randomVar: RANDOM_VAR_NAMES[rv], 
-                rvIndex: rv, 
-                unit: UNITS[rv],  
-                mode: MODES[rv],
+                dataSpecs: {
+                    randomVars: [], 
+                    rvIndices: [], 
+                    units: [],  
+                    modes: []
+                },
                 data: [],
                 labels: [],
                 distLines: [],
@@ -1607,16 +1781,24 @@ class Scratch3Turing {
             };
         }
 
-    async definePrior(args, util) {
+    async defineModel(args, util) {
+
+        // var random_var_idx = args.RANDOM_VAR - 1
+        var modelName = args.MODEL
+
+        this.defineTargetModel(util, modelName)
+        this._runtime.emit('PROJECT_CHANGED')
+
+        // util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
         var dist = DISTRIBUTIONS[args.DISTRIBUTION - 1]
 
-        if (this.user_models[util.target.getName()] == null) {
+        if (this.user_models[modelName] == null) {
             return "No model found."
         }
         // emit loading screen ask
 
         var message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist).then(response => 
-                this.updateInternals(this.user_models[util.target.getName()], response, 'prior', ['prior'], distribution = dist)); // unpacks the new data using the turing samples
+                this.updateInternals(this.user_models[modelName], response, 'prior', ['prior'], distribution = dist)); // unpacks the new data using the turing samples
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -1633,6 +1815,16 @@ class Scratch3Turing {
     async takeSampleFromSprite (args, util) {
         console.log("Taking a sample!")
         // Slightly buffer requests
+
+        var modelName = args.MODEL
+        console.log("looking for model called " + modelName)
+
+        if (this.user_models[modelName] == undefined) {
+            return "No model called " + modelName
+        }
+
+        var random_var_idx = args.RANDOM_VAR - 1
+
         const currentTime = Date.now(); 
         if (currentTime - this.lastSampleTime < 400) {
           return; 
@@ -1643,16 +1835,25 @@ class Scratch3Turing {
         console.log(util.target)
 
         if (typeof util.target != undefined) {
-            user_model = this.user_models[util.target.getName()]
+            user_model = this.user_models[modelName]
 
             if (user_model == undefined) {
                 return "No model defined for this sprite."
             }
 
             console.log("we want to take a sample from a sprite... but has a model been defined for this sprite yet?")
-            message = this._getThenSendSample(util, user_model)
+            message = this._getThenSendSample(util, user_model, random_var_idx)
             this.conditionOnPrior(util, user_model)
-                    .then(response => this.updateInternals(user_model, response, 'posterior', ['posterior']));            
+                    .then(response => this.updateInternals(user_model, response, 'posterior', random_var_idx, ['posterior']));  
+               
+            if (random_var_idx == COLOR) {
+                return "I can't do this alone... add me to the workspace!"
+            } else {
+                const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
+                const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
+                const lastUnit = units[units.length - 1]; // gets the last unit    
+                return `${observation} ${lastUnit}`
+            }
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
@@ -1666,7 +1867,7 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, modelType, keys, distribution = null) {
+    updateInternals(user_model, response, modelType, rv, keys, distribution = null) {
         dict = this.parseResponse(response)
 
         if (distribution != null) {
@@ -1681,6 +1882,7 @@ class Scratch3Turing {
         user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
         user_model.models[modelType]['stdv'] = dict['summary']["std"][1]
         user_model.models[modelType]['defined'] = true
+        this.updateSampleSpecs(user_model, rv)
         user_model['hasDistData'] = true
 
         this.updateVisualisationData(user_model, modelType)
@@ -1691,6 +1893,7 @@ class Scratch3Turing {
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         this._runtime.emit('TURING_CLOSE_LOAD')
+        this._runtime.emit('PROJECT_CHANGED')
     }
 
     distributionData(user_model) {
@@ -1712,15 +1915,22 @@ class Scratch3Turing {
 
     // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
     takeSampleAsNumber (args, util) {
+        var modelName = args.MODEL
+
+        if (this.user_models[modelName] == undefined) {
+            return "No model called " + modelName
+        }
+
         if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
-            return "The observation must be a number";
+            return "This observation must be a number";
           }
           
         observation = Number(args.OBSERVATION);
 
-        if (typeof util.target != undefined &&  typeof this.user_models[util.target.getName()] != undefined ) {
-            user_model = this.user_models[util.target.getName()]
-            this.user_models[util.target.getName()].data.push(observation);
+        if (typeof util.target != undefined &&  typeof this.user_models[modelName] != undefined ) {
+            user_model = this.user_models[modelName]
+            this.user_models[modelName].data.push(observation);
+            this.updateSampleSpecs(user_model, CUSTOM)
 
             this.conditionOnPrior(util, user_model) // updates posterior
             this.updateVisualisationData(user_model, 'posterior')
@@ -1729,41 +1939,46 @@ class Scratch3Turing {
             this._runtime.emit('TURING_DATA', this.visualisationData)
             this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
             this._runtime.emit('TURING_CLOSE_LOAD')
-            return util.target.getName() + " took sample " + observation + this.user_models[ util.target.getName()]['unit']
+
+            const units = this.user_models[modelName].dataSpecs.units;
+            const lastUnit = units[units.length - 1]; // Efficiently access the last unit
+            return `${observation} ${lastUnit}`
         } else {
             return "I can't do this alone ;) Add me to your code!"
         }
     }
 
-    extractSample = (util, user_model, groundTruth) => {
+    extractSample = (util, user_model, rv, groundTruth) => {
 
         console.log("got user model as " )
         console.log(user_model)
 
+        console.log("got random variable as: " + RANDOM_VAR_NAMES[rv])
 
-        var sample = this.TARGET_PROPERTIES[user_model['rvIndex']](util);
+        this.updateSampleSpecs(user_model, rv)
+        
+        var sample = this.TARGET_PROPERTIES[rv](util);
 
-        console.log("got sample as " + sample)
-
-        if (user_model.randomVar == COLOR) {
+        if (rv == COLOR) {
             sample = Color.rgbToHex(sample)
         }
 
         if (!groundTruth) {
           user_model.data.push(sample);
+
         } else {
           user_model.labels.push(sample);
         }
-        if (user_model.rvIndex === TIME) {
+        if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
             user_model.timer.start(); // Start a new timer only for TIME
         }
         return sample
       };
 
-    _getThenSendSample(util, user_model, groundTruth = false) {
+    _getThenSendSample(util, user_model, rvIndex, groundTruth = false) {
         console.log("---------->")
         var newSample;
-        observation = this.extractSample(util, user_model, groundTruth) 
+        observation = this.extractSample(util, user_model, rvIndex, groundTruth) 
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
         this.updateVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
@@ -1771,8 +1986,7 @@ class Scratch3Turing {
         this._runtime.emit('TURING_DATA', this.visualisationData)
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         this._runtime.emit('TURING_CLOSE_LOAD')
-
-        return  util.target.getName() + " took sample " + observation + this.user_models[util.target.getName()]['unit']
+        return observation
     }
 
     _getDistLines (user_model) {
@@ -1838,14 +2052,14 @@ class Scratch3Turing {
 
     getTargetsWithDistsAsDict() {        
         var defined = {}
-        for (const user_model in this.user_models) {
-            console.log("do we have a user model yet?")
-            console.log(user_model)
+        for (const modelName in this.user_models) {
+            console.log("do we have a model yet?")
+            console.log(modelName)
 
-            if ( this.user_models[user_model].hasDistData) {
-                defined[this.user_models[user_model].targetSprite] = true
+            if ( this.user_models[modelName].hasDistData) {
+                defined[this.user_models[modelName]] = true
             } else {
-                defined[this.user_models[user_model].targetSprite] = false
+                defined[this.user_models[modelName]] = false
             }
         }
         console.log("sending this to be our new sprite data states:")
@@ -1857,9 +2071,10 @@ class Scratch3Turing {
     updateVisualisationData(user_model, type = null) {
         {console.log("when updating vis data, we have:")}
         {console.log(user_model)}
-        if (type != 'observed') {
+        if (type != 'observed' && type != null) {
             newJSON = {
                 modelName: user_model.modelName,
+                targetSprite: user_model.targetSprite,
                 activeDists: this.getActiveDists(user_model.models),
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list
@@ -2088,17 +2303,18 @@ class Scratch3Turing {
         this._sendRequesttoServer(url, payload)
     }
 
-    _onClearSamples(targetName) {
+    _onClearSamples(modelName) {
         console.log("clearing samples for " + targetName)
-        this.user_models[targetName].data = []
+        this.user_models[modelName].data = []
         this.observations = []
-        this.user_models[targetName].models.posterior = this.getClearedModel()
+        this.user_models[modelName].models.posterior = this.getClearedModel()
+        this.user_models[modelName].dataSpecs = getClearedSampleSpecs // clear sample specifications
 
         console.log(":0 :0 after clearing, this is usermodels...")
         console.log(this.user_models)
-        this.user_models[targetName]
+        this.user_models[modelName]
 
-        this.updateVisualisationData(this.user_models[targetName]) 
+        this.updateVisualisationData(this.user_models[modelName]) 
         this._runtime.emit('TURING_DATA', this.visualisationData)
     }
 
@@ -2156,31 +2372,33 @@ class Scratch3Turing {
         this._timer.start(); 
     }
 
-    labelGroundTruth (args, util) {
-        console.log("Adding a sample to our ground truth!")
+    // labelGroundTruth (args, util) {
+    //     console.log("Adding a sample to our ground truth!")
 
-        var random_var_idx = args.RANDOM_VAR - 1
 
-        if (this.state.random_var != random_var_idx) {
-            this._setRandomVariable(random_var_idx)
-        }
+    //     var random_var_idx = args.RANDOM_VAR - 1
+    //     var modelName = args.RANDOM_VAR - 1 //TTODO fix this?
 
-        // Slightly buffer requests
-        const currentTime = Date.now(); 
-        if (currentTime - this.lastSampleTime < 400) {
-          return; 
-        }
-        this.lastSampleTime = currentTime;
+    //     if (this.state.random_var != random_var_idx) {
+    //         this._setRandomVariable(random_var_idx)
+    //     }
 
-        // Check if we can get a sample
-        console.log(util.target)
+    //     // Slightly buffer requests
+    //     const currentTime = Date.now(); 
+    //     if (currentTime - this.lastSampleTime < 400) {
+    //       return; 
+    //     }
+    //     this.lastSampleTime = currentTime;
 
-        if (typeof util.target != undefined) {
-            this._getThenSendSample(util, this.user_models[util.target.getName()], groundTruth = true)
-        } else {
-            return "I can't do this alone ;) Add me to your code!"
-        }
-    }
+    //     // Check if we can get a sample
+    //     console.log(util.target)
+
+    //     if (typeof util.target != undefined) {
+    //         this._getThenSendSample(util, this.user_models[modelName], groundTruth = true)
+    //     } else {
+    //         return "I can't do this alone ;) Add me to your code!"
+    //     }
+    // }
 
     /* Helper Utilities */
     _getAffirmation() {

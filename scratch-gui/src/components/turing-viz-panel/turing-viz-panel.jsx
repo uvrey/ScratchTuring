@@ -67,6 +67,106 @@ const getIntroOfPage = (label) => {
     return null;
   };
 
+
+  const getParameterLabels = (props) => {
+    console.log("getting labels");
+      switch (props.data.user_model.distribution) {
+        case 'gaussian':
+          return (
+            <div>
+            <div>Gaussian: <h1>μ</h1>
+            <input
+              type="text"
+              id="gaussian_mu" 
+              maxLength="8" // Restrict to 8 characters
+              defaultValue={1} // Set initial value
+              // className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.longLat)}
+              onChange={(event) => {
+              const newValue = parseFloat(event.target.value);
+              if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
+                  document.getElementById("gaussian_mu").value = newValue;
+              }
+              }}
+            />
+            </div>
+            <h1>σ²</h1>
+            <input
+              type="text"
+              id="gaussian_std" 
+              maxLength="8" // Restrict to 8 characters
+              defaultValue={1} // Set initial value
+              // className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.longLat)}
+              onChange={(event) => {
+              const newValue = parseFloat(event.target.value);
+              if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
+                  document.getElementById("gaussian_std").value = newValue;
+              }
+              }}
+            />
+
+            <label for="groundTruth">
+              <p>Show Ground Truth</p>
+              <input type="checkbox" id="groundTruth" name="groundTruth" value="yes"/>  
+            </label>
+
+            <label for="prior">
+              <p>Show Prior</p>
+              <input type="checkbox" id="prior" name="prior" value="yes"/>  
+            </label>
+
+            <label for="Posterior">
+              <p>Show Posterior</p>
+              <input type="checkbox" id="Posterior" name="Posterior" value="yes"/>  
+            </label>
+
+            <Box className={styles.buttonRow}>
+                <button
+                    className={styles.mapOptionsButton}
+                    onClick={props.onCoords}
+                >
+                    <FormattedMessage
+                        defaultMessage="Update Prior"
+                        description="Button in prompt for starting a search"
+                        id="gui.mapModal.getCoords"
+                    />
+                    <img
+                    className={styles.buttonIconRight}
+                        // src={compassIcon}
+                    />
+                </button>
+
+                <button
+                    className={styles.mapOptionsButton}
+                    onClick={props.onSurprise}
+                >
+                    <FormattedMessage
+                        defaultMessage="Create Ground Truth"
+                        description="Button in prompt for starting a search"
+                        id="gui.mapModal.surprise"
+                    />
+                    <img
+                        className={styles.buttonIconRight}
+                        // src={surpriseIcon}
+                    />
+                </button>
+            </Box>
+
+            </div>
+            
+          
+         // 
+        
+        ); // Use PascalCase for model names
+        case 'poisson':
+          return (<div>Poisson: <h1>λ</h1></div>)
+        case 'binomial':
+          return (<div>Binomial: <h1>n</h1><h1>p</h1></div>)
+        default:
+          return (<h1>Unknown distribution</h1>);
+      }
+  };
+  
+
 const TuringVizPanel = props => (
         <Box className={styles.body}>
             <Box className={styles.dataCol}>
@@ -121,7 +221,7 @@ const TuringVizPanel = props => (
                       key={key}
                       dataKey={key}
                       type = "monotone"
-                      stroke={"#d4e414"}
+                      stroke={"#000000"}
                       dot={false}
                       isAnimationActive={true}
                       strokeWidth="1.5px"
@@ -130,6 +230,10 @@ const TuringVizPanel = props => (
                 <Legend />
                 <Tooltip />
                 </LineChart>
+
+                <Box>
+                {getParameterLabels(props)}
+                </Box>
                 </Box>
                 </Box>
                 </Box>
