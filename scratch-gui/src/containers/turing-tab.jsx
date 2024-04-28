@@ -55,7 +55,7 @@ class TuringTab extends React.Component {
         this.state = {
             selectedSampleIndex: 0,
             activeModelIndex: 0, // Add activeModelIndex here
-          };
+        };
 
         this.handleActivateDashboard = this.handleActivateDashboard.bind(this)
     }
@@ -149,6 +149,12 @@ class TuringTab extends React.Component {
         return this.getModelData(n)
     }
 
+    getActiveModelDataState() {
+        var n = this.getActiveModelName()
+        return this.getModelDataState(n)
+    }
+
+
     getTuringCheckbox(props) {
         const [selectedKey, setSelectedKey] = useState(null); // Stores the selected key
 
@@ -190,7 +196,7 @@ class TuringTab extends React.Component {
 
         const sprite = vm.editingTarget.sprite;
         const targetName = vm.editingTarget.getName();
-        const modelName = 'height'; //TTODO
+        const modelName = ''; //TTODO
 
         const sounds = sprite.sounds ? sprite.sounds.map(sound => (
             {
@@ -235,30 +241,22 @@ class TuringTab extends React.Component {
                 vm={this.props.vm}
                 onItemClick={this.handleSelectSample}
                 items={this.getActiveModelSamples()}
-                dataIsSet={this.getModelDataState(modelName)}
+                dataIsSet={this.getActiveModelDataState()}
                 activeModels={this.getActiveModels(this.props.dataIsSet)}
                 activateModelDashboard={this.handleActivateDashboard}
                 activeModelIndex={this.state.activeModelIndex}
                 activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
             >
-
-                {/* {console.log("Active models??")}
-                {console.log(this.getActiveModels(this.props.dataIsSet))} */}
-
-                {/* {console.log("******* data set, samples, data: *********")}
-                {console.log(this.getModelDataState(modelName))}
-                {console.log(this.getModelSamples(modelName))}
-                {console.log(this.getModelData(modelName))} */}
-
-                {(this.getModelDataState(modelName)) ?
+                {this.getActiveModelDataState() ?
                     (<TuringVizPanel
                         vm={this.props.vm}
                         data={this.getActiveModelData()}
+                        dataIsSet={this.getActiveModelDataState()}
                         activeModels={this.getActiveModels(this.props.dataIsSet)}
                         activateModelDashboard={this.handleActivateDashboard}
                         activeModelIndex={this.state.activeModelIndex}
                         activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
-                    />) : (<h1>No model defined for {modelName}... yet!</h1>)}
+                    />) : (<h1>No models defined... yet!</h1>)}
             </TuringAssetPanel>
         );
     }

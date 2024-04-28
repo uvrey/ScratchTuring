@@ -1883,7 +1883,8 @@ class Scratch3Turing {
         user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
         user_model.models[modelType]['stdv'] = dict['summary']["std"][1]
         user_model.models[modelType]['defined'] = true
-        this.updateSampleSpecs(user_model, rv)
+
+        // this.updateSampleSpecs(user_model, rv)
         user_model['hasDistData'] = true
 
         this.updateVisualisationData(user_model, modelType)
@@ -2070,13 +2071,12 @@ class Scratch3Turing {
 
     /* Prepare a JSON of relevant data */
     updateVisualisationData(user_model, type = null) {
-        {console.log("when updating vis data, we have:")}
-        {console.log(user_model)}
         if (type != 'observed' && type != null) {
             newJSON = {
                 distribution: user_model.distribution,
                 modelName: user_model.modelName,
                 targetSprite: user_model.targetSprite,
+                dataSpecs: user_model.dataSpecs,
                 activeDists: this.getActiveDists(user_model.models),
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list

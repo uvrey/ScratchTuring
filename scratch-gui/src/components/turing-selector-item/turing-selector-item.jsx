@@ -57,15 +57,16 @@ const TuringSelectorItem = props => {
         <div className={styles.spriteImageInner}>
           {console.log("Inside turing selector, we have... ")}
           {console.log(props.data)}
+          {console.log("random varname?" + props.randomVarName)}
           {/* Display swatch or icon */}
-          {props.data.user_model.randomVar === 'COLOR' ? (
+          {props.randomVarName === 'COLOR' ? (
             <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}>
             </div>
           ) : (
             <img
               className={styles.spriteImage}
               draggable={false}
-              src={getIconFromType(props.data.user_model.randomVar)}
+              src={getIconFromType(props.randomVarName)}
             />
           )}
         </div>
@@ -96,6 +97,7 @@ TuringSelectorItem.propTypes = {
   selected: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
   sample: PropTypes.node.isRequired,
+  randomVarName: PropTypes.string.isRequired
 };
 
 export default TuringSelectorItem;
