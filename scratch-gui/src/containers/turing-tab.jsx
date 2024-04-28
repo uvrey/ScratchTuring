@@ -146,15 +146,37 @@ class TuringTab extends React.Component {
         vm.runtime.emit('TOGGLE_VISIBILITY', data)
     }
 
+    // buildDocTag(modelName, model, mode) {
+    //     return modelName + "_" + model + "_" + mode
+    // }
+
+    // getDocTags(modelName) {
+    //     return [
+    //         {
+    //             stdv: modelName + "_custom_stdv",
+    //             stdvValue: modelName +"customValue_stdv",
+    //             mean: modelName +"_custom_mu",
+    //             meanValue: modelName +"_customValue_mu"
+    //         },
+    //         {
+    //             stdv: modelName + "_prior_stdv",
+    //             stdvValue: modelName +"prioralue_stdv",
+    //             mean: modelName +"_prior_mu",
+    //             meanValue: modelName +"_priorValue_mu"
+    //         }
+    //     ]
+    // }
+
     handleUpdateToChart(modelName, vm, updateCustom) {
         console.log("handling new values in the selection box")
 
-        const inputs = ["customParamsValue_mu", "customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
+        const inputs = [modelName + "_customParamsValue_mu", modelName + "_customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
         const values = {};
-        
+
         for (const inputName of inputs) {
-          const input = document.getElementById(inputName);
-          values[inputName] = parseFloat(input.value);
+
+            const input = document.getElementById(inputName);
+            values[inputName] = parseFloat(input.value);
         }
 
         console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
@@ -162,14 +184,14 @@ class TuringTab extends React.Component {
         console.log("--------------")
 
         // Update models on the backend with new information
-        var data = {modelName: modelName, mean: values["customParamsValue_mu"], stdv: values["customParamsValue_stdv"]}
-        updateCustom(vm, data) 
+        var data = { modelName: modelName, mean: values[modelName + "_customParamsValue_mu"], stdv: values[modelName + "_customParamsValue_stdv"] }
+        updateCustom(vm, data)
 
         // const longitudeValue = values.longitude;
         // const latitudeValue = values.latitude;
         // const zoomValue = values.zoom;
         // const pitchValue = values.pitch;
-      
+
         // try {
         //     var long = parseFloat(longitudeValue);
         //     var lat = parseFloat(latitudeValue);
@@ -187,7 +209,7 @@ class TuringTab extends React.Component {
         //     return; 
         //   }
     }
-    
+
     handleUpdateCustom(vm, data) {
         console.log("Sending...")
         console.log(data)
@@ -196,19 +218,19 @@ class TuringTab extends React.Component {
 
     handleUpdatePrior(vm, data) {
         vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
-       //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+        //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
     handleUpdateGroundTruth(vm, data) {
         vm.runtime.emit('UPDATE_GROUND_TRUTH_PARAMS', data)
-      //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+        //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
     getStoredValue(value, defaultValue) {
         try {
             return localStorage.getItem(value);
-        }  catch (error) {
-            return defaultValue; 
+        } catch (error) {
+            return defaultValue;
         }
     }
 
@@ -287,7 +309,7 @@ class TuringTab extends React.Component {
             }
         });
 
-        
+
 
         return (
             <TuringAssetPanel

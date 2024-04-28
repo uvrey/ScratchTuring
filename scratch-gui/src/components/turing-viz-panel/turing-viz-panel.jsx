@@ -30,6 +30,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const formatId = (modelName, label) => {
+  return modelName +"_" + label
+}
+
+const CUSTOM = 0
+const PRIOR = 1
+
 const getParameterLabels = (props) => {
   switch (props.data.user_model.distribution) {
     case 'gaussian':
@@ -40,62 +47,63 @@ const getParameterLabels = (props) => {
             <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
           </label> */}
           <Box className={styles.sliderBox}>
-          <h3>Ground Truth</h3>
-          <b>mean (μ)</b>
+            <h3>Ground Truth</h3>
+            <b>mean (μ)</b>
             <input
-                type="range"
-                id="customParams_mu"
-                min="0"
-                max="100"
-                step="0.05"
-                defaultValue={props.getValue('customParams_mu', 0.1119)}
-                onChange={(event) => {
-                    const newValue = parseFloat(event.target.value);
-                    document.getElementById("customParamsValue_mu").value = newValue;
-                }}
+              type="range"
+              id={formatId(props.activeModel, "customParams_mu")}
+              min="0"
+              max="100"
+              step="0.05"
+              defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 0.1119)}
+              onChange={(event) => {
+                const newValue = parseFloat(event.target.value);
+                document.getElementById(formatId(props.activeModel, "customParamsValue_mu")).value = newValue;
+              }}
             />
             <input
-                type="text"
-                id="customParamsValue_mu" 
-                maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue('customParams_mu', 14.25)} // Set initial value
-                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
-                onChange={(event) => {
+              type="text"
+              id={formatId(props.activeModel, "customParamsValue_mu")}
+              maxLength="4" // Restrict to 8 characters
+              defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 14.25)} // Set initial value
+              className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+              onChange={(event) => {
                 const newValue = parseFloat(event.target.value);
                 if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById("customParams_mu").value = newValue;
+                  document.getElementById(formatId(props.activeModel, "customParams_mu")).value = newValue;
                 }
-                }}
+              }}
             />
-            </Box>
-            <Box className={styles.sliderBox}>
+          </Box>
+          <Box className={styles.sliderBox}>
+            <h3>Ground Truth</h3>
             <b>stdv (σ)</b>
             <input
-                type="range"
-                id="customParams_stdv"
-                min="0"
-                max="22"
-                step="0.05"
-                defaultValue={props.getValue('customParams_stdv', 0.1119)}
-                onChange={(event) => {
-                    const newValue = parseFloat(event.target.value);
-                    document.getElementById("customParamsValue_stdv").value = newValue;
-                }}
+              type="range"
+              id={formatId(props.activeModel, "customParams_stdv")}
+              min="0"
+              max="100"
+              step="0.05"
+              defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 0.1119)}
+              onChange={(event) => {
+                const newValue = parseFloat(event.target.value);
+                document.getElementById(formatId(props.activeModel, "customParamsValue_stdv")).value = newValue;
+              }}
             />
             <input
-                type="text"
-                id="customParamsValue_stdv" 
-                maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue('customParams_stdv', 14.25)} // Set initial value
-                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
-                onChange={(event) => {
+              type="text"
+              id={formatId(props.activeModel, "customParamsValue_stdv")}
+              maxLength="4" // Restrict to 8 characters
+              defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 14.25)} // Set initial value
+              className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+              onChange={(event) => {
                 const newValue = parseFloat(event.target.value);
                 if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById("customParams_stdv").value = newValue;
+                  document.getElementById(formatId(props.activeModel, "customParams_stdv")).value = newValue;
                 }
-                }}
+              }}
             />
-            </Box>
+          </Box>
 
           <Box className={styles.buttonRow}>
             {/* <button
@@ -180,20 +188,6 @@ const TuringVizPanel = props => (
       {console.log("Building visualisation panel :) here's what we have!")}
       {console.log(props.data)}
 
-      <Box className={styles.keyStats}>
-        <div>
-          <img src={FontType} className={styles.statsHeading} />
-          <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
-        </div>
-        <div>
-          <img src={FontCurrentSample} className={styles.statsHeading} />
-          {(props.data.samples.length == 0) ? (<p className={styles.stat}>none</p>) : (<p className={styles.stat}>{props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}</p>)}
-        </div>
-        <div>
-          <img src={FontNumSamples} className={styles.statsHeading} />
-          <p className={styles.stat}>{props.data.samples.length}</p>
-        </div>
-      </Box>
 
       <Box className={styles.dataRow}>
         {/* <Box className={styles.dataCol}>
@@ -205,7 +199,22 @@ const TuringVizPanel = props => (
             <YAxis />
           </BarChart>
         </Box> */}
-
+        <Box className={styles.keyStats}>
+          <div>
+            <img src={FontType} className={styles.statsHeading} />
+            <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
+          </div>
+          <div>
+            <img src={FontCurrentSample} className={styles.statsHeading} />
+            {(props.data.samples.length == 0) ? (<p className={styles.stat}>none</p>) : (<p className={styles.stat}>{props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}</p>)}
+          </div>
+          <div>
+            <img src={FontNumSamples} className={styles.statsHeading} />
+            <p className={styles.stat}>{props.data.samples.length}</p>
+          </div>
+        </Box>
+      </Box>
+      <Box className={styles.dataRow}>
         <Box className={styles.dataCol}>
           <img src={FontDist} className={styles.visHeading} />
           <LineChart width={800} height={400} data={props.data.distData}>
@@ -216,7 +225,7 @@ const TuringVizPanel = props => (
             />
             <YAxis allowDecimals={true} />
             <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-
+            {props.docTags}
             {props.data.activeDists.map((key) => (
               <Line
                 key={key}
@@ -228,13 +237,13 @@ const TuringVizPanel = props => (
                 strokeWidth={props.data.styles[key].strokeWidth}
               />
             ))}
+            {/* <Customized component={CustomizedRectangle} /> */}
             <Legend />
             <Tooltip />
           </LineChart>
-
-          <Box>
-            {getParameterLabels(props)}
-          </Box>
+        </Box>
+        <Box>
+          {getParameterLabels(props)}
         </Box>
       </Box>
     </Box>
