@@ -88,16 +88,16 @@ class Scratch3Turing {
         this._runtime.on('PROJECT_START', this._onResetTimer);
 
         this._updateParams = this._updateParams.bind(this);
-        this._runtime.on('UPDATE_CUSTOM_PARAMS', data => this._updateParams(data, 'custom'));        
+        this._runtime.on('UPDATE_CUSTOM_PARAMS', data => this._updateParams(data, 'custom'));
 
         this._updateParams = this._updateParams.bind(this);
-        this._runtime.on('UPDATE_PRIOR_PARAMS', data => this._updateParams(data, 'prior'));        
+        this._runtime.on('UPDATE_PRIOR_PARAMS', data => this._updateParams(data, 'prior'));
 
         this._updateParams = this._updateParams.bind(this);
-        this._runtime.on('UPDATE_GROUND_TRUTH_PARAMS', data => this._updateParams(data, 'groundTruth'));      
-        
+        this._runtime.on('UPDATE_GROUND_TRUTH_PARAMS', data => this._updateParams(data, 'groundTruth'));
+
         this.toggleVisibility = this.toggleVisibility.bind(this);
-        this._runtime.on('TOGGLE_VISIBILITY', data => this.toggleVisibility(data));       
+        this._runtime.on('TOGGLE_VISIBILITY', data => this.toggleVisibility(data));
     }
 
     _getColorFromPalette() {
@@ -961,7 +961,7 @@ class Scratch3Turing {
 
         if (this.user_models[data.modelName].models[data.mode] != undefined) {
             console.log("TOGGLING " + data.modelName + " data.mode? " + data.mode)
-            this.user_models[data.modelName].models[data.mode].active = !this.user_models[data.modelName].models[data.mode].active 
+            this.user_models[data.modelName].models[data.mode].active = !this.user_models[data.modelName].models[data.mode].active
         }
     }
 
@@ -977,14 +977,14 @@ class Scratch3Turing {
             this._toggleVisibilityByState(data.modelName, mode, true)
         }
 
-        this.user_models[data.modelName].models[mode].mean =  data.mean
-        this.user_models[data.modelName].models[mode].stdv =  data.stdv
+        this.user_models[data.modelName].models[mode].mean = data.mean
+        this.user_models[data.modelName].models[mode].stdv = data.stdv
 
         this.updateVisualisationData(this.user_models[data.modelName])
 
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-    } 
+    }
 
     _getDistributionData(user_model) {
         // TODO if statement here so that you can use other things 
@@ -1065,6 +1065,11 @@ class Scratch3Turing {
                 targetSprite: user_model.targetSprite,
                 dataSpecs: user_model.dataSpecs,
                 activeDists: this.getActiveDists(user_model.models),
+                styles: {
+                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px"},
+                    'posterior': { stroke: "#45BDE5", dots: false , strokeWidth: "4px"},
+                    'custom': { stroke: "#9966FF", dots: false , strokeWidth: "4px"}
+                },
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list
                 barData: this._getBarChartData(user_model), // plots bar chart data
@@ -1073,7 +1078,7 @@ class Scratch3Turing {
                 distLines: user_model.distLines
             }
             this.visualisationData[user_model.modelName] = newJSON
-        } 
+        }
     }
 
     async buildQuery(modelName, url_path, method, modelType, distribution = '', n = '', data = []) {

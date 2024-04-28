@@ -35,10 +35,10 @@ const getParameterLabels = (props) => {
     case 'gaussian':
       return (
         <div>
-          <label htmlFor="groundTruth">
+          {/* <label htmlFor="groundTruth"> //TTODO
             <p>Show Custom Distribution</p>
             <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
-          </label>
+          </label> */}
           <Box className={styles.sliderBox}>
           <h3>Ground Truth</h3>
           <b>mean (μ)</b>
@@ -98,7 +98,7 @@ const getParameterLabels = (props) => {
             </Box>
 
           <Box className={styles.buttonRow}>
-            <button
+            {/* <button
               className={styles.mapOptionsButton}
               onClick={() => props.updateCustom(props.vm, { modelName: props.activeModel, mean: 10, stdv: 0.5 })}
             >
@@ -111,7 +111,7 @@ const getParameterLabels = (props) => {
                 className={styles.buttonIconRight}
               // src={compassIcon}
               />
-            </button>
+            </button> */}
 
             <button
               className={styles.mapOptionsButton}
@@ -196,7 +196,7 @@ const TuringVizPanel = props => (
       </Box>
 
       <Box className={styles.dataRow}>
-        <Box className={styles.dataCol}>
+        {/* <Box className={styles.dataCol}>
           <img src={FontBarChart} className={styles.visHeading} />
           <BarChart width={500} height={300} data={props.data.barData} className={styles.chartElement}>
             <Bar key={props.data.barData.type} fill="#855CD6" isAnimationActive={true} dataKey="value" barsize={10} />
@@ -204,11 +204,11 @@ const TuringVizPanel = props => (
             <Tooltip content={<CustomTooltip />} />
             <YAxis />
           </BarChart>
-        </Box>
+        </Box> */}
 
         <Box className={styles.dataCol}>
           <img src={FontDist} className={styles.visHeading} />
-          <LineChart width={600} height={300} data={props.data.distData}>
+          <LineChart width={800} height={400} data={props.data.distData}>
             <XAxis
               allowDecimals={false}
               dataKey="input"
@@ -217,19 +217,15 @@ const TuringVizPanel = props => (
             <YAxis allowDecimals={true} />
             <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
 
-
-            {console.log("active distributions??")}
-            {console.log(props.data.activeDists)}
-
             {props.data.activeDists.map((key) => (
               <Line
                 key={key}
                 dataKey={key}
                 type="monotone"
-                stroke={"#000000"}
-                dot={false}
+                stroke={props.data.styles[key].stroke}
+                dot={props.data.styles[key].dots}
                 isAnimationActive={true}
-                strokeWidth="1.5px"
+                strokeWidth={props.data.styles[key].strokeWidth}
               />
             ))}
             <Legend />
