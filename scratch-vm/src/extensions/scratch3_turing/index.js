@@ -975,15 +975,29 @@ class Scratch3Turing {
 
         if (mode == 'custom') {
             this._toggleVisibilityByState(data.modelName, mode, true)
+            this.user_models[data.modelName].models[mode].mean = data.mean
+            this.user_models[data.modelName].models[mode].stdv = data.stdv
+
+            this.updateVisualisationData(this.user_models[data.modelName])
+
+            this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
+            this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+        } else if (mode == 'prior') {
+            var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) ||  (this.user_models[data.modelName].models[mode].stdv != data.stdv) 
+            
+            if (changed) {
+                console.log("}}}}}}}}} the prior data has changed! but we must keep our observations")
+                this._resetPriorAndObservations(this.user_models[data.modelName], data.mean, data.stdv)
+            } else {
+                console.log("{{{{{{{{{{ NO CHANGES TO THE PRIOR SPOTTED")
+            }
+        } else {
+            console.log("unknown mode " + mode)
         }
+    }
 
-        this.user_models[data.modelName].models[mode].mean = data.mean
-        this.user_models[data.modelName].models[mode].stdv = data.stdv
-
-        this.updateVisualisationData(this.user_models[data.modelName])
-
-        this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
-        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+    _resetPriorAndObservations(user_model, mean, stdv) {
+        console.log("will reset prior etc here to " + mean + ", " + stdv)
     }
 
     _getDistributionData(user_model) {
@@ -1066,9 +1080,9 @@ class Scratch3Turing {
                 dataSpecs: user_model.dataSpecs,
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
-                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px"},
-                    'posterior': { stroke: "#45BDE5", dots: false , strokeWidth: "4px"},
-                    'custom': { stroke: "#9966FF", dots: false , strokeWidth: "4px"}
+                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px" },
+                    'posterior': { stroke: "#45BDE5", dots: false, strokeWidth: "4px" },
+                    'custom': { stroke: "#9966FF", dots: false, strokeWidth: "4px" }
                 },
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list
@@ -1292,35 +1306,35 @@ class Scratch3Turing {
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
     }
 
-    setPrior(args, util) {
-        var prior = args.PRIOR
-        var random_var_idx = args.RANDOM_VAR - 1
+    // setPrior(args, util) {
+    //     var prior = args.PRIOR
+    //     var random_var_idx = args.RANDOM_VAR - 1
 
-        console.log("Setting prior to " + RANDOM_VAR_NAMES[prior])
+    //     console.log("Setting prior to " + RANDOM_VAR_NAMES[prior])
 
-        if (this.state.random_var != random_var_idx) {
-            this._setRandomVariable(random_var_idx)
-        }
+    //     if (this.state.random_var != random_var_idx) {
+    //         this._setRandomVariable(random_var_idx)
+    //     }
 
-        // Compatibility checks with type of random variable chosen
-        if (!this._checkCompatibility(prior)) {
-            return this._getCaution()
-        }
+    //     // Compatibility checks with type of random variable chosen
+    //     if (!this._checkCompatibility(prior)) {
+    //         return this._getCaution()
+    //     }
 
-        // set the new prior in the line charts
-        this.state.prior = Number(prior)
-        this._updatePrior(prior)
-        this._onClearSamples()
+    //     // set the new prior in the line charts
+    //     this.state.prior = Number(prior)
+    //     this._updatePrior(prior)
+    //     this._onClearSamples()
 
-        this.updateVisualisationData(this.observations, 'prior')
+    //     this.updateVisualisationData(this.observations, 'prior')
 
-        console.log("emitting ")
-        console.log(this.visualisationData)
+    //     console.log("emitting ")
+    //     console.log(this.visualisationData)
 
-        this._runtime.emit('TURING_DATA', this.visualisationData)
-        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-        return this._getAffirmation()
-    }
+    //     this._runtime.emit('TURING_DATA', this.visualisationData)
+    //     this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+    //     return this._getAffirmation()
+    // }
 
     _onResetTimer() {
         this._timer.start();

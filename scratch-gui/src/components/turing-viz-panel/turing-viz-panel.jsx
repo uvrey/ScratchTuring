@@ -31,7 +31,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const formatId = (modelName, label) => {
-  return modelName +"_" + label
+  return modelName + "_" + label
 }
 
 const CUSTOM = 0
@@ -46,117 +46,160 @@ const getParameterLabels = (props) => {
             <p>Show Custom Distribution</p>
             <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
           </label> */}
-          <Box className={styles.sliderBox}>
-            <h3>Ground Truth</h3>
-            <b>mean (μ)</b>
-            <input
-              type="range"
-              id={formatId(props.activeModel, "customParams_mu")}
-              min="0"
-              max="100"
-              step="0.05"
-              defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 0.1119)}
-              onChange={(event) => {
-                const newValue = parseFloat(event.target.value);
-                document.getElementById(formatId(props.activeModel, "customParamsValue_mu")).value = newValue;
-              }}
-            />
-            <input
-              type="text"
-              id={formatId(props.activeModel, "customParamsValue_mu")}
-              maxLength="4" // Restrict to 8 characters
-              defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 14.25)} // Set initial value
-              className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
-              onChange={(event) => {
-                const newValue = parseFloat(event.target.value);
-                if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                  document.getElementById(formatId(props.activeModel, "customParams_mu")).value = newValue;
-                }
-              }}
-            />
-          </Box>
-          <Box className={styles.sliderBox}>
-            <h3>Ground Truth</h3>
-            <b>stdv (σ)</b>
-            <input
-              type="range"
-              id={formatId(props.activeModel, "customParams_stdv")}
-              min="0"
-              max="100"
-              step="0.05"
-              defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 0.1119)}
-              onChange={(event) => {
-                const newValue = parseFloat(event.target.value);
-                document.getElementById(formatId(props.activeModel, "customParamsValue_stdv")).value = newValue;
-              }}
-            />
-            <input
-              type="text"
-              id={formatId(props.activeModel, "customParamsValue_stdv")}
-              maxLength="4" // Restrict to 8 characters
-              defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 14.25)} // Set initial value
-              className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
-              onChange={(event) => {
-                const newValue = parseFloat(event.target.value);
-                if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                  document.getElementById(formatId(props.activeModel, "customParams_stdv")).value = newValue;
-                }
-              }}
-            />
-          </Box>
+          <Box className={styles.paramBox}>
+          <h3>Ground Truth</h3>
+            <Box className={styles.sliderBox}>
+              <h4><b>mean (μ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "customParams_mu")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "customParamsValue_mu")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "customParamsValue_mu")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "customParams_mu")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+            <Box className={styles.sliderBox}>
+              <h4><b>stdv (σ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "customParams_stdv")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "customParamsValue_stdv")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "customParamsValue_stdv")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "customParams_stdv")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
 
-          <Box className={styles.buttonRow}>
-            {/* <button
-              className={styles.mapOptionsButton}
-              onClick={() => props.updateCustom(props.vm, { modelName: props.activeModel, mean: 10, stdv: 0.5 })}
-            >
-              <FormattedMessage
-                defaultMessage="Create a Ground Truth"
-                description="Button in prompt for starting a search"
-                id="gui.vizPanel.makeGroundTruth"
-              />
-              <img
-                className={styles.buttonIconRight}
-              // src={compassIcon}
-              />
-            </button> */}
-
-            <button
-              className={styles.mapOptionsButton}
-              onClick={() => props.updateChart(props.activeModel, props.vm, props.updateCustom)}
-            >
-              <FormattedMessage
-                defaultMessage="Update Charts"
-                description="Button in prompt for starting a search"
-                id="gui.vizPanel.updateCharts"
-              />
-              <img
-                className={styles.buttonIconRight}
-              // src={compassIcon}
-              />
-            </button>
-
-            {/* <button
-              className={styles.mapOptionsButton}
-              onClick={props.onSurprise}
-            >
-              <FormattedMessage
-                defaultMessage="Create Ground Truth"
-                description="Button in prompt for starting a search"
-                id="gui.mapModal.surprise"
-              />
-              <img
-                className={styles.buttonIconRight}
-              // src={surpriseIcon}
-              />
-            </button> */}
+            <Box className={styles.buttonRow}>
+              <button
+                className={styles.mapOptionsButton}
+                onClick={() => props.updateChart(props.activeModel, props.vm, props.updateCustom, 'custom')}
+              >
+                <FormattedMessage
+                  defaultMessage="Update Ground Truth"
+                  description="Button in prompt for starting a search"
+                  id="gui.mapModal.groundTruth"
+                />
+                <img
+                  className={styles.buttonIconRight}
+                // src={surpriseIcon}
+                />
+              </button>
+            </Box>
           </Box>
 
+          <Box className={styles.paramBox}>
+          <h3>Prior</h3>
+            <Box className={styles.sliderBox}>
+
+              <h4><b>mean (μ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "priorParams_mu")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_mu"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "priorParamsValue_mu")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "priorParamsValue_mu")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_mu"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "priorParams_mu")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+            <Box className={styles.sliderBox}>
+              <h4><b>stdv (σ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "priorParams_stdv")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_stdv"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "priorParamsValue_stdv")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "priorParamsValue_stdv")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_stdv"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "priorParams_stdv")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+            <Box className={styles.buttonRow}>
+              <button
+                className={styles.mapOptionsButton}
+                onClick={() => props.updateChart(props.activeModel, props.vm, props.updatePrior, 'prior')}
+              >
+                <FormattedMessage
+                  defaultMessage="Update Belief"
+                  description="Button in prompt for starting a search"
+                  id="gui.vizPanel.updateBelief"
+                />
+                <img
+                  className={styles.buttonIconRight}
+                // src={compassIcon}
+                />
+              </button>
+            </Box>
+          </Box>
         </div>
-
-
-        // 
-
       ); // Use PascalCase for model names
     case 'poisson':
       return (<div>Poisson: <h1>λ</h1></div>)
@@ -215,6 +258,7 @@ const TuringVizPanel = props => (
         </Box>
       </Box>
       <Box className={styles.dataRow}>
+        {getParameterLabels(props)}
         <Box className={styles.dataCol}>
           <img src={FontDist} className={styles.visHeading} />
           <LineChart width={800} height={400} data={props.data.distData}>
@@ -243,7 +287,6 @@ const TuringVizPanel = props => (
           </LineChart>
         </Box>
         <Box>
-          {getParameterLabels(props)}
         </Box>
       </Box>
     </Box>

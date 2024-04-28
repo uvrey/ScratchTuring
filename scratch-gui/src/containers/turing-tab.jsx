@@ -167,47 +167,48 @@ class TuringTab extends React.Component {
     //     ]
     // }
 
-    handleUpdateToChart(modelName, vm, updateCustom) {
+    handleUpdateToChart(modelName, vm, updateFunction, mode) {
         console.log("handling new values in the selection box")
 
-        const inputs = [modelName + "_customParamsValue_mu", modelName + "_customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
-        const values = {};
+        if (mode == 'custom') {
+            const inputs = [modelName + "_customParamsValue_mu", modelName + "_customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
+            const values = {};
 
-        for (const inputName of inputs) {
+            for (const inputName of inputs) {
 
-            const input = document.getElementById(inputName);
-            values[inputName] = parseFloat(input.value);
+                const input = document.getElementById(inputName);
+                values[inputName] = parseFloat(input.value);
+            }
+
+            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
+            console.log(values)
+            console.log("--------------")
+
+            // Update models on the backend with new information
+            var customData = { modelName: modelName, mean: values[modelName + "_customParamsValue_mu"], stdv: values[modelName + "_customParamsValue_stdv"] }
+            updateFunction(vm, customData)
+            return
         }
 
-        console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
-        console.log(values)
-        console.log("--------------")
+        if (mode == 'prior') {
+            const inputs = [modelName + "_priorParamsValue_mu", modelName + "_priorParamsValue_stdv"]; // TODO check if I can use these labels for all models?
+            const values = {};
 
-        // Update models on the backend with new information
-        var data = { modelName: modelName, mean: values[modelName + "_customParamsValue_mu"], stdv: values[modelName + "_customParamsValue_stdv"] }
-        updateCustom(vm, data)
+            for (const inputName of inputs) {
 
-        // const longitudeValue = values.longitude;
-        // const latitudeValue = values.latitude;
-        // const zoomValue = values.zoom;
-        // const pitchValue = values.pitch;
+                const input = document.getElementById(inputName);
+                values[inputName] = parseFloat(input.value);
+            }
 
-        // try {
-        //     var long = parseFloat(longitudeValue);
-        //     var lat = parseFloat(latitudeValue);
-        //     var zoom = parseFloat(zoomValue);
-        //     var pitch = parseFloat(pitchValue);
+            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
+            console.log(values)
+            console.log("--------------")
 
-        //     this.props.onCancel(); // close modal
-        //     // check if valid 
-        //     this.handleFetchingMap(lat, long, zoom, pitch)
-
-        //   } catch (error) {
-        //     console.log(error)
-        //     this.props.onShowMapError()
-        //     console.log("Please enter valid numbers for longitude and latitude.");
-        //     return; 
-        //   }
+            // Update models on the backend with new information
+            var priorData = { modelName: modelName, mean: values[modelName + "_priorParamsValue_mu"], stdv: values[modelName + "_priorParamsValue_stdv"] }
+            updateFunction(vm, priorData)
+            return
+        }
     }
 
     handleUpdateCustom(vm, data) {
@@ -227,7 +228,9 @@ class TuringTab extends React.Component {
     }
 
     getStoredValue(value, defaultValue) {
+        console.log("@@trying to get the stored value for " + value)
         try {
+            console.log("found the value as " + value)
             return localStorage.getItem(value);
         } catch (error) {
             return defaultValue;
