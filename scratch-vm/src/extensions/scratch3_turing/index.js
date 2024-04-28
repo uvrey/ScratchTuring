@@ -1791,6 +1791,7 @@ class Scratch3Turing {
 
         // util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
         var dist = DISTRIBUTIONS[args.DISTRIBUTION - 1]
+        console.log("we got a " + dist + " as our distribution...")
 
         if (this.user_models[modelName] == null) {
             return "No model found."
@@ -1798,7 +1799,7 @@ class Scratch3Turing {
         // emit loading screen ask
 
         var message = this.buildQuery(util, "defineModel", 'POST', "prior", distribution = dist).then(response => 
-                this.updateInternals(this.user_models[modelName], response, 'prior', ['prior'], distribution = dist)); // unpacks the new data using the turing samples
+                this.updateInternals(this.user_models[modelName], response, 'prior', rv = NONE, distribution = dist)); // unpacks the new data using the turing samples
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -1844,7 +1845,7 @@ class Scratch3Turing {
             console.log("we want to take a sample from a sprite... but has a model been defined for this sprite yet?")
             message = this._getThenSendSample(util, user_model, random_var_idx)
             this.conditionOnPrior(util, user_model)
-                    .then(response => this.updateInternals(user_model, response, 'posterior', random_var_idx, ['posterior']));  
+                    .then(response => this.updateInternals(user_model, response, 'posterior', random_var_idx));  
                
             if (random_var_idx == COLOR) {
                 return "I can't do this alone... add me to the workspace!"
@@ -1867,7 +1868,7 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, modelType, rv, keys, distribution = null) {
+       updateInternals(user_model, response, modelType, rv, distribution = null) {
         dict = this.parseResponse(response)
 
         if (distribution != null) {
@@ -2073,6 +2074,7 @@ class Scratch3Turing {
         {console.log(user_model)}
         if (type != 'observed' && type != null) {
             newJSON = {
+                distribution: user_model.distribution,
                 modelName: user_model.modelName,
                 targetSprite: user_model.targetSprite,
                 activeDists: this.getActiveDists(user_model.models),

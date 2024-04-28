@@ -19,8 +19,6 @@
     -webkit-text-stroke: 5px $looks-secondary;
 } */
 
-
-
 .slider-value-background {
     background-color: $looks-secondary; /* Add your desired background color */
     padding: 2px; /* Add some padding around the text */

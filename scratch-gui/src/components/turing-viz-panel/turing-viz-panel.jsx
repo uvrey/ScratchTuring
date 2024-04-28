@@ -70,7 +70,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 
 const getParameterLabels = (props) => {
-  console.log("getting labels");
+  console.log("~~~~~~~~~~~~~~user model in param labels?~~~~~~~~~~~~~~~~~~~~");
+  console.log(props.data.user_model)
   switch (props.data.user_model.distribution) {
     case 'gaussian':
       return (
