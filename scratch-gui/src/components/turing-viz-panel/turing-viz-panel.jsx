@@ -36,7 +36,7 @@ const getParameterLabels = (props) => {
       return (
         <div>
           <div>Gaussian: <h1>μ</h1>
-            <input
+            {/* <input
               type="text"
               id="gaussian_mu"
               maxLength="8" // Restrict to 8 characters
@@ -48,10 +48,10 @@ const getParameterLabels = (props) => {
                   document.getElementById("gaussian_mu").value = newValue;
                 }
               }}
-            />
+            /> */}
           </div>
           <h1>σ²</h1>
-          <input
+          {/* <input
             type="text"
             id="gaussian_std"
             maxLength="8" // Restrict to 8 characters
@@ -63,14 +63,14 @@ const getParameterLabels = (props) => {
                 document.getElementById("gaussian_std").value = newValue;
               }
             }}
-          />
-
+          /> */}
+          
           <label htmlFor="groundTruth">
-            <p>Show Ground Truth</p>
-            <input type="checkbox" id="groundTruth" name="groundTruth" value="yes" />
+            <p>Show Custom Distribution</p>
+            <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
           </label>
 
-          <label htmlFor="prior">
+          {/* <label htmlFor="prior">
             <p>Show Prior</p>
             <input type="checkbox" id="prior" name="prior" value="yes" />
           </label>
@@ -78,15 +78,15 @@ const getParameterLabels = (props) => {
           <label htmlFor="Posterior">
             <p>Show Posterior</p>
             <input type="checkbox" id="Posterior" name="Posterior" value="yes" />
-          </label>
+          </label> */}
 
           <Box className={styles.buttonRow}>
             <button
               className={styles.mapOptionsButton}
-              onClick={props.onCoords}
+              onClick={() => props.updateCustom(props.vm, { modelName: props.activeModel, mean: 10, stdv: 0.5 })}
             >
               <FormattedMessage
-                defaultMessage="Update Prior"
+                defaultMessage="Update Custom"
                 description="Button in prompt for starting a search"
                 id="gui.mapModal.getCoords"
               />
@@ -96,7 +96,7 @@ const getParameterLabels = (props) => {
               />
             </button>
 
-            <button
+            {/* <button
               className={styles.mapOptionsButton}
               onClick={props.onSurprise}
             >
@@ -109,7 +109,7 @@ const getParameterLabels = (props) => {
                 className={styles.buttonIconRight}
               // src={surpriseIcon}
               />
-            </button>
+            </button> */}
           </Box>
 
         </div>

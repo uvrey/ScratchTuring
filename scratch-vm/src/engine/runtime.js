@@ -491,6 +491,18 @@ class Runtime extends EventEmitter {
         return 'PROJECT_START';
     }
 
+    static get UPDATE_CUSTOM_PARAMS () {
+        return 'UPDATE_CUSTOM_PARAMS';
+    }
+
+    static get UPDATE_PRIOR_PARAMS () {
+        return 'UPDATE_PRIOR_PARAMS';
+    }
+
+    static get UPDATE_GROUND_TRUTH_PARAMS () {
+        return 'UPDATE_GROUND_TRUTH_PARAMS';
+    }
+
     /**
      * Event name when threads start running.
      * Used by the UI to indicate running status.

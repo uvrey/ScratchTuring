@@ -83,8 +83,21 @@ class Scratch3Turing {
         // Set up signal receipt from the GUI
         this._onClearSamples = this._onClearSamples.bind(this);
         this._runtime.on('CLEAR_SAMPLES', targetName => this._onClearSamples(targetName));
+
         this._onResetTimer = this._onResetTimer.bind(this);
         this._runtime.on('PROJECT_START', this._onResetTimer);
+
+        this._updateParams = this._updateParams.bind(this);
+        this._runtime.on('UPDATE_CUSTOM_PARAMS', data => this._updateParams(data, 'custom'));        
+
+        this._updateParams = this._updateParams.bind(this);
+        this._runtime.on('UPDATE_PRIOR_PARAMS', data => this._updateParams(data, 'prior'));        
+
+        this._updateParams = this._updateParams.bind(this);
+        this._runtime.on('UPDATE_GROUND_TRUTH_PARAMS', data => this._updateParams(data, 'groundTruth'));      
+        
+        this.toggleVisibility = this.toggleVisibility.bind(this);
+        this._runtime.on('TOGGLE_VISIBILITY', data => this.toggleVisibility(data));       
     }
 
     _getColorFromPalette() {
@@ -694,7 +707,8 @@ class Scratch3Turing {
                     data: null,
                     mean: null,
                     stdv: null,
-                    defined: false
+                    defined: false,
+                    active: false
                 },
                 posterior: {
                     params: null,
@@ -702,7 +716,8 @@ class Scratch3Turing {
                     data: null,
                     mean: null,
                     stdv: null,
-                    defined: false
+                    defined: false,
+                    active: false
                 },
                 groundTruth: {
                     params: null,
@@ -710,7 +725,17 @@ class Scratch3Turing {
                     data: null,
                     mean: null,
                     stdv: null,
-                    defined: false
+                    defined: false,
+                    active: false
+                },
+                custom: {
+                    params: null,
+                    // barValue: null,
+                    data: null,
+                    mean: null,
+                    stdv: null,
+                    defined: false,
+                    active: false
                 },
             },
             targetSprite: util.target.getName(),
@@ -747,7 +772,6 @@ class Scratch3Turing {
             return "No model found."
         }
         // emit loading screen ask
-
         var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", distribution = dist).then(response =>
             this.updateInternals(this.user_models[modelName], response, 'prior', rv = NONE, distribution = dist)); // unpacks the new data using the turing samples
         // close loading screen
@@ -821,6 +845,7 @@ class Scratch3Turing {
         user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
         user_model.models[modelType]['stdv'] = dict['summary']["std"][1]
         user_model.models[modelType]['defined'] = true
+        user_model.models[modelType]['active'] = true
 
         // this.updateSampleSpecs(user_model, rv)
         user_model['hasDistData'] = true
@@ -917,20 +942,57 @@ class Scratch3Turing {
     _getDistLines(user_model) {
         distLines = []
         for (const model in user_model.models) {
-            dss = {}
-            dss.id = model
-            dss.mean = user_model.models[model].mean
-            dss.stdv = user_model.models[model].stdv
-            distLines.push(dss)
+            if (user_model.models[model].active) {
+                dss = {}
+                dss.id = model
+                dss.mean = user_model.models[model].mean
+                dss.stdv = user_model.models[model].stdv
+                distLines.push(dss)
+            }
         }
         return distLines
     }
 
+    toggleVisibility(data) {
+        console.log("RECEIVED SIGNAL TO TOGGLE VIS OF " + data.modelName + ", " + data.mode)
+
+        console.log("State of our models?")
+        console.log(this.user_models[data.modelName].models)
+
+        if (this.user_models[data.modelName].models[data.mode] != undefined) {
+            console.log("TOGGLING " + data.modelName + " data.mode? " + data.mode)
+            this.user_models[data.modelName].models[data.mode].active = !this.user_models[data.modelName].models[data.mode].active 
+        }
+    }
+
+    _toggleVisibilityByState(modelName, mode, state) {
+        this.user_models[modelName].models[mode].active = state
+    }
+
+    _updateParams(data, mode) {
+        console.log("RECEIVED SIGNAL TO UPDATE PARAMS from BUTTON PRESS...")
+        console.log(data)
+
+        if (mode == 'custom') {
+            this._toggleVisibilityByState(data.modelName, mode, true)
+        }
+
+        this.user_models[data.modelName].models[mode].mean =  data.mean
+        this.user_models[data.modelName].models[mode].stdv =  data.stdv
+
+        this.updateVisualisationData(this.user_models[data.modelName])
+
+        this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+    } 
+
     _getDistributionData(user_model) {
         // TODO if statement here so that you can use other things 
         if (user_model.distribution != null) { // TTODO add compatibility for other distributions
-            // console.log("getting dist data for ....")
-            // console.log(user_model.distribution)
+            console.log("getting dist data for ....")
+            console.log(user_model.distribution)
+            console.log("dist lines?")
+            console.log(this._getDistLines(user_model))
             return Distributions.generateProbabilityData(this._getDistLines(user_model))
         }
     }
@@ -963,30 +1025,40 @@ class Scratch3Turing {
     }
 
     getActiveDists(models) {
+        var active = []
+        for (const model in models) {
+            if (models[model].active) {
+                active.push(model)
+            }
+        }
+        return active
+    }
+
+    getDefinedDists(models) {
         var defined = []
         for (const model in models) {
             if (models[model].defined) {
-                defined.push(model)
+                active.push(model)
             }
         }
         return defined
     }
 
     getTargetsWithDistsAsDict() {
-        var defined = {}
+        var active = {}
         for (const modelName in this.user_models) {
             if (this.user_models[modelName].hasDistData) {
-                defined[modelName] = true
+                active[modelName] = true
             } else {
-                defined[modelName] = false
+                active[modelName] = false
             }
         }
-        return defined
+        return active
     }
 
     /* Prepare a JSON of relevant data */
     updateVisualisationData(user_model, type = null) {
-        if (type != 'observed' && type != null) {
+        if (type != 'observed') {
             newJSON = {
                 distribution: user_model.distribution,
                 modelName: user_model.modelName,
@@ -1001,9 +1073,7 @@ class Scratch3Turing {
                 distLines: user_model.distLines
             }
             this.visualisationData[user_model.modelName] = newJSON
-        } else {
-            console.log("taking an observation ... how to add it to the visualisation?")
-        }
+        } 
     }
 
     async buildQuery(modelName, url_path, method, modelType, distribution = '', n = '', data = []) {

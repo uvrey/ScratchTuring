@@ -100,20 +100,6 @@ class TuringTab extends React.Component {
         this.setState({ activeModelIndex: index });
     }
 
-
-    getTargetDataState(targetName) {
-        return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[targetName] == undefined) ? (false) : (this.props.dataIsSet[targetName]));
-    }
-
-    getTargetSamples(targetName) {
-        return (this.props.dataIsSet == {}) ? ([]) : ((this.props.dataIsSet[targetName] == undefined) ? ([]) : (this.props.data[targetName].samples));
-    }
-
-    getTargetData(targetName) {
-        return (this.props.dataIsSet == {}) ? ({ user_model: { randomVar: 'NONE', unit: '' } }) : ((this.props.dataIsSet[targetName] == undefined) ?
-            ({ user_model: { randomVar: 'NONE', unit: '' } }) : (this.props.data[targetName]));
-    }
-
     getModelDataState(modelName) {
         return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[modelName] == undefined) ? (false) : (this.props.dataIsSet[modelName]));
     }
@@ -154,6 +140,25 @@ class TuringTab extends React.Component {
         return this.getModelDataState(n)
     }
 
+    handleToggleVisibility(vm, data) {
+        console.log("Toggle vis: Sending...")
+        console.log(data)
+        vm.runtime.emit('TOGGLE_VISIBILITY', data)
+    }
+
+    handleUpdateCustom(vm, data) {
+        console.log("Sending...")
+        console.log(data)
+        vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
+
+    handleUpdatePrior(data) {
+       //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
+
+    handleUpdateGroundTruth(data) {
+      //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
 
     getTuringCheckbox(props) {
         const [selectedKey, setSelectedKey] = useState(null); // Stores the selected key
@@ -246,6 +251,7 @@ class TuringTab extends React.Component {
                 activateModelDashboard={this.handleActivateDashboard}
                 activeModelIndex={this.state.activeModelIndex}
                 activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
+                toggleVisbility={this.handleToggleVisibility}
             >
                 {this.getActiveModelDataState() ?
                     (<TuringVizPanel
@@ -256,6 +262,10 @@ class TuringTab extends React.Component {
                         activateModelDashboard={this.handleActivateDashboard}
                         activeModelIndex={this.state.activeModelIndex}
                         activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
+                        updateCustom={this.handleUpdateCustom}
+                        updatePrior={this.handleUpdatePrior}
+                        updateGroundTruth={this.handleUpdateGroundTruth}
+                        toggleVisibility={this.handleToggleVisibility}
                     />) : (<h1>No models defined... yet!</h1>)}
             </TuringAssetPanel>
         );
