@@ -1070,6 +1070,16 @@ class Scratch3Turing {
         return active
     }
 
+    _getSampleSpaceData(user_model) {
+        var observations = user_model.data
+        var data = []
+        for (var i = 0; i < observations.length; i++) {
+            var tmp = {x: i, y: observations[i], z: 0}
+            data.push(tmp)
+        }
+        return data
+    }
+
     /* Prepare a JSON of relevant data */
     updateVisualisationData(user_model, type = null) {
         if (type != 'observed') {
@@ -1080,15 +1090,15 @@ class Scratch3Turing {
                 dataSpecs: user_model.dataSpecs,
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
-                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px" },
-                    'posterior': { stroke: "#45BDE5", dots: false, strokeWidth: "4px" },
-                    'custom': { stroke: "#9966FF", dots: false, strokeWidth: "4px" }
+                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief"},
+                    'posterior': { stroke: "#45BDE5", dots: false, strokeWidth: "4px", chartName: "Updated Belief" },
+                    'custom': { stroke: "#9966FF", dots: false, strokeWidth: "4px", chartName: "Ground Truth"}
                 },
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list
                 barData: this._getBarChartData(user_model), // plots bar chart data
                 distData: this._getDistributionData(user_model), // plots normal distribution TTODO update this with other distribution types
-                sampleSpace: this._getSampleSpace(user_model),
+                sampleSpace: this._getSampleSpaceData(user_model),
                 distLines: user_model.distLines
             }
             this.visualisationData[user_model.modelName] = newJSON

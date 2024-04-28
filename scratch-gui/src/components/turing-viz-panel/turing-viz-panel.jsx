@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import FontDashboard from './font--dashboard.svg'
@@ -47,7 +47,7 @@ const getParameterLabels = (props) => {
             <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
           </label> */}
           <Box className={styles.paramBox}>
-          <h3>Ground Truth</h3>
+            <h3>Ground Truth</h3>
             <Box className={styles.sliderBox}>
               <h4><b>mean (μ)</b></h4>
               <input
@@ -124,7 +124,7 @@ const getParameterLabels = (props) => {
           </Box>
 
           <Box className={styles.paramBox}>
-          <h3>Prior</h3>
+            <h3>Prior</h3>
             <Box className={styles.sliderBox}>
 
               <h4><b>mean (μ)</b></h4>
@@ -272,7 +272,7 @@ const TuringVizPanel = props => (
             {props.docTags}
             {props.data.activeDists.map((key) => (
               <Line
-                key={key}
+                key={props.data.styles[key].chartName}
                 dataKey={key}
                 type="monotone"
                 stroke={props.data.styles[key].stroke}
@@ -286,6 +286,22 @@ const TuringVizPanel = props => (
             <Tooltip />
           </LineChart>
         </Box>
+        <ScatterChart
+          width={400}
+          height={300}
+          margin={{
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20,
+          }}
+        >
+          <CartesianGrid />
+          <XAxis type="number" dataKey="x" name="sample" unit="" />
+          <YAxis type="number" dataKey="y" name="value" unit="" />
+          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+          <Scatter name="Grid" data={props.data.sampleSpace} fill="blue" />
+        </ScatterChart>
         <Box>
         </Box>
       </Box>
