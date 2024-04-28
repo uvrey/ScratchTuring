@@ -35,50 +35,67 @@ const getParameterLabels = (props) => {
     case 'gaussian':
       return (
         <div>
-          <div>Gaussian: <h1>μ</h1>
-            {/* <input
-              type="text"
-              id="gaussian_mu"
-              maxLength="8" // Restrict to 8 characters
-              defaultValue={1} // Set initial value
-              // className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.longLat)}
-              onChange={(event) => {
-                const newValue = parseFloat(event.target.value);
-                if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
-                  document.getElementById("gaussian_mu").value = newValue;
-                }
-              }}
-            /> */}
-          </div>
-          <h1>σ²</h1>
-          {/* <input
-            type="text"
-            id="gaussian_std"
-            maxLength="8" // Restrict to 8 characters
-            defaultValue={1} // Set initial value
-            // className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.longLat)}
-            onChange={(event) => {
-              const newValue = parseFloat(event.target.value);
-              if (!isNaN(newValue) && newValue >= -90 && newValue <= 90) {
-                document.getElementById("gaussian_std").value = newValue;
-              }
-            }}
-          /> */}
-          
           <label htmlFor="groundTruth">
             <p>Show Custom Distribution</p>
             <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
           </label>
-
-          {/* <label htmlFor="prior">
-            <p>Show Prior</p>
-            <input type="checkbox" id="prior" name="prior" value="yes" />
-          </label>
-
-          <label htmlFor="Posterior">
-            <p>Show Posterior</p>
-            <input type="checkbox" id="Posterior" name="Posterior" value="yes" />
-          </label> */}
+          <Box className={styles.sliderBox}>
+          <h3>Ground Truth</h3>
+          <b>mean (μ)</b>
+            <input
+                type="range"
+                id="customParams_mu"
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue('customParams_mu', 0.1119)}
+                onChange={(event) => {
+                    const newValue = parseFloat(event.target.value);
+                    document.getElementById("customParamsValue_mu").value = newValue;
+                }}
+            />
+            <input
+                type="text"
+                id="customParamsValue_mu" 
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue('customParams_mu', 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                const newValue = parseFloat(event.target.value);
+                if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById("customParams_mu").value = newValue;
+                }
+                }}
+            />
+            </Box>
+            <Box className={styles.sliderBox}>
+            <b>stdv (σ)</b>
+            <input
+                type="range"
+                id="customParams_stdv"
+                min="0"
+                max="22"
+                step="0.05"
+                defaultValue={props.getValue('customParams_stdv', 0.1119)}
+                onChange={(event) => {
+                    const newValue = parseFloat(event.target.value);
+                    document.getElementById("customParamsValue_stdv").value = newValue;
+                }}
+            />
+            <input
+                type="text"
+                id="customParamsValue_stdv" 
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue('customParams_stdv', 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                const newValue = parseFloat(event.target.value);
+                if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById("customParams_stdv").value = newValue;
+                }
+                }}
+            />
+            </Box>
 
           <Box className={styles.buttonRow}>
             <button
@@ -86,9 +103,24 @@ const getParameterLabels = (props) => {
               onClick={() => props.updateCustom(props.vm, { modelName: props.activeModel, mean: 10, stdv: 0.5 })}
             >
               <FormattedMessage
-                defaultMessage="Update Custom"
+                defaultMessage="Create a Ground Truth"
                 description="Button in prompt for starting a search"
-                id="gui.mapModal.getCoords"
+                id="gui.vizPanel.makeGroundTruth"
+              />
+              <img
+                className={styles.buttonIconRight}
+              // src={compassIcon}
+              />
+            </button>
+
+            <button
+              className={styles.mapOptionsButton}
+              onClick={() => props.updateChart(props.activeModel, props.vm, props.updateCustom)}
+            >
+              <FormattedMessage
+                defaultMessage="Update Charts"
+                description="Button in prompt for starting a search"
+                id="gui.vizPanel.updateCharts"
               />
               <img
                 className={styles.buttonIconRight}

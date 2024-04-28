@@ -146,18 +146,70 @@ class TuringTab extends React.Component {
         vm.runtime.emit('TOGGLE_VISIBILITY', data)
     }
 
+    handleUpdateToChart(modelName, vm, updateCustom) {
+        console.log("handling new values in the selection box")
+
+        const inputs = ["customParamsValue_mu", "customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
+        const values = {};
+        
+        for (const inputName of inputs) {
+          const input = document.getElementById(inputName);
+          values[inputName] = parseFloat(input.value);
+        }
+
+        console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
+        console.log(values)
+        console.log("--------------")
+
+        // Update models on the backend with new information
+        var data = {modelName: modelName, mean: values["customParamsValue_mu"], stdv: values["customParamsValue_stdv"]}
+        updateCustom(vm, data) 
+
+        // const longitudeValue = values.longitude;
+        // const latitudeValue = values.latitude;
+        // const zoomValue = values.zoom;
+        // const pitchValue = values.pitch;
+      
+        // try {
+        //     var long = parseFloat(longitudeValue);
+        //     var lat = parseFloat(latitudeValue);
+        //     var zoom = parseFloat(zoomValue);
+        //     var pitch = parseFloat(pitchValue);
+
+        //     this.props.onCancel(); // close modal
+        //     // check if valid 
+        //     this.handleFetchingMap(lat, long, zoom, pitch)
+
+        //   } catch (error) {
+        //     console.log(error)
+        //     this.props.onShowMapError()
+        //     console.log("Please enter valid numbers for longitude and latitude.");
+        //     return; 
+        //   }
+    }
+    
     handleUpdateCustom(vm, data) {
         console.log("Sending...")
         console.log(data)
         vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
-    handleUpdatePrior(data) {
+    handleUpdatePrior(vm, data) {
+        vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
        //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
-    handleUpdateGroundTruth(data) {
+    handleUpdateGroundTruth(vm, data) {
+        vm.runtime.emit('UPDATE_GROUND_TRUTH_PARAMS', data)
       //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
+
+    getStoredValue(value, defaultValue) {
+        try {
+            return localStorage.getItem(value);
+        }  catch (error) {
+            return defaultValue; 
+        }
     }
 
     getTuringCheckbox(props) {
@@ -235,6 +287,7 @@ class TuringTab extends React.Component {
             }
         });
 
+        
 
         return (
             <TuringAssetPanel
@@ -266,6 +319,8 @@ class TuringTab extends React.Component {
                         updatePrior={this.handleUpdatePrior}
                         updateGroundTruth={this.handleUpdateGroundTruth}
                         toggleVisibility={this.handleToggleVisibility}
+                        getValue={this.getStoredValue}
+                        updateChart={this.handleUpdateToChart}
                     />) : (<h1>No models defined... yet!</h1>)}
             </TuringAssetPanel>
         );
