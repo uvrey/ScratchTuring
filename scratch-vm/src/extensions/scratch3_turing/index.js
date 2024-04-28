@@ -780,27 +780,23 @@ class Scratch3Turing {
         }
         this.lastSampleTime[modelName] = currentTime; // TTODO add a time buffer for each model sampling!
 
-        if (typeof util.target != undefined) {
-            user_model = this.user_models[modelName]
+        var user_model = this.user_models[modelName]
 
-            if (user_model == undefined) {
-                return "No model defined for this sprite."
-            }
+        if (user_model == undefined) {
+            return "No model defined!"
+        }
 
-            message = this._getThenSendSample(util, user_model, random_var_idx)
-            this.conditionOnPrior(util, user_model)
-                .then(response => this.updateInternals(user_model, response, 'posterior', random_var_idx));
+        message = this._getThenSendSample(util, user_model, random_var_idx)
+        this.conditionOnPrior(user_model)
+            .then(response => this.updateInternals(user_model, response, 'posterior', random_var_idx));
 
-            if (random_var_idx == COLOR) {
-                return "I can't do this alone... add me to the workspace!"
-            } else {
-                const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
-                const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
-                const lastUnit = units[units.length - 1]; // gets the last unit    
-                return `${observation} ${lastUnit}`
-            }
+        if (random_var_idx == COLOR) {
+            return "I can't do this alone... add me to the workspace!"
         } else {
-            return "I can't do this alone ;) Add me to your code!"
+            const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
+            const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
+            const lastUnit = units[units.length - 1]; // gets the last unit    
+            return `${observation} ${lastUnit}`
         }
     }
 
@@ -860,29 +856,20 @@ class Scratch3Turing {
     // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
     takeSampleAsNumber(args, util) {
         var modelName = args.MODEL
-
         if (this.user_models[modelName] == undefined) {
             return "No model called " + modelName
         }
-
         if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
-            return "This observation must be a number";
+            return "Oops, this should be a number.";
         }
-
-        observation = Number(args.OBSERVATION);
-
+        var observation = Number(args.OBSERVATION);
         if (typeof util.target != undefined && typeof this.user_models[modelName] != undefined) {
             user_model = this.user_models[modelName]
             this.user_models[modelName].data.push(observation);
             this.updateSampleSpecs(user_model, CUSTOM)
 
-            this.conditionOnPrior(util, user_model) // updates posterior
-            this.updateVisualisationData(user_model, 'posterior')
-
-            this._runtime.emit('TURING_SHOW_LOAD')
-            this._runtime.emit('TURING_DATA', this.visualisationData)
-            this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-            this._runtime.emit('TURING_CLOSE_LOAD')
+            this.conditionOnPrior(user_model)
+                .then(response => this.updateInternals(user_model, response, 'posterior', CUSTOM));
 
             const units = this.user_models[modelName].dataSpecs.units;
             const lastUnit = units[units.length - 1]; // Efficiently access the last unit
@@ -967,7 +954,7 @@ class Scratch3Turing {
         return sampleSpace
     }
 
-    async conditionOnPrior(util, user_model) {
+    async conditionOnPrior(user_model) {
         const newData = user_model['data']
         message = this.buildQuery(user_model.modelName, "condition", 'POST', distribution = distribution, data = newData, n = 100) // logic to check number args
         console.log("Server responded:")
