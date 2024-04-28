@@ -15,6 +15,8 @@ import loudnessIcon from './icon--loudness.svg';
 import sizeIcon from './icon--size.svg';
 import erasorIcon from './icon--eraser.svg'
 import timeIcon from './icon--time.svg'
+import octopusIcon from './icon--purpleOctopus.svg'
+import surpriseIcon from '../action-menu/icon--graySurprise.svg'
 
 // // react-contextmenu requires unique id to match trigger and context menu
 let contextMenuId = 0;
@@ -32,7 +34,7 @@ function getIconFromType(type) {
     case 'Y':
       return yIcon;
     default:
-      return erasorIcon; // Return null for any other type
+      return surpriseIcon; // Return null for any other type
   }
 }
 const TuringSelectorItem = props => {

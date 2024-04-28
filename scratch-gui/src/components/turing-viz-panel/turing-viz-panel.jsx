@@ -10,7 +10,6 @@ import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import FontDashboard from './font--dashboard.svg'
 import FontScratchTuring from './font--scratchturing.svg'
-import octopusIcon from './icon--octopus.svg'
 import FontBarChart from './font--barChart.svg'
 import FontDist from './font--normalDist.svg'
 import FontCurrentSample from './font--currentSample.svg'
@@ -19,55 +18,17 @@ import FontType from './font--value.svg'
 import Carousel from './carousel.jsx'
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
 
-
-const ThreeColumnLayout = ({ children }) => {
-  return (
-    <div className="three-column-layout">
-      {children}
-    </div>
-  );
-};
-
-const ThreeColumnLayoutItem = ({ children }) => {
-  return (
-    <div className="three-column-layout-item">{children}</div>
-  );
-};
-
-const getIntroOfPage = (label) => {
-  if (label === 'Page A') {
-    return "Page A is about men's clothing";
-  }
-  if (label === 'Page B') {
-    return "Page B is about women's dress";
-  }
-  if (label === 'Page C') {
-    return "Page C is about women's bag";
-  }
-  if (label === 'Page D') {
-    return 'Page D is about household goods';
-  }
-  if (label === 'Page E') {
-    return 'Page E is about food';
-  }
-  if (label === 'Page F') {
-    return 'Page F is about baby food';
-  }
-  return '';
-};
-
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className={styles.customTooltip}>
         <p className={styles.chartLabel}>{`Average: ${payload[0].value} sec`}</p>
-        <p className="intro">{getIntroOfPage(label)}</p>
+        <p className="intro"></p>
       </div>
     );
   }
   return null;
 };
-
 
 const getParameterLabels = (props) => {
   console.log("~~~~~~~~~~~~~~user model in param labels?~~~~~~~~~~~~~~~~~~~~");
@@ -106,17 +67,17 @@ const getParameterLabels = (props) => {
             }}
           />
 
-          <label for="groundTruth">
+          <label htmlFor="groundTruth">
             <p>Show Ground Truth</p>
             <input type="checkbox" id="groundTruth" name="groundTruth" value="yes" />
           </label>
 
-          <label for="prior">
+          <label htmlFor="prior">
             <p>Show Prior</p>
             <input type="checkbox" id="prior" name="prior" value="yes" />
           </label>
 
-          <label for="Posterior">
+          <label htmlFor="Posterior">
             <p>Show Posterior</p>
             <input type="checkbox" id="Posterior" name="Posterior" value="yes" />
           </label>
@@ -171,8 +132,19 @@ const getParameterLabels = (props) => {
 
 const TuringVizPanel = props => (
   <Box className={styles.body}>
-     <h2>Inside VIZ PANEL we want to display... {props.activeModel}</h2>
     <Box className={styles.dataCol}>
+
+      <Box className={styles.buttonRow}>
+        {props.activeModels.map((modelName, index) => (
+          <button
+            key={modelName}  // Add a unique key for each button
+            className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
+            onClick={() => props.activateModelDashboard(modelName, index)}
+          >
+            {modelName}
+          </button>
+        ))}
+      </Box>
 
       <img src={FontDashboard} className={styles.dashboard} />
       {console.log("Building visualisation panel :) here's what we have!")}
@@ -181,7 +153,7 @@ const TuringVizPanel = props => (
       <Box className={styles.keyStats}>
         <div>
           <img src={FontType} className={styles.statsHeading} />
-          <div><p className={styles.stat}>{props.data.user_model.modelName}</p><p>({props.data.user_model.randomVar})</p></div>
+          <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
         </div>
         <div>
           <img src={FontCurrentSample} className={styles.statsHeading} />

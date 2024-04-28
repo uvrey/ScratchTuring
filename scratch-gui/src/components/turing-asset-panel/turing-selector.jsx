@@ -12,6 +12,7 @@ import yIcon from './icon--y.svg';
 import loudnessIcon from './icon--loudness.svg';
 import sizeIcon from './icon--size.svg';
 import erasorIcon from './icon--eraser.svg'
+import octopusIcon from './icon--octopus.svg'
 // import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
 // import styles from './turing-selector.css';
 // import VM from 'scratch-vm';
@@ -73,7 +74,7 @@ const TuringSelector = props => {
             className={styles.wrapper}
             componentRef={containerRef}
         >
-            <h2>Inside turing selector we want to display... {props.activeModel}</h2>
+            {/* <h2>Inside turing selector we want to display... {props.activeModel}</h2> */}
             <Box className={styles.listArea}>
                 {props.items.map((sample, index) => (
                     <SortableAsset
