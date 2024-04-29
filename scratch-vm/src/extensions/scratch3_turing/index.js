@@ -669,7 +669,7 @@ class Scratch3Turing {
 
     getClearedModel() {
         return {
-            params: null,
+            params: {},
             // barValue: null,
             data: null,
             mean: null,
@@ -702,7 +702,7 @@ class Scratch3Turing {
         this.user_models[modelName] = {
             models: {
                 prior: {
-                    params: null,
+                    params: {},
                     // barValue: null,
                     data: null,
                     mean: null,
@@ -711,7 +711,7 @@ class Scratch3Turing {
                     active: false
                 },
                 posterior: {
-                    params: null,
+                    params: {},
                     // barValue: null,
                     data: null,
                     mean: null,
@@ -720,7 +720,7 @@ class Scratch3Turing {
                     active: false
                 },
                 groundTruth: {
-                    params: null,
+                    params: {},
                     // barValue: null,
                     data: null,
                     mean: null,
@@ -729,7 +729,7 @@ class Scratch3Turing {
                     active: false
                 },
                 custom: {
-                    params: null,
+                    params: {},
                     // barValue: null,
                     data: null,
                     mean: null,
@@ -773,9 +773,9 @@ class Scratch3Turing {
             return "No model found."
         }
         // emit loading screen ask
-        var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", distribution = dist).then(response =>
+        var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
             this.updateInternals(this.user_models[modelName], response, 'prior', rv = NONE, distribution = dist)); // unpacks the new data using the turing samples
-        
+
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -834,7 +834,7 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, modelType, rv, distribution = null) {
+    updateInternals(user_model, response, modelType, rv = '', distribution = null) {
         dict = this.parseResponse(response)
 
         if (distribution != null) {
@@ -984,8 +984,8 @@ class Scratch3Turing {
             this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
             this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         } else if (mode == 'prior') {
-            var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) ||  (this.user_models[data.modelName].models[mode].stdv != data.stdv) 
-            
+            var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) || (this.user_models[data.modelName].models[mode].stdv != data.stdv)
+
             if (changed) {
                 console.log("}}}}}}}}} the prior data has changed! but we must keep our observations")
                 this._resetPriorAndObservations(this.user_models[data.modelName], data.mean, data.stdv)
@@ -997,8 +997,38 @@ class Scratch3Turing {
         }
     }
 
-    _resetPriorAndObservations(user_model, mean, stdv) {
+    _updateModel(user_model) {
+        params = {
+            mean: user_model.models.prior.mean,
+            stdv: user_model.models.prior.stdv, 
+        }
+        var message = this.buildQuery(user_model.modelName, "updateModelPrior", 'POST', modelType = 'prior', user_model.distribution, -1, [], params).then(response =>
+            this.updateInternals(this.user_models[modelName], response, 'posterior', distribution = user_model.distribution)); // unpacks the new data using the turing samples
+        console.log("got this from server: " + message)
+        return message
+    }
+
+    _resetPriorAndObservations(user_model, mean, stdv, buildModel = true) {
         console.log("will reset prior etc here to " + mean + ", " + stdv)
+
+        user_model.models.prior = this.getClearedModel()
+        user_model.models.prior.mean = mean
+        user_model.models.prior.stdv = stdv
+
+        // initialise a new model in turing
+        if (buildModel) {
+            this._runtime.emit('TURING_SHOW_LOAD')
+
+            if (user_model.data.length > 0) {
+                this._updateModel(user_model).then(() => this.conditionOnPrior(user_model)
+                    .then(response => this.updateInternals(user_model, response, 'posterior')))
+            } else {
+                this._updateModel(user_model).then(response => this.updateInternals(user_model, response, 'posterior'))
+            }
+        }
+        // Update the posterior based on the new prior... also notify turing
+        this.updateVisualisationData(user_model)
+        this._runtime.emit('TURING_DATA', this.visualisationData)
     }
 
     _getDistributionData(user_model) {
@@ -1031,9 +1061,9 @@ class Scratch3Turing {
         return sampleSpace
     }
 
-    async conditionOnPrior(user_model) {
+    async conditionOnPrior(user_model, n = 1) { // n defines the number of potential posteriors we would like to visualise...
         const newData = user_model['data']
-        message = this.buildQuery(user_model.modelName, "condition", 'POST', distribution = distribution, data = newData, n = 100) // logic to check number args
+        message = this.buildQuery(user_model.modelName, "condition", 'POST', distribution, newData, 100, {}) // logic to check number args
         console.log("Server responded:")
         console.log(message)
         return message
@@ -1075,7 +1105,7 @@ class Scratch3Turing {
         var observations = user_model.data
         var data = []
         for (var i = 0; i < observations.length; i++) {
-            var tmp = {x: i, y: observations[i], z: 0}
+            var tmp = { x: i, y: observations[i], z: 0 }
             data.push(tmp)
         }
         return data
@@ -1091,9 +1121,9 @@ class Scratch3Turing {
                 dataSpecs: user_model.dataSpecs,
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
-                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief"},
+                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },
                     'posterior': { stroke: "#45BDE5", dots: false, strokeWidth: "4px", chartName: "Updated Belief" },
-                    'custom': { stroke: "#9966FF", dots: false, strokeWidth: "4px", chartName: "Ground Truth"}
+                    'custom': { stroke: "#9966FF", dots: false, strokeWidth: "4px", chartName: "Ground Truth" }
                 },
                 user_model: user_model,
                 samples: user_model.data, // updates the samples list
@@ -1106,7 +1136,7 @@ class Scratch3Turing {
         }
     }
 
-    async buildQuery(modelName, url_path, method, modelType, distribution = '', n = '', data = []) {
+    async buildQuery(modelName, url_path, method, modelType, distribution, n, data = [], params = {}) {
         const url = this.api_host + "/api/turing/v1/" + url_path;
 
         const dict = {
@@ -1116,6 +1146,7 @@ class Scratch3Turing {
             "distribution": distribution,
             "n": n,
             "data": data,
+            "model_params": params
         }
         const payload = {
             method: method,

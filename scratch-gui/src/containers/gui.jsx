@@ -187,8 +187,6 @@ const mapDispatchToProps = dispatch => ({
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
-    onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
-    onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
 });
 
 const ConnectedGUI = injectIntl(connect(
