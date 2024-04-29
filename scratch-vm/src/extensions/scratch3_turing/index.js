@@ -841,8 +841,13 @@ class Scratch3Turing {
             user_model['distribution'] = distribution
         }
 
+        console.log(dict)
+
         console.log("Updating internals...")
-        user_model.models[modelType]['data'] = dict['data'][0]
+
+        if (dict['data'] != undefined) {
+            user_model.models[modelType]['data'] = dict['data'][0]
+        }
         user_model.models[modelType]['params'] = dict['summary']["parameters"]
         user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
         user_model.models[modelType]['stdv'] = dict['summary']["std"][1]
@@ -983,52 +988,60 @@ class Scratch3Turing {
 
             this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
             this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+
+            
         } else if (mode == 'prior') {
             var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) || (this.user_models[data.modelName].models[mode].stdv != data.stdv)
 
             if (changed) {
-                console.log("}}}}}}}}} the prior data has changed! but we must keep our observations")
+                this.user_models[data.modelName].models[mode].mean = data.mean
+                this.user_models[data.modelName].models[mode].stdv = data.stdv
                 this._resetPriorAndObservations(this.user_models[data.modelName], data.mean, data.stdv)
+
             } else {
-                console.log("{{{{{{{{{{ NO CHANGES TO THE PRIOR SPOTTED")
+                console.log("{Prior is unchanged}")
             }
+
+            this.updateVisualisationData(this.user_models[data.modelName])
+            this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
+            this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         } else {
             console.log("unknown mode " + mode)
         }
     }
 
-    _updateModel(user_model) {
+    async _updateModel(user_model) {
         params = {
             mean: user_model.models.prior.mean,
             stdv: user_model.models.prior.stdv, 
         }
-        var message = this.buildQuery(user_model.modelName, "updateModelPrior", 'POST', modelType = 'prior', user_model.distribution, -1, [], params).then(response =>
-            this.updateInternals(this.user_models[modelName], response, 'posterior', distribution = user_model.distribution)); // unpacks the new data using the turing samples
+
+        console.log("trying to update this model..")
+        console.log(user_model)
+
+        var message = await this.buildQuery(user_model.modelName, "updateModelPrior", 'POST', modelType = 'prior', user_model.distribution, -1, [], params)
         console.log("got this from server: " + message)
         return message
     }
 
-    _resetPriorAndObservations(user_model, mean, stdv, buildModel = true) {
+    async _resetPriorAndObservations(user_model, mean, stdv, buildModel = true) {
         console.log("will reset prior etc here to " + mean + ", " + stdv)
 
-        user_model.models.prior = this.getClearedModel()
-        user_model.models.prior.mean = mean
-        user_model.models.prior.stdv = stdv
+        // user_model.models.prior = this.getClearedModel()
+        // user_model.models.prior.mean = mean
+        // user_model.models.prior.stdv = stdv
 
-        // initialise a new model in turing
-        if (buildModel) {
-            this._runtime.emit('TURING_SHOW_LOAD')
+        // TODO initialise a new model in turing and update posterior if there is data already
+        // if (buildModel) {
+        //     this._runtime.emit('TURING_SHOW_LOAD')
 
-            if (user_model.data.length > 0) {
-                this._updateModel(user_model).then(() => this.conditionOnPrior(user_model)
-                    .then(response => this.updateInternals(user_model, response, 'posterior')))
-            } else {
-                this._updateModel(user_model).then(response => this.updateInternals(user_model, response, 'posterior'))
-            }
-        }
-        // Update the posterior based on the new prior... also notify turing
-        this.updateVisualisationData(user_model)
-        this._runtime.emit('TURING_DATA', this.visualisationData)
+        //     // if (user_model.data.length > 0) {
+        //     await this._updateModel(user_model).then(() => this.conditionOnPrior(user_model)
+        //         .then(response => this.updateInternals(user_model, response, 'posterior')))
+        //     // } else {
+        //     //     await this._updateModel(user_model).then(response => this.updateInternals(user_model, response, 'posterior',  distribution = user_model.distribution))
+        //     // }
+        // }
     }
 
     _getDistributionData(user_model) {
