@@ -53,13 +53,13 @@ class Scratch3Turing {
         this._extensionId = 'turing'
 
         this.TARGET_PROPERTIES = [
-            (util) => this._timer.timeElapsed() / 1000, // TIME
-            (util) => util.target.size,
-            (util) => util.target.x,
-            (util) => util.target.y,
-            (util) => 10, // LOUDNESS TODO
-            (util) => TuringSensing.fetchColor(util.target),
-            (util) => NONE,
+            (util, model) => model.timer.timeElapsed() / 1000, // TIME
+            (util,  model) => util.target.size,
+            (util,  model) => util.target.x,
+            (util,  model) => util.target.y,
+            (util,  model) => 10, // LOUDNESS TODO
+            (util,  model) => TuringSensing.fetchColor(util.target),
+            (util,  model) => NONE,
         ];
 
         this.user_models = {} // each target has its own model
@@ -72,8 +72,7 @@ class Scratch3Turing {
         this.observations = []
         this.truth_data = []
         this.lastSampleTime = {};
-        this._timer = new Timer();
-        this._timer.start(); // TODO start this when the program's runtim begins (green flag)
+        this.timers = {};
         this.palette_idx = 0;
 
         sessionStorage.setItem("username", this.username);
@@ -776,6 +775,7 @@ class Scratch3Turing {
         var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
             this.updateInternals(this.user_models[modelName], response, 'prior', rv = NONE, distribution = dist)); // unpacks the new data using the turing samples
 
+  
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -915,7 +915,11 @@ class Scratch3Turing {
     extractSample = (util, user_model, rv, groundTruth) => {
         this.updateSampleSpecs(user_model, rv)
 
-        var sample = this.TARGET_PROPERTIES[rv](util);
+        var sample = this.TARGET_PROPERTIES[rv](util, user_model);
+
+        if (user_model.data.length < 1) {
+            user_model.timer.start();
+        }
 
         if (rv == COLOR) {
             sample = Color.rgbToHex(sample)
@@ -927,6 +931,7 @@ class Scratch3Turing {
         } else {
             user_model.labels.push(sample);
         }
+
         if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
             user_model.timer.start(); // Start a new timer only for TIME
         }
@@ -989,7 +994,7 @@ class Scratch3Turing {
             this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
             this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
 
-            
+
         } else if (mode == 'prior') {
             var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) || (this.user_models[data.modelName].models[mode].stdv != data.stdv)
 
@@ -1392,7 +1397,9 @@ class Scratch3Turing {
     // }
 
     _onResetTimer() {
-        this._timer.start();
+        for (const modelName in this.user_models) {
+            this.timers[modelName].start()
+        }
     }
 
     /* Helper Utilities */

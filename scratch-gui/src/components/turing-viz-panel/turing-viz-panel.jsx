@@ -261,7 +261,7 @@ const TuringVizPanel = props => (
         {getParameterLabels(props)}
         <Box className={styles.dataCol}>
           <img src={FontDist} className={styles.visHeading} />
-          <LineChart width={800} height={400} data={props.data.distData}>
+          <LineChart width={900} height={600} data={props.data.distData}>
             <XAxis
               allowDecimals={false}
               dataKey="input"
