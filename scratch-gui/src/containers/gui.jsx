@@ -186,7 +186,9 @@ const mapDispatchToProps = dispatch => ({
     onActivateTuringControlPanel: () => dispatch(activateTab(TURING_TAB_INDEX)),
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
-    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal())
+    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
+    onShowMapLoad: () => dispatch(showStandardAlert('loadingMap')),
+    onCloseMapLoad: () => dispatch(closeAlertWithId('loadingMap')),
 });
 
 const ConnectedGUI = injectIntl(connect(

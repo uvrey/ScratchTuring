@@ -567,6 +567,14 @@ class Runtime extends EventEmitter {
         return 'TURING_DATA';
     }
 
+    static get TURING_SHOW_LOAD () {
+        return 'TURING_SHOW_LOAD';
+    }
+
+    static get TURING_CLOSE_LOAD () {
+        return 'TURING_CLOSE_LOAD';
+    }    
+    
     static get TURING_DATA_STATE () {
         return 'TURING_DATA_STATE';
     }

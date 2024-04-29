@@ -763,6 +763,7 @@ class Scratch3Turing {
 
         this.lastSampleTime[modelName] = 0
 
+        this._runtime.emit('TURING_SHOW_LOAD')
         this.defineTargetModel(util, modelName)
         this._runtime.emit('PROJECT_CHANGED')
 
@@ -774,6 +775,7 @@ class Scratch3Turing {
         // emit loading screen ask
         var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", distribution = dist).then(response =>
             this.updateInternals(this.user_models[modelName], response, 'prior', rv = NONE, distribution = dist)); // unpacks the new data using the turing samples
+        
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -854,11 +856,12 @@ class Scratch3Turing {
         console.log("updated internals, emitting...")
         console.log(this.visualisationData)
 
-        this._runtime.emit('TURING_SHOW_LOAD')
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-        this._runtime.emit('TURING_CLOSE_LOAD')
         this._runtime.emit('PROJECT_CHANGED')
+
+        // Emit only once the project has finished loading
+        this._runtime.emit('TURING_CLOSE_LOAD')
     }
 
     distributionData(user_model) {
@@ -932,10 +935,8 @@ class Scratch3Turing {
 
         // TTODO update line list visualisations... Can I get turing to do this for me?
         this.updateVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
-        this._runtime.emit('TURING_SHOW_LOAD')
         this._runtime.emit('TURING_DATA', this.visualisationData)
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-        this._runtime.emit('TURING_CLOSE_LOAD')
         return observation
     }
 

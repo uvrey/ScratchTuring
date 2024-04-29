@@ -13,6 +13,7 @@ import {setTuringData, setTuringDataState, setTuringActive} from '../reducers/tu
 import {setRunningState, setTurboState, setStartedState} from '../reducers/vm-status';
 import {showExtensionAlert} from '../reducers/alerts';
 import {updateMicIndicator} from '../reducers/mic-indicator';
+import {showStandardAlert, closeAlertWithId} from '../reducers/alerts';
 
 /*
  * Higher Order Component to manage events emitted by the VM
@@ -51,7 +52,7 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('TURING_DATA_STATE', (state) => this.handleTuringDataState(state));
             this.props.vm.on('TURING_ACTIVE', this.props.onTuringActive);
             this.props.vm.on('TURING_SHOW_LOAD', () => this.handleTuringLoad());
-            this.props.vm.on('TURING_CLOSE_LOAD', this.props.onCloseTuringLoad);
+            this.props.vm.on('TURING_CLOSE_LOAD', () => this.handleTuringCloseLoad());
             console.log("inside listener HOC")
         }
         componentDidMount () {
@@ -83,6 +84,14 @@ const vmListenerHOC = function (WrappedComponent) {
             if (this.props.shouldUpdateProjectChanged && !this.props.projectChanged) {
                 this.props.onProjectChanged();
             }
+        }
+        handleTuringLoad() {
+            console.log("RECEIVED SIGNAL TO LOAD fetching from turing modal...") 
+            this.props.onShowTuringLoad()
+        }
+        handleTuringCloseLoad() {
+            console.log("RECEIVED SIGNAL TO CLOSE fetching from turing modal....") 
+            this.props.onCloseTuringLoad()
         }
         handleTuringData (data) {
             this.props.onSetTuringData(data)

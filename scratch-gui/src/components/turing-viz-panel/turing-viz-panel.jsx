@@ -300,7 +300,7 @@ const TuringVizPanel = props => (
           <XAxis type="number" dataKey="x" name="sample" unit="" />
           <YAxis type="number" dataKey="y" name="value" unit="" />
           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          <Scatter name="Grid" data={props.data.sampleSpace} fill="blue" />
+          <Scatter name="Sample Space" data={props.data.sampleSpace} fill="#FF5959" />
         </ScatterChart>
         <Box>
         </Box>
