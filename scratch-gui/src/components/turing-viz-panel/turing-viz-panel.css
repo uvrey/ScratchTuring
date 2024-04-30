@@ -318,6 +318,26 @@ input[type="range"] {
     }
   }
 
+  .color-swatch {
+    width: 50px;
+    /* Adjust width as needed */
+    height: 50px;
+    /* Adjust height as needed */
+    border-radius: 0.25rem;
+}
+
+  .custom-label {
+    background: #aaa;
+    color: #111;
+    font-size: 14px;
+  }
+  
+  .label-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+  
+
   .param-box {
     background-color: white;
     outline: $looks-light-transparent;

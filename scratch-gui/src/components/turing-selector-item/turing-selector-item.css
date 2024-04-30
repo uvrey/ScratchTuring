@@ -26,7 +26,7 @@
     box-shadow: 0px 0px 0px 4px $looks-transparent;
     border: 2px solid $looks-secondary;
     background: $ui-white;
-    filter: drop-shadow(0px 0px 2px  $ui-black-transparent);
+    filter: drop-shadow(0px 0px 2px $ui-black-transparent);
 }
 
 .sprite-selector-item:hover {
@@ -34,8 +34,9 @@
     background: $ui-white;
 }
 
-.sprite-selector-item:hover .sprite-image, .is-selected .sprite-image {
-    filter: drop-shadow(0px 0px 2px  $ui-black-transparent);
+.sprite-selector-item:hover .sprite-image,
+.is-selected .sprite-image {
+    filter: drop-shadow(0px 0px 2px $ui-black-transparent);
 }
 
 /* Outer/Inner chicanery is to prevent layouts when sprite image changes */
@@ -72,7 +73,8 @@
     user-select: none;
 }
 
-.sprite-name, .sprite-details {
+.sprite-name,
+.sprite-details {
     /*
         For truncating overflowing text gracefully
         Min-width is for a bug: https://css-tricks.com/flexbox-truncated-text
@@ -89,19 +91,25 @@
 }
 
 .color-swatch {
-    width: 50px; /* Adjust width as needed */
-    height: 50px; /* Adjust height as needed */
+    width: 50px;
+    /* Adjust width as needed */
+    height: 50px;
+    /* Adjust height as needed */
     border-radius: 0.25rem;
-  }
-  
-  .square-rectangle {
-    width: 20px; /* Adjust width as needed */
-    height: 20px; /* Adjust height as needed */
-    background-color: inherit; /* Inherit background color from parent */
-    margin: auto; /* Center the rectangle horizontally and vertically */
-  }
+}
 
-  
+.square-rectangle {
+    width: 20px;
+    /* Adjust width as needed */
+    height: 20px;
+    /* Adjust height as needed */
+    background-color: inherit;
+    /* Inherit background color from parent */
+    margin: auto;
+    /* Center the rectangle horizontally and vertically */
+}
+
+
 .is-selected .sprite-info {
     background: $looks-secondary;
     color: $ui-white;

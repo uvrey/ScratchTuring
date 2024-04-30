@@ -62,8 +62,7 @@ const TuringSelectorItem = props => {
           {console.log("random varname?" + props.randomVarName)} */}
           {/* Display swatch or icon */}
           {props.randomVarName === 'COLOR' ? (
-            <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}>
-            </div>
+            <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}/>
           ) : (
             <img
               className={styles.spriteImage}

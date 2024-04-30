@@ -30,16 +30,25 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const CustomLabel = props => {
+const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
   console.log(props);
   return (
-    <foreignObject class="label-wrapper" x={props.viewBox.x} y="0">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="custom-label">
+    <foreignObject className={styles.labelWrapper} x="0" y="0"> 
+      <div className={styles.customLabel}>
         Label
       </div>
     </foreignObject>
   );
 };
+
+const CustomHue = (hue) => { // TODO modify this so it returns rectangles with a particular colour
+  return (
+    <foreignObject className={styles.labelWrapper}> 
+      <div className={styles.colorSwatch} style={{ backgroundColor: hue }}/>
+    </foreignObject>
+  );
+};
+
 
 const formatId = (modelName, label) => {
   return modelName + "_" + label
@@ -59,6 +68,7 @@ const getGaussianPanel = (props) => {
             allowDecimals={false}
             dataKey="input"
             type="number"
+            tick={CustomLabel}
           />
           <YAxis allowDecimals={true} />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
@@ -141,7 +151,7 @@ const getHuePanel = () => {
     <Box className={styles.dataRow}>
     <LineChart width={800} height={300} data={getData()}>
       <Line type="monotone" dataKey="density" stroke="#8884d8" dots ={false} />
-      <XAxis label="Hue" tick={<CustomizedAxisTick />} />
+      <XAxis label="Hue" tick={CustomHue("#d41444")} />
       <YAxis label="Probability Density" />
       <title>Probability Density of Uniform Distribution (0-360 degrees)</title>
     </LineChart>
