@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import FontDashboard from './font--dashboard.svg'
@@ -17,6 +17,11 @@ import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
 import Carousel from './carousel.jsx'
 import Color from './color.js'
+
+import { Doughnut } from 'react-chartjs-2'
+import HuePanel from './turing-hue-panel.jsx';
+
+// import { Doughnut } from 'react-chartjs-2';
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -31,22 +36,22 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
-//   return (
-//     <foreignObject className={styles.labelWrapper} x="0" y="0"> 
-//       <div className={styles.customLabel}>
-//         Label
-//       </div>
-//     </foreignObject>
-//   );
-// };
+const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
+  return (
+    <foreignObject className={styles.labelWrapper} x="0" y="0"> 
+      <div className={styles.customLabel}>
+        Label
+      </div>
+    </foreignObject>
+  );
+};
 
 const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
   // console.log(props.payload)
-  const hue = props.payload.value % 360 
+  const hue = props.payload.value % 360
   return (
-    <foreignObject className={styles.labelWrapper} y = {260} x= {props.payload.tickCoord}> 
-      <div className={styles.colorSwatch} style={{ backgroundColor: hueToHex(hue) }}/>
+    <foreignObject className={styles.labelWrapper} y={260} x={props.payload.tickCoord}>
+      <div className={styles.colorSwatch} style={{ backgroundColor: hueToHex(hue) }} />
     </foreignObject>
   );
 };
@@ -60,7 +65,7 @@ const CustomHue = (props) => { // TODO modify this so it returns rectangles with
  */
 
 const hueToHex = (hue) => {
-  const hsv = {h: hue, s: 100, v: 100}
+  const hsv = { h: hue, s: 100, v: 100 }
   return Color.rgbToHex(Color.hsvToRgb(hsv))
 }
 
@@ -129,20 +134,26 @@ const getHueDistributionData = () => {
 const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
-    <LineChart width={800} height={300} data={getHueDistributionData()}>
+      {/* <LineChart width={800} height={300} data={getHueDistributionData()}>
       <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="4px" dot= {false} />
       <XAxis label="Hue" tick={<CustomHue />}/>
       <YAxis  dots={false} yAxis={-5}/>
-    </LineChart>
+    </LineChart> */}
+      {/* <PieChart width={300} height={300} data={props.data.huePropData}>
+      <Pie dataKey="value" outerRadius={200} fill="#d41444"/>
+      <Legend />
+    </PieChart> */}
+      {/* <Doughnut data={props.data.huePlotData} /> */}
+{/* 
+      <HuePanel data={props.data.huePlotData}/> */}
+      {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
+      {console.log(props.data)}
 
-    {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
-    {console.log(props.data)}
-    
-    <BarChart width={800} height={300} data={props.data.huePlotData}>
-      <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot= {false} />
-      <XAxis label="Hue" tick={<CustomHue />} />
-      <YAxis  dots={false} yAxis={-5}/>
-    </BarChart>
+      <BarChart width={800} height={300} data={props.data.huePlotData}>
+        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
+        <XAxis label="Hue" tick={<CustomHue />} />
+        <YAxis dots={false} yAxis={-5} />
+      </BarChart>
     </Box>
   );
 }

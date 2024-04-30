@@ -25,14 +25,13 @@ const TIME = 0
 const SIZE = 1
 const X = 2
 const Y = 3
-const LOUDNESS = 4 // TODO possibly remove.
-const COLOR = 5
-const NONE = 6
-const CUSTOM = 7
+const COLOR = 4
+const NONE = 5
+const CUSTOM = 6
 
-const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC']
-const UNITS = ['s', '', '', '', 'db', '', '', '', '', '']
-const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'LOUDNESS', 'COLOR', 'NONE', 'CUSTOM']
+const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC']
+const UNITS = ['s', '', '', '', '', '', '', '', '']
+const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'COLOR', 'NONE', 'CUSTOM']
 const DISTRIBUTIONS = ['gaussian', 'hue', 'rhythm']
 
 window.addEventListener("beforeunload", (event) => {
@@ -57,7 +56,6 @@ class Scratch3Turing {
             (util, model) => util.target.size,
             (util, model) => util.target.x,
             (util, model) => util.target.y,
-            (util, model) => 10, // LOUDNESS TODO
             (util, model) => TuringSensing.fetchColor(util.target),
             (util, model) => NONE,
         ];
@@ -175,13 +173,6 @@ class Scratch3Turing {
                     id: 'turing.randomVarsMenu.y',
                     default: 'Y',
                     description: 'y'
-                }),
-            },
-            {
-                name: formatMessage({
-                    id: 'turing.randomVarsMenu.loudness',
-                    default: 'LOUDNESS',
-                    description: 'loudness'
                 }),
             },
             {
@@ -1207,6 +1198,16 @@ class Scratch3Turing {
         return data
     }
 
+    _getHueProportionData(user_model) {
+        var data = []
+        for (var i = 0; i < user_model.hueData.hue.length; i++) {
+            data.push({hue: i, value: user_model.hueData.hueProportions[i]})
+        }
+        console.log("Prepared this hue data to plot...")
+        console.log(data)
+        return data
+    }
+
     /* Prepare a JSON of relevant data */
     updateVisualisationData(user_model, type = null) {
         if (type != 'observed') {
@@ -1217,6 +1218,7 @@ class Scratch3Turing {
                 dataSpecs: user_model.dataSpecs,
                 hueData: user_model.hueData,
                 huePlotData: this._getHuePlotData(user_model),
+                huePropData: this._getHueProportionData(user_model),
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
                     'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },
@@ -1518,8 +1520,6 @@ class Scratch3Turing {
                 return !isNaN(Number(prior)) && Number(prior) > 0 && Number(prior) < 500;
             case 'TIME':
                 return !isNaN(Number(prior)) && Number(prior) > 0;
-            case 'LOUDNESS':
-                return !isNaN(Number(prior)) && Number(prior) > 0 && Number(prior) < 100;
             case 'COLOR':
                 return true;
             default:

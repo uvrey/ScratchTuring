@@ -318,6 +318,11 @@ input[type="range"] {
     }
   }
 
+
+  .hueDataChart {
+    width: 500px;
+    height: 200px;
+  }
   .color-swatch {
     width: 10px;
     /* Adjust width as needed */
