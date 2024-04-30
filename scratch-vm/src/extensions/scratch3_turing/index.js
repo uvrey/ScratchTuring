@@ -773,9 +773,8 @@ class Scratch3Turing {
         }
         // emit loading screen ask
         var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
-            this.updateInternals(this.user_models[modelName], response, 'prior', rv = NONE, distribution = dist)); // unpacks the new data using the turing samples
+            this.updateInternals(this.user_models[modelName], response, 'prior', true, distribution = dist)); // unpacks the new data using the turing samples
 
-  
         // close loading screen
         return message
         // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
@@ -783,9 +782,28 @@ class Scratch3Turing {
 
     parseResponse(response) {
         const responseJSON = JSON.parse(JSON.parse(response))
+        console.log(typeof responseJSON)
+
+        console.log( responseJSON["chain"])
+
+        console.log("Showing response data...")
+
+        console.log("summary ->")
         summary = responseJSON["summary"]
+        console.log( responseJSON["summary"])
+
+        console.log("chain ->")
         chain = responseJSON["chain"]
+        console.log( responseJSON["chain"])
+
+        console.log("data ->")
         data = chain["data"]
+
+        if (data == undefined) {
+            data = chain["x"]
+        }
+
+        console.log(data)
         return { 'data': data, 'chain': chain, 'summary': summary }
     }
 
@@ -814,7 +832,7 @@ class Scratch3Turing {
 
         message = this._getThenSendSample(util, user_model, random_var_idx)
         this.conditionOnPrior(user_model)
-            .then(response => this.updateInternals(user_model, response, 'posterior', random_var_idx));
+            .then(response => this.updateInternals(user_model, response, 'posterior'));
 
         if (random_var_idx == COLOR) {
             return "I can't do this alone... add me to the workspace!"
@@ -834,8 +852,10 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, modelType, rv = '', distribution = null) {
+    updateInternals(user_model, response, modelType, firstModelInit = false, distribution = null, ) {
+
         dict = this.parseResponse(response)
+        console.log("AFTER STUFF, UPDATING " + modelType + " INTERNALS WITH!")
 
         if (distribution != null) {
             user_model['distribution'] = distribution
@@ -843,14 +863,21 @@ class Scratch3Turing {
 
         console.log(dict)
 
-        console.log("Updating internals...")
+        console.log("first time init? " + firstModelInit)
 
         if (dict['data'] != undefined) {
             user_model.models[modelType]['data'] = dict['data'][0]
         }
-        user_model.models[modelType]['params'] = dict['summary']["parameters"]
-        user_model.models[modelType]['mean'] = dict['summary']["mean"][1]
-        user_model.models[modelType]['stdv'] = dict['summary']["std"][1]
+
+        if (firstModelInit) {
+            user_model.models[modelType]['params'] = dict['summary']["parameters"]
+            user_model.models[modelType]['mean'] = 0
+            user_model.models[modelType]['stdv'] = 1
+        } else {
+            user_model.models[modelType]['params'] = dict['summary']["parameters"]
+            user_model.models[modelType]['mean'] = dict['summary']["mean"][dict['summary']["mean"].length - 1] //TTODO this is a bit hardcoded... is data always the last param?
+            user_model.models[modelType]['stdv'] = dict['summary']["std"][dict['summary']["mean"].length - 1]
+        }
         user_model.models[modelType]['defined'] = true
         user_model.models[modelType]['active'] = true
 
@@ -902,7 +929,7 @@ class Scratch3Turing {
             this.updateSampleSpecs(user_model, CUSTOM)
 
             this.conditionOnPrior(user_model)
-                .then(response => this.updateInternals(user_model, response, 'posterior', CUSTOM));
+                .then(response => this.updateInternals(user_model, response, 'posterior'));
 
             const units = this.user_models[modelName].dataSpecs.units;
             const lastUnit = units[units.length - 1]; // Efficiently access the last unit
@@ -954,6 +981,9 @@ class Scratch3Turing {
         distLines = []
         for (const model in user_model.models) {
             if (user_model.models[model].active) {
+                console.log("getting the dist lines here for: " + model)
+                console.log(user_model.modelName)
+                console.log(user_model.models[model])
                 dss = {}
                 dss.id = model
                 dss.mean = user_model.models[model].mean
@@ -1025,28 +1055,25 @@ class Scratch3Turing {
         console.log(user_model)
 
         var message = await this.buildQuery(user_model.modelName, "updateModelPrior", 'POST', modelType = 'prior', user_model.distribution, -1, [], params)
-        console.log("got this from server: " + message)
+        console.log("got this from server: " + JSON.parse(message))
         return message
     }
 
     async _resetPriorAndObservations(user_model, mean, stdv, buildModel = true) {
         console.log("will reset prior etc here to " + mean + ", " + stdv)
 
-        // user_model.models.prior = this.getClearedModel()
-        // user_model.models.prior.mean = mean
-        // user_model.models.prior.stdv = stdv
-
         // TODO initialise a new model in turing and update posterior if there is data already
-        // if (buildModel) {
-        //     this._runtime.emit('TURING_SHOW_LOAD')
+        if (buildModel) {
+            this._runtime.emit('TURING_SHOW_LOAD')
 
-        //     // if (user_model.data.length > 0) {
-        //     await this._updateModel(user_model).then(() => this.conditionOnPrior(user_model)
-        //         .then(response => this.updateInternals(user_model, response, 'posterior')))
-        //     // } else {
-        //     //     await this._updateModel(user_model).then(response => this.updateInternals(user_model, response, 'posterior',  distribution = user_model.distribution))
-        //     // }
-        // }
+            if (user_model.data.length > 0) {
+                await this._updateModel(user_model).then(() => this.conditionOnPrior(user_model)
+                .then(response => this.updateInternals(user_model, response, 'posterior')))
+            } else {
+
+                await this._updateModel(user_model).then(response => this.updateInternals(user_model, response, 'posterior'))
+            }
+        }
     }
 
     _getDistributionData(user_model) {
@@ -1079,7 +1106,9 @@ class Scratch3Turing {
         return sampleSpace
     }
 
-    async conditionOnPrior(user_model, n = 1) { // n defines the number of potential posteriors we would like to visualise...
+    async conditionOnPrior(user_model) { // n defines the number of potential posteriors we would like to visualise...
+        console.log("conditionOnPrior")
+        console.log("obtaining posterior... since there is data!")
         const newData = user_model['data']
         message = this.buildQuery(user_model.modelName, "condition", 'POST', distribution, newData, 100, {}) // logic to check number args
         console.log("Server responded:")

@@ -33,6 +33,9 @@ import VM from 'scratch-vm'
 
 import styles from './turing-selector.css';
 
+
+var SAMPLE_COUNTS = {}
+
 const TuringSelector = props => {
     const {
         buttons,
@@ -59,6 +62,16 @@ const TuringSelector = props => {
         props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
     }
 
+    function getKey(sample) {
+        if (SAMPLE_COUNTS[sample] == undefined) {
+            SAMPLE_COUNTS[sample] = 0
+            return sample+''
+        } else {
+            SAMPLE_COUNTS[sample] = SAMPLE_COUNTS[sample] + 1
+            return sample + "_" + SAMPLE_COUNTS[sample]
+        }
+    }
+
     newButtonSection = (
         <Box className={styles.newButtons}>
             <ActionMenu
@@ -80,7 +93,7 @@ const TuringSelector = props => {
                     <SortableAsset
                         id={sample}
                         index={isRelevantDrag ? ordering.indexOf(index) : index}
-                        key={sample}
+                        key={getKey(sample)}
                         onAddSortable={onAddSortable}
                         onRemoveSortable={onRemoveSortable}
                     >
@@ -92,7 +105,7 @@ const TuringSelector = props => {
                             dragType={dragType}
                             id={index}
                             index={index}
-                            name={sample}
+                            name={sample => typeof sample !== 'string' ? sample.toString() : sample}
                             number={index + 1}
                             selected={index === selectedItemIndex}
                             onClick={onItemClick}
@@ -130,7 +143,7 @@ TuringSelector.propTypes = {
     onItemClick: PropTypes.func.isRequired,
     onRemoveSortable: PropTypes.func,
     ordering: PropTypes.arrayOf(PropTypes.number),
-    selectedItemIndex: PropTypes.number.isRequired,
+    selectedItemIndex: PropTypes.number,
     items: PropTypes.array,
     activeModels: PropTypes.array
 };
