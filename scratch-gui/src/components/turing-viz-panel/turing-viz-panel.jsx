@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import FontDashboard from './font--dashboard.svg'
@@ -30,12 +30,124 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const CustomLabel = props => {
+  console.log(props);
+  return (
+    <foreignObject class="label-wrapper" x={props.viewBox.x} y="0">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="custom-label">
+        Label
+      </div>
+    </foreignObject>
+  );
+};
+
 const formatId = (modelName, label) => {
   return modelName + "_" + label
 }
 
 const CUSTOM = 0
 const PRIOR = 1
+
+const getGaussianPanel = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      {getParameterLabels(props)}
+      <Box className={styles.dataCol}>
+        <img src={FontDist} className={styles.visHeading} />
+        <LineChart width={900} height={600} data={props.data.distData}>
+          <XAxis
+            allowDecimals={false}
+            dataKey="input"
+            type="number"
+          />
+          <YAxis allowDecimals={true} />
+          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          {props.docTags}
+          {props.data.activeDists.map((key) => (
+            <Line
+              key={props.data.styles[key].chartName}
+              dataKey={key}
+              type="monotone"
+              stroke={props.data.styles[key].stroke}
+              dot={props.data.styles[key].dots}
+              isAnimationActive={true}
+              strokeWidth={props.data.styles[key].strokeWidth}
+            />
+          ))}
+          <ReferenceLine x={0} label={CustomLabel} />
+          <Legend />
+          <Tooltip />
+        </LineChart>
+      </Box>
+      <ScatterChart
+        width={400}
+        height={300}
+        margin={{
+          top: 20,
+          right: 20,
+          bottom: 20,
+          left: 20,
+        }}
+      >
+        <CartesianGrid />
+        <XAxis type="number" dataKey="x" name="sample" unit="" />
+        <YAxis type="number" dataKey="y" name="value" unit="" />
+        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+        <Scatter name="Sample Space" data={props.data.sampleSpace} fill="#FF5959" />
+      </ScatterChart>
+      <Box>
+      </Box>
+    </Box>
+  )
+}
+
+const data = [];
+
+const rand = 300;
+for (let i = 0; i < 7; i++) {
+  let d = {
+    year: 2000 + i,
+    value: Math.random() * (rand + 50) + 100
+  };
+
+  data.push(d);
+}
+
+const CustomLabelOld = props => {
+  console.log(props);
+  return (
+    <g>
+      <rect
+        x={props.viewBox.x}
+        y={props.viewBox.y}
+        fill="#aaa"
+        width={100}
+        height={30}
+      />
+      <text x={props.viewBox.x} y={props.viewBox.y} fill="#111" dy={20} dx={30}>
+        Label
+      </text>
+    </g>
+  );
+};
+
+const getData = () => {
+  return Array(361).fill(0).map((_, i) => ({ angle: i, density: 1 / 360 }));
+}
+
+
+const getHuePanel = () => {
+  return (
+    <Box className={styles.dataRow}>
+    <LineChart width={800} height={300} data={getData()}>
+      <Line type="monotone" dataKey="density" stroke="#8884d8" dots ={false} />
+      <XAxis label="Hue" tick={<CustomizedAxisTick />} />
+      <YAxis label="Probability Density" />
+      <title>Probability Density of Uniform Distribution (0-360 degrees)</title>
+    </LineChart>
+    </Box>
+  );
+}
 
 const getParameterLabels = (props) => {
   switch (props.data.user_model.distribution) {
@@ -201,16 +313,45 @@ const getParameterLabels = (props) => {
           </Box>
         </div>
       ); // Use PascalCase for model names
-    case 'poisson':
-      return (<div>Poisson: <h1>λ</h1></div>)
-    case 'binomial':
-      return (<div>Binomial: <h1>n</h1><h1>p</h1></div>)
+    case 'color':
+      return (<div>Hue: <h1>λ</h1></div>)
+    case 'rhythm':
+      return (<div>Rhythm: <h1>n</h1><h1>p</h1></div>)
     default:
       return (<h1>Unknown distribution</h1>);
   }
 };
 
+const getPanel = (props) => {
+  switch (props.data.user_model.distribution) {
+    case 'gaussian':
+      return getGaussianPanel(props)
+    case 'hue':
+      return getHuePanel(props)
+    case 'rhythm':
+      return getRhythmPanel(props)
+  }
+}
 
+const getKeyStats = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      <Box className={styles.keyStats}>
+        <div>
+          <img src={FontType} className={styles.statsHeading} />
+          <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
+        </div>
+        <div>
+          <img src={FontCurrentSample} className={styles.statsHeading} />
+          {(props.data.samples.length == 0) ? (<p className={styles.stat}>none</p>) : (<p className={styles.stat}>{props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}</p>)}
+        </div>
+        <div>
+          <img src={FontNumSamples} className={styles.statsHeading} />
+          <p className={styles.stat}>{props.data.samples.length}</p>
+        </div>
+      </Box>
+    </Box>);
+}
 const TuringVizPanel = props => (
   <Box className={styles.body}>
     <Box className={styles.dataCol}>
@@ -228,83 +369,10 @@ const TuringVizPanel = props => (
       </Box>
 
       <img src={FontDashboard} className={styles.dashboard} />
-      {console.log("Building visualisation panel :) here's what we have!")}
-      {console.log(props.data)}
-
-
-      <Box className={styles.dataRow}>
-        {/* <Box className={styles.dataCol}>
-          <img src={FontBarChart} className={styles.visHeading} />
-          <BarChart width={500} height={300} data={props.data.barData} className={styles.chartElement}>
-            <Bar key={props.data.barData.type} fill="#855CD6" isAnimationActive={true} dataKey="value" barsize={10} />
-            <XAxis dataKey="type" />
-            <Tooltip content={<CustomTooltip />} />
-            <YAxis />
-          </BarChart>
-        </Box> */}
-        <Box className={styles.keyStats}>
-          <div>
-            <img src={FontType} className={styles.statsHeading} />
-            <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
-          </div>
-          <div>
-            <img src={FontCurrentSample} className={styles.statsHeading} />
-            {(props.data.samples.length == 0) ? (<p className={styles.stat}>none</p>) : (<p className={styles.stat}>{props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}</p>)}
-          </div>
-          <div>
-            <img src={FontNumSamples} className={styles.statsHeading} />
-            <p className={styles.stat}>{props.data.samples.length}</p>
-          </div>
-        </Box>
-      </Box>
-      <Box className={styles.dataRow}>
-        {getParameterLabels(props)}
-        <Box className={styles.dataCol}>
-          <img src={FontDist} className={styles.visHeading} />
-          <LineChart width={900} height={600} data={props.data.distData}>
-            <XAxis
-              allowDecimals={false}
-              dataKey="input"
-              type="number"
-            />
-            <YAxis allowDecimals={true} />
-            <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-            {props.docTags}
-            {props.data.activeDists.map((key) => (
-              <Line
-                key={props.data.styles[key].chartName}
-                dataKey={key}
-                type="monotone"
-                stroke={props.data.styles[key].stroke}
-                dot={props.data.styles[key].dots}
-                isAnimationActive={true}
-                strokeWidth={props.data.styles[key].strokeWidth}
-              />
-            ))}
-            {/* <Customized component={CustomizedRectangle} /> */}
-            <Legend />
-            <Tooltip />
-          </LineChart>
-        </Box>
-        <ScatterChart
-          width={400}
-          height={300}
-          margin={{
-            top: 20,
-            right: 20,
-            bottom: 20,
-            left: 20,
-          }}
-        >
-          <CartesianGrid />
-          <XAxis type="number" dataKey="x" name="sample" unit="" />
-          <YAxis type="number" dataKey="y" name="value" unit="" />
-          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          <Scatter name="Sample Space" data={props.data.sampleSpace} fill="#FF5959" />
-        </ScatterChart>
-        <Box>
-        </Box>
-      </Box>
+      {console.log("INSIDE VIZ PANEL! Props are..")}
+      {console.log(props)}
+      {getKeyStats(props)}
+      {getPanel(props)}
     </Box>
   </Box>
 );

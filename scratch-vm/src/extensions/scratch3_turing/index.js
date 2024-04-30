@@ -33,7 +33,7 @@ const CUSTOM = 7
 const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC']
 const UNITS = ['s', '', '', '', 'db', '', '', '', '', '']
 const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'LOUDNESS', 'COLOR', 'NONE', 'CUSTOM']
-const DISTRIBUTIONS = ['gaussian', 'poisson', 'binomial']
+const DISTRIBUTIONS = ['gaussian', 'hue', 'rhythm']
 
 window.addEventListener("beforeunload", (event) => {
     console.log("Session might have ended");
@@ -54,12 +54,12 @@ class Scratch3Turing {
 
         this.TARGET_PROPERTIES = [
             (util, model) => model.timer.timeElapsed() / 1000, // TIME
-            (util,  model) => util.target.size,
-            (util,  model) => util.target.x,
-            (util,  model) => util.target.y,
-            (util,  model) => 10, // LOUDNESS TODO
-            (util,  model) => TuringSensing.fetchColor(util.target),
-            (util,  model) => NONE,
+            (util, model) => util.target.size,
+            (util, model) => util.target.x,
+            (util, model) => util.target.y,
+            (util, model) => 10, // LOUDNESS TODO
+            (util, model) => TuringSensing.fetchColor(util.target),
+            (util, model) => NONE,
         ];
 
         this.user_models = {} // each target has its own model
@@ -205,16 +205,16 @@ class Scratch3Turing {
             },
             {
                 name: formatMessage({
-                    id: 'turing.distInfo.poisson',
-                    default: 'POISSON',
-                    description: 'poisson'
+                    id: 'turing.distInfo.hue',
+                    default: 'HUE',
+                    description: 'hue'
                 }),
             },
             {
                 name: formatMessage({
-                    id: 'turing.distInfo.binomial',
-                    default: 'BINOMIAL',
-                    description: 'binomial'
+                    id: 'turing.distInfo.rhythm',
+                    default: 'RHYTHM',
+                    description: 'rhythm'
                 }),
             }
         ]
@@ -762,39 +762,46 @@ class Scratch3Turing {
 
         this.lastSampleTime[modelName] = 0
 
-        this._runtime.emit('TURING_SHOW_LOAD')
         this.defineTargetModel(util, modelName)
         this._runtime.emit('PROJECT_CHANGED')
 
-        // util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
         var dist = DISTRIBUTIONS[args.DISTRIBUTION - 1]
         if (this.user_models[modelName] == null) {
             return "No model found."
         }
-        // emit loading screen ask
-        var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
-            this.updateInternals(this.user_models[modelName], response, 'prior', true, distribution = dist)); // unpacks the new data using the turing samples
 
-        // close loading screen
-        return message
-        // return util.target.getName() + "'s belief about " + this.user_models[util.target.getName()].modelName + " has a " + dist + " distribution"
+        this._runtime.emit('TURING_SHOW_LOAD')
+
+        if (dist == 'hue') {
+            console.log("defined a hue model...")
+            var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
+                this.updateInternals(this.user_models[modelName], response, 'prior', true, distribution = dist)); // unpacks the new data using the turing samples
+
+        } else if (dist == 'rhythm') {
+            var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
+                this.updateInternals(this.user_models[modelName], response, 'prior', true, distribution = dist)); // unpacks the new data using the turing samples
+        } else {
+            var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", dist, -1, [], {}).then(response =>
+                this.updateInternals(this.user_models[modelName], response, 'prior', true, distribution = dist)); // unpacks the new data using the turing samples
+            return message
+        }
     }
 
     parseResponse(response) {
         const responseJSON = JSON.parse(JSON.parse(response))
         console.log(typeof responseJSON)
 
-        console.log( responseJSON["chain"])
+        console.log(responseJSON["chain"])
 
         console.log("Showing response data...")
 
         console.log("summary ->")
         summary = responseJSON["summary"]
-        console.log( responseJSON["summary"])
+        console.log(responseJSON["summary"])
 
         console.log("chain ->")
         chain = responseJSON["chain"]
-        console.log( responseJSON["chain"])
+        console.log(responseJSON["chain"])
 
         console.log("data ->")
         data = chain["data"]
@@ -841,7 +848,7 @@ class Scratch3Turing {
             if (this.user_models[modelName].data.length > 0) {
                 const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
                 const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
-                const lastUnit = units[units.length-1]// gets the last unit    
+                const lastUnit = units[units.length - 1]// gets the last unit    
                 return `${observation} ${lastUnit}`
             } else {
                 if (random_var_idx == TIME) {
@@ -859,7 +866,7 @@ class Scratch3Turing {
         }
     }
 
-    updateInternals(user_model, response, modelType, firstModelInit = false, distribution = null, ) {
+    updateInternals(user_model, response, modelType, firstModelInit = false, distribution = null,) {
 
         dict = this.parseResponse(response)
         console.log("AFTER STUFF, UPDATING " + modelType + " INTERNALS WITH!")
@@ -876,7 +883,7 @@ class Scratch3Turing {
             user_model.models[modelType]['data'] = dict['data'][0]
         }
 
-        if (firstModelInit) {
+        if (firstModelInit) { // the parameters will change. 
             user_model.models[modelType]['params'] = dict['summary']["parameters"]
             user_model.models[modelType]['mean'] = 0
             user_model.models[modelType]['stdv'] = 1
@@ -891,12 +898,12 @@ class Scratch3Turing {
         // this.updateSampleSpecs(user_model, rv)
         user_model['hasDistData'] = true
 
-        this.updateVisualisationData(user_model, modelType)
+        this.updateVisualisationData(user_model, modelType) // how we get our distributiond data will change...
         console.log("updated internals, emitting...")
         console.log(this.visualisationData)
 
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
-        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict()) 
         this._runtime.emit('PROJECT_CHANGED')
 
         // Emit only once the project has finished loading
@@ -947,9 +954,11 @@ class Scratch3Turing {
     }
 
     extractSample = (util, user_model, rv, groundTruth) => {
-        this.updateSampleSpecs(user_model, rv)
 
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
+
+        console.log("SAMPLE FOUND!")
+        console.log(sample)
 
         if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
             user_model.timer.start(); // Start a new timer only for TIME
@@ -959,6 +968,8 @@ class Scratch3Turing {
             console.log(sample)
             return "Started timer..."
         }
+
+        this.updateSampleSpecs(user_model, rv) // update if not a TIME without timer already started.
 
         if (user_model.data.length < 1) {
             user_model.timer.start();
@@ -974,7 +985,7 @@ class Scratch3Turing {
         } else {
             user_model.labels.push(sample);
         }
-        return sample 
+        return sample
     };
 
     _getThenSendSample(util, user_model, rvIndex, groundTruth = false) {
@@ -1060,7 +1071,7 @@ class Scratch3Turing {
     async _updateModel(user_model) {
         params = {
             mean: user_model.models.prior.mean,
-            stdv: user_model.models.prior.stdv, 
+            stdv: user_model.models.prior.stdv,
         }
 
         console.log("trying to update this model..")
@@ -1080,7 +1091,7 @@ class Scratch3Turing {
 
             if (user_model.data.length > 0) {
                 await this._updateModel(user_model).then(() => this.conditionOnPrior(user_model)
-                .then(response => this.updateInternals(user_model, response, 'posterior')))
+                    .then(response => this.updateInternals(user_model, response, 'posterior')))
             } else {
 
                 await this._updateModel(user_model).then(response => this.updateInternals(user_model, response, 'posterior'))
