@@ -834,13 +834,20 @@ class Scratch3Turing {
         this.conditionOnPrior(user_model)
             .then(response => this.updateInternals(user_model, response, 'posterior'));
 
+        // Handle the case where this is the first sample we take - may not work with green flat...
         if (random_var_idx == COLOR) {
             return "I can't do this alone... add me to the workspace!"
         } else {
-            const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
-            const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
-            const lastUnit = units[units.length - 1]; // gets the last unit    
-            return `${observation} ${lastUnit}`
+            if (this.user_models[modelName].data.length > 0) {
+                const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
+                const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
+                const lastUnit = units[units.length-1]// gets the last unit    
+                return `${observation} ${lastUnit}`
+            } else {
+                if (random_var_idx == TIME) {
+                    return "You haven't used this block in a project, so it has started a stopwatch until clicked again..."
+                }
+            }
         }
     }
 
@@ -944,6 +951,15 @@ class Scratch3Turing {
 
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
+        if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
+            user_model.timer.start(); // Start a new timer only for TIME
+        }
+
+        if (rv == TIME && sample > 1000000) {
+            console.log(sample)
+            return "Started timer..."
+        }
+
         if (user_model.data.length < 1) {
             user_model.timer.start();
         }
@@ -958,11 +974,7 @@ class Scratch3Turing {
         } else {
             user_model.labels.push(sample);
         }
-
-        if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
-            user_model.timer.start(); // Start a new timer only for TIME
-        }
-        return sample
+        return sample 
     };
 
     _getThenSendSample(util, user_model, rvIndex, groundTruth = false) {
@@ -1426,8 +1438,9 @@ class Scratch3Turing {
     // }
 
     _onResetTimer() {
+        console.log("RECEIVED PROJECT START SYMBOL! time to start timers...")
         for (const modelName in this.user_models) {
-            this.timers[modelName].start()
+            this.user_models[modelName].timer.start()
         }
     }
 
