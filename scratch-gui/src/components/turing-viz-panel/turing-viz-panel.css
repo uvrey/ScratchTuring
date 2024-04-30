@@ -319,11 +319,11 @@ input[type="range"] {
   }
 
   .color-swatch {
-    width: 50px;
+    width: 10px;
     /* Adjust width as needed */
-    height: 50px;
+    height: 10px;
     /* Adjust height as needed */
-    border-radius: 0.25rem;
+    /* border-radius: 0.25rem; */
 }
 
   .custom-label {

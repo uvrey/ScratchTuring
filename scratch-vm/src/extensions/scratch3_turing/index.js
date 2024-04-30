@@ -748,6 +748,11 @@ class Scratch3Turing {
                 units: [],
                 modes: []
             },
+            hueData: {
+                hue: [],
+                hex: [],
+                hsv: [],
+            },
             data: [],
             labels: [],
             distLines: [],
@@ -903,7 +908,7 @@ class Scratch3Turing {
         console.log(this.visualisationData)
 
         this._runtime.emit('TURING_DATA', this.visualisationData) // ODO get this data as probabilities and represent in the GUI
-        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict()) 
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         this._runtime.emit('PROJECT_CHANGED')
 
         // Emit only once the project has finished loading
@@ -976,6 +981,9 @@ class Scratch3Turing {
         }
 
         if (rv == COLOR) {
+            user_model.hueData.hsv.push(Color.rgbToHsv(sample))
+            user_model.hueData.hex.push( Color.rgbToHex(sample))
+            user_model.hueData.hue.push(user_model.hueData.hsv.h)
             sample = Color.rgbToHex(sample)
         }
 
@@ -1189,6 +1197,7 @@ class Scratch3Turing {
                 modelName: user_model.modelName,
                 targetSprite: user_model.targetSprite,
                 dataSpecs: user_model.dataSpecs,
+                hueData: user_model.hueData,
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
                     'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },

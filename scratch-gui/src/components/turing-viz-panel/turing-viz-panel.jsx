@@ -16,6 +16,7 @@ import FontCurrentSample from './font--currentSample.svg'
 import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
 import Carousel from './carousel.jsx'
+import Color from './color.js'
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -41,21 +42,32 @@ const CustomLabel = (props) => { // TODO modify this so it returns rectangles wi
   );
 };
 
-const CustomHue = (hue) => { // TODO modify this so it returns rectangles with a particular colour
+const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
+  console.log(props.payload)
+  const hue = props.payload.value % 360 
   return (
-    <foreignObject className={styles.labelWrapper}> 
-      <div className={styles.colorSwatch} style={{ backgroundColor: hue }}/>
+    <foreignObject className={styles.labelWrapper} y = {260} x= {props.payload.tickCoord}> 
+      <div className={styles.colorSwatch} style={{ backgroundColor: hueToHex(hue) }}/>
     </foreignObject>
   );
 };
 
+/**
+ * Convert a hex color (e.g., F00, #03F, #0033FF) to an RGB color object.
+ * CC-BY-SA Tim Down:
+ * https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+ * @param {!string} hex Hex representation of the color.
+ * @return {RGBObject} null on failure, or rgb: {r: red [0,255], g: green [0,255], b: blue [0,255]}.
+ */
+
+const hueToHex = (hue) => {
+  const hsv = {h: hue, s: 100, v: 100}
+  return Color.rgbToHex(Color.hsvToRgb(hsv))
+}
 
 const formatId = (modelName, label) => {
   return modelName + "_" + label
 }
-
-const CUSTOM = 0
-const PRIOR = 1
 
 const getGaussianPanel = (props) => {
   return (
@@ -150,9 +162,9 @@ const getHuePanel = () => {
   return (
     <Box className={styles.dataRow}>
     <LineChart width={800} height={300} data={getData()}>
-      <Line type="monotone" dataKey="density" stroke="#8884d8" dots ={false} />
-      <XAxis label="Hue" tick={CustomHue("#d41444")} />
-      <YAxis label="Probability Density" />
+      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="3px" dot= {false} />
+      <XAxis label="Hue" tick={<CustomHue />}/>
+      <YAxis  dots={false} yAxis={-5}/>
       <title>Probability Density of Uniform Distribution (0-360 degrees)</title>
     </LineChart>
     </Box>
