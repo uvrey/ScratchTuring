@@ -137,11 +137,12 @@ const getHuePanel = (props) => {
 
     {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
     {console.log(props.data)}
-    {/* <BarChart width={800} height={300} data={props.data.huePlotData}>
-      <Bar type="monotone" dataKey="hue" stroke="#8884d8" strokeWeight="3px" dot= {false} />
-      <XAxis label="Hue" tick={<CustomHue />}  dataKey="hue"/>
+    
+    <BarChart width={800} height={300} data={props.data.huePlotData}>
+      <Bar type="monotone" dataKey="value" stroke="#8884d8" strokeWeight="3px" dot= {false} />
+      <XAxis label="Hue" />
       <YAxis  dots={false} yAxis={-5}/>
-    </BarChart> */}
+    </BarChart>
     </Box>
   );
 }

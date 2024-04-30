@@ -958,11 +958,12 @@ class Scratch3Turing {
         }
     }
 
-    updateHueData(user_model) {
-        const hue = user_model.data[user_model.data.length-1] // gets the most recent hue
-        user_model.hueData.hue[hue] += 1
+    updateHueData(user_model, hue) {
+        console.log("\n-------------------------------------------\n updating with hue")
+        var hue = Math.floor(hue % 360)
+        user_model.hueData.hue[hue] =  user_model.hueData.hue[hue] + 1
         user_model.hueData.hueCounts += 1 
-        user_model.hueData.hueProportions[hue] = user_model.hueData.hue / user_model.hueData.hueCounts
+        user_model.hueData.hueProportions[hue] = user_model.hueData.hue[hue] / user_model.hueData.hueCounts
     }
 
     extractSample = (util, user_model, rv, groundTruth) => {
@@ -990,7 +991,7 @@ class Scratch3Turing {
         if (rv == COLOR) {
             // user_model.hueData.hsv.push(Color.rgbToHsv(sample))
             // user_model.hueData.hex.push(Color.rgbToHex(sample))
-            this.updateHueData(user_model)
+            this.updateHueData(user_model, Color.rgbToHsv(sample).h)
             sample = Color.rgbToHex(sample)
         }
 
@@ -1199,9 +1200,10 @@ class Scratch3Turing {
     _getHuePlotData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
-            data.push({type: i, value: user_model.hueData.hue[i]})
+            data.push({hue: i, value: user_model.hueData.hue[i]})
         }
-        console.log("Prepared")
+        console.log("Prepared this hue data to plot...")
+        console.log(data)
         return data
     }
 
