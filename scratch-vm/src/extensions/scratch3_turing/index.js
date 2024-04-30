@@ -749,9 +749,9 @@ class Scratch3Turing {
                 modes: []
             },
             hueData: {
-                hue: [],
-                hex: [],
-                hsv: [],
+                hue: Array(360).fill(0),
+                hueProportions: Array(360).fill(0),
+                hueCounts: 0
             },
             data: [],
             labels: [],
@@ -958,6 +958,13 @@ class Scratch3Turing {
         }
     }
 
+    updateHueData(user_model) {
+        const hue = user_model.data[user_model.data.length-1] // gets the most recent hue
+        user_model.hueData.hue[hue] += 1
+        user_model.hueData.hueCounts += 1 
+        user_model.hueData.hueProportions[hue] = user_model.hueData.hue / user_model.hueData.hueCounts
+    }
+
     extractSample = (util, user_model, rv, groundTruth) => {
 
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
@@ -981,9 +988,9 @@ class Scratch3Turing {
         }
 
         if (rv == COLOR) {
-            user_model.hueData.hsv.push(Color.rgbToHsv(sample))
-            user_model.hueData.hex.push( Color.rgbToHex(sample))
-            user_model.hueData.hue.push(user_model.hueData.hsv.h)
+            // user_model.hueData.hsv.push(Color.rgbToHsv(sample))
+            // user_model.hueData.hex.push(Color.rgbToHex(sample))
+            this.updateHueData(user_model)
             sample = Color.rgbToHex(sample)
         }
 
@@ -1189,6 +1196,15 @@ class Scratch3Turing {
         return data
     }
 
+    _getHuePlotData(user_model) {
+        var data = []
+        for (var i = 0; i < user_model.hueData.hue.length; i++) {
+            data.push({type: i, value: user_model.hueData.hue[i]})
+        }
+        console.log("Prepared this hue data to plot...")
+        return data
+    }
+
     /* Prepare a JSON of relevant data */
     updateVisualisationData(user_model, type = null) {
         if (type != 'observed') {
@@ -1198,6 +1214,7 @@ class Scratch3Turing {
                 targetSprite: user_model.targetSprite,
                 dataSpecs: user_model.dataSpecs,
                 hueData: user_model.hueData,
+                huePlotData: this._getHuePlotData(user_model),
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
                     'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },

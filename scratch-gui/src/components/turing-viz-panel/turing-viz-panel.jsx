@@ -123,49 +123,23 @@ const getGaussianPanel = (props) => {
   )
 }
 
-const data = [];
-
-const rand = 300;
-for (let i = 0; i < 7; i++) {
-  let d = {
-    year: 2000 + i,
-    value: Math.random() * (rand + 50) + 100
-  };
-
-  data.push(d);
-}
-
-const CustomLabelOld = props => {
-  console.log(props);
-  return (
-    <g>
-      <rect
-        x={props.viewBox.x}
-        y={props.viewBox.y}
-        fill="#aaa"
-        width={100}
-        height={30}
-      />
-      <text x={props.viewBox.x} y={props.viewBox.y} fill="#111" dy={20} dx={30}>
-        Label
-      </text>
-    </g>
-  );
-};
-
-const getData = () => {
+const getHueDistributionData = () => {
   return Array(361).fill(0).map((_, i) => ({ angle: i, density: 1 / 360 }));
 }
 
-
-const getHuePanel = () => {
+const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
-    <LineChart width={800} height={300} data={getData()}>
+    <LineChart width={800} height={300} data={getHueDistributionData()}>
       <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="3px" dot= {false} />
       <XAxis label="Hue" tick={<CustomHue />}/>
       <YAxis  dots={false} yAxis={-5}/>
-      <title>Probability Density of Uniform Distribution (0-360 degrees)</title>
+    </LineChart>
+
+    <LineChart width={800} height={300} data={props.huePlotData}>
+      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="3px" dot= {false} />
+      <XAxis label="Hue" tick={<CustomHue />}/>
+      <YAxis  dots={false} yAxis={-5}/>
     </LineChart>
     </Box>
   );
