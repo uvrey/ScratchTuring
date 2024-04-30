@@ -31,19 +31,18 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
-  console.log(props);
-  return (
-    <foreignObject className={styles.labelWrapper} x="0" y="0"> 
-      <div className={styles.customLabel}>
-        Label
-      </div>
-    </foreignObject>
-  );
-};
+// const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
+//   return (
+//     <foreignObject className={styles.labelWrapper} x="0" y="0"> 
+//       <div className={styles.customLabel}>
+//         Label
+//       </div>
+//     </foreignObject>
+//   );
+// };
 
 const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
-  console.log(props.payload)
+  // console.log(props.payload)
   const hue = props.payload.value % 360 
   return (
     <foreignObject className={styles.labelWrapper} y = {260} x= {props.payload.tickCoord}> 
@@ -136,11 +135,13 @@ const getHuePanel = (props) => {
       <YAxis  dots={false} yAxis={-5}/>
     </LineChart>
 
-    <LineChart width={800} height={300} data={props.huePlotData}>
-      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="3px" dot= {false} />
-      <XAxis label="Hue" tick={<CustomHue />}/>
+    {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
+    {console.log(props.data)}
+    {/* <BarChart width={800} height={300} data={props.data.huePlotData}>
+      <Bar type="monotone" dataKey="hue" stroke="#8884d8" strokeWeight="3px" dot= {false} />
+      <XAxis label="Hue" tick={<CustomHue />}  dataKey="hue"/>
       <YAxis  dots={false} yAxis={-5}/>
-    </LineChart>
+    </BarChart> */}
     </Box>
   );
 }

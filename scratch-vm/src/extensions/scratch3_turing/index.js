@@ -1201,7 +1201,7 @@ class Scratch3Turing {
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
             data.push({type: i, value: user_model.hueData.hue[i]})
         }
-        console.log("Prepared this hue data to plot...")
+        console.log("Prepared")
         return data
     }
 
