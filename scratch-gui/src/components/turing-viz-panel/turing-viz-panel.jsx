@@ -130,7 +130,7 @@ const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
     <LineChart width={800} height={300} data={getHueDistributionData()}>
-      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="3px" dot= {false} />
+      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="4px" dot= {false} />
       <XAxis label="Hue" tick={<CustomHue />}/>
       <YAxis  dots={false} yAxis={-5}/>
     </LineChart>
@@ -139,8 +139,8 @@ const getHuePanel = (props) => {
     {console.log(props.data)}
     
     <BarChart width={800} height={300} data={props.data.huePlotData}>
-      <Bar type="monotone" dataKey="value" stroke="#8884d8" strokeWeight="3px" dot= {false} />
-      <XAxis label="Hue" />
+      <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot= {false} />
+      <XAxis label="Hue" tick={<CustomHue />} />
       <YAxis  dots={false} yAxis={-5}/>
     </BarChart>
     </Box>
