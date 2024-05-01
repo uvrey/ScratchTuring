@@ -76,7 +76,7 @@ const CustomHue = (props) => { // TODO modify this so it returns rectangles with
  * @return {RGBObject} null on failure, or rgb: {r: red [0,255], g: green [0,255], b: blue [0,255]}.
  */
 const hueToHex = (hue) => {
-  const hsv = { h: hue, s: 100, v: 80 }
+  const hsv = { h: hue, s: 80, v: 80 }
   return Color.rgbToHex(Color.hsvToRgb(hsv))
 }
 
@@ -334,13 +334,19 @@ const MyPieChart = ({ data }) => {
 const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
-      <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      <Box className={styles.dataCol}>
+      <h1>Proportion of Hues</h1>
       <MyPieChart data={props.data.huePieData} />
+      <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      </Box>
+      <Box className={styles.dataCol}>
+      <h1>Hue Distribution</h1>
       <BarChart width={800} height={400} data={props.data.huePlotData}>
         <Bar type="monotone" dataKey="value" stroke={props.data.huePlotData.stroke} dot={false} />
         <XAxis label="Hue" tick={<CustomHue />} />
         <YAxis dots={false} yAxis={-5} />
       </BarChart>
+      </Box>
     </Box>
   );
 };
