@@ -5,6 +5,7 @@ const Timer = require('../../util/timer');
 const Distributions = require('./distributions.js')
 const Color = require('../../util/color.js');
 const TuringSensing = require('./turing-sensing.js');
+const { random } = require('gsap');
 
 const palette = [
     "#4D97FF",
@@ -28,10 +29,11 @@ const Y = 3
 const COLOR = 4
 const NONE = 5
 const CUSTOM = 6
+const RHYTHM = 7
 
-const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC']
-const UNITS = ['s', '', '', '', '', '', '', '', '']
-const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'COLOR', 'NONE', 'CUSTOM']
+const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC', 'OBJECT']
+const UNITS = ['s', '', '', '', '', '', '', '', '', '']
+const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'COLOR', 'NONE', 'CUSTOM', 'RHYTHM']
 const DISTRIBUTIONS = ['gaussian', 'hue', 'rhythm']
 
 window.addEventListener("beforeunload", (event) => {
@@ -58,6 +60,7 @@ class Scratch3Turing {
             (util, model) => util.target.y,
             (util, model) => TuringSensing.fetchColor(util.target),
             (util, model) => NONE,
+            (util, model) => this.globalTimer.timeElapsed() / 1000 // Get global timer for the timeline
         ];
 
         this.user_models = {} // each target has its own model
@@ -76,6 +79,7 @@ class Scratch3Turing {
         sessionStorage.setItem("username", this.username);
 
         this.visualisationData = {}
+        this.globalTimer = new Timer()
 
         // Set up signal receipt from the GUI
         this._onClearSamples = this._onClearSamples.bind(this);
@@ -211,6 +215,54 @@ class Scratch3Turing {
         ]
     }
 
+    get RHYTHM_INFO() {
+        return [
+            {
+                name: formatMessage({
+                    id: 'turing.rhythmInfo.gun',
+                    default: 'Gun',
+                    description: 'Rhythm Info.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.rhythmInfo.go',
+                    default: 'go',
+                    description: 'Rhythm Info.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.rhythmInfo.pa',
+                    default: 'pa',
+                    description: 'Rhythm Info.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.rhythmInfo.dun',
+                    default: 'Dun',
+                    description: 'Rhythm Info.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.rhythmInfo.do',
+                    default: 'do',
+                    description: 'Rhythm Info.'
+                }),
+            },
+            {
+                name: formatMessage({
+                    id: 'turing.rhythmInfo.ta',
+                    default: 'ta',
+                    description: 'Rhythm Info.'
+                }),
+            },
+
+        ]
+    }
+
     getModelNameInfo() {
         var model_list = []
 
@@ -320,67 +372,15 @@ class Scratch3Turing {
             name: 'Turing',
 
             blocks: [
-                // {
-                //     opcode: 'showPrior',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.showPrior',
-                //         default:  'our expectation',
-                //         description: 'turing.pinLocation'
-                //     })
-                // },
-                // {
-                //     opcode: 'greet',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.greet',
-                //         default:  'greet...',
-                //         description: 'turing.greet'
-                //     })
-                // },
-                // {
-                //     opcode: 'showLastSample',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.lastSample',
-                //         default:  'most recent sample',
-                //         description: 'turing.lastSample'
-                //     })
-                // },
-                // {
-                //     opcode: 'showMean',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.showMean',
-                //         default:  'average',
-                //         description: 'turing.showMean'
-                //     })
-                // },
-                // {
-                //     opcode: 'showRandomVariable',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.showRandomVariable',
-                //         default:  'random variable',
-                //         description: 'turing.showRandomVariable'
-                //     })
-                // },
-                // {
-                //     opcode: 'defineGroundTruth',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.defineGroundTruth',
-                //         default:  'define ground truth as [DISTRIBUTION]',
-                //         description: 'turing.defineGroundTruth'
-                //     }),
-                //     arguments: {
-                //         DISTRIBUTION: {
-                //             type: ArgumentType.NUMBER,
-                //             defaultValue: 1,
-                //             menu: 'DISTRIBUTION_MENU',
-                //         }
-                //     }
-                // },
+                {
+                    opcode: 'viewModel',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.viewModel',
+                        default: 'model',
+                        description: 'turing.viewModel'
+                    })
+                },
                 {
                     opcode: 'defineModel',
                     blockType: BlockType.COMMAND,
@@ -406,24 +406,6 @@ class Scratch3Turing {
                         }
                     }
                 },
-                // {
-                //     opcode: 'setColourPrior',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.setColourPrior',
-                //         default:  'I think [SOMETHING] is [COLOR]',
-                //         description: 'turing.setRandomVariable'
-                //     }),
-                //     arguments: {
-                //         SOMETHING: {
-                //             type: ArgumentType.STRING,
-                //             defaultValue: 'a field',
-                //         },
-                //         COLOR: {
-                //             type: ArgumentType.COLOR,
-                //         }
-                //     }
-                // },
                 {
                     opcode: 'takeSampleFromSprite',
                     blockType: BlockType.COMMAND,
@@ -445,31 +427,23 @@ class Scratch3Turing {
                     }
                 },
                 {
-                    opcode: 'takeSampleAsNumber',
+                    opcode: 'takeSampleFromUser',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.takeSampleAsNumber',
+                        id: 'turing.takeSampleFromUser',
                         default: 'sample [OBSERVATION] for [MODEL]',
-                        description: 'turing.takeSampleAsNumber'
+                        description: 'turing.takeSampleFromUser'
                     }),
                     arguments: {
                         OBSERVATION: {
-                            type: ArgumentType.NUMBER
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
                         },
                         MODEL: {
                             type: ArgumentType.STRING,
                             defaultValue: "height"
                         }
                     }
-                },
-                {
-                    opcode: 'viewModel',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.viewModel',
-                        default: 'model',
-                        description: 'turing.viewModel'
-                    })
                 },
                 {
                     opcode: 'removeModel',
@@ -486,31 +460,6 @@ class Scratch3Turing {
                         },
                     }
                 }
-                // {
-                //     opcode: 'startStopwatch',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.startStopwatch',
-                //         default:  'start stopwatch',
-                //         description: 'turing.startStopwatch'
-                //     })
-                // },
-                // {
-                //     opcode: 'labelGroundTruth',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.labelGroundTruth',
-                //         default:  'label [RANDOM_VAR]',
-                //         description: 'turing.labelGroundTruth'
-                //     }),
-                //     arguments: {
-                //         RANDOM_VAR: {
-                //             type: ArgumentType.NUMBER,
-                //             defaultValue: 1,
-                //             menu: 'NUMERIC_MENU',
-                //         }
-                //     }
-                // },
                 // {
                 //     opcode: 'clearSamples',
                 //     blockType: BlockType.COMMAND,
@@ -539,9 +488,9 @@ class Scratch3Turing {
                     acceptReporters: true,
                     items: this._buildMenu(this.DISTRIBUTION_INFO)
                 },
-                MODEL_NAME_MENU: {
+                RHYTHM_MENU: {
                     acceptReporters: true,
-                    items: this._buildMenu(this.test())
+                    items: this._buildMenu(this.RHYTHM_INFO)
                 }
             }
         };
@@ -559,29 +508,8 @@ class Scratch3Turing {
         // TTODO remove the model in Turing also. 
     }
 
-    // Function to calculate the probability density function (PDF) of a normal distribution
-    normalPDF(x, mean, stdDev) {
-        const constant = 1 / (stdDev * Math.sqrt(2 * Math.PI));
-        const exponent = Math.exp(-Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2)));
-        return constant * exponent;
-    }
-
-    createPoissonCurveData(samples) {
-        // Choose the maximum number of events to display (can be adjusted based on data)
-        const maxEvents = Math.ceil(Math.max(...samples)) + 2;
-
-        // Generate Poisson probability data
-        const poissonData = [];
-        for (let i = 0; i <= maxEvents; i++) {
-            const probability = Math.exp(-lambda) * Math.pow(lambda, i) / factorial(i);
-            poissonData.push({ x: i, y: probability });
-        }
-
-        // Function to calculate factorial (used for Poisson probability)
-        function factorial(n) {
-            return n === 0 ? 1 : n * factorial(n - 1);
-        }
-        return poissonData
+    sampleRhythm(args, util) {
+        var rhythm = args.RHYTHM
     }
 
     getDistributionData(user_model) {
@@ -785,34 +713,32 @@ class Scratch3Turing {
 
     parseResponse(response) {
         const responseJSON = JSON.parse(JSON.parse(response))
-        console.log(typeof responseJSON)
+        //  console.log(typeof responseJSON)
 
-        console.log(responseJSON["chain"])
+        // console.log(responseJSON["chain"])
 
-        console.log("Showing response data...")
+        // console.log("Showing response data...")
 
-        console.log("summary ->")
+        //  console.log("summary ->")
         summary = responseJSON["summary"]
-        console.log(responseJSON["summary"])
+        //  console.log(responseJSON["summary"])
 
-        console.log("chain ->")
+        //  console.log("chain ->")
         chain = responseJSON["chain"]
-        console.log(responseJSON["chain"])
+        //console.log(responseJSON["chain"])
 
-        console.log("data ->")
+        //   console.log("data ->")
         data = chain["data"]
 
         if (data == undefined) {
             data = chain["x"]
         }
 
-        console.log(data)
+        //  console.log(data)
         return { 'data': data, 'chain': chain, 'summary': summary }
     }
 
     async takeSampleFromSprite(args, util) {
-        console.log("Taking a sample!")
-
         var modelName = args.MODEL
 
         if (this.user_models[modelName] == undefined) {
@@ -821,11 +747,21 @@ class Scratch3Turing {
 
         var random_var_idx = args.RANDOM_VAR - 1
 
-        const currentTime = Date.now();
-        if (currentTime - this.lastSampleTime[modelName] < 400) {
-            return;
+        if (this.user_models[modelName].distribution == "rhythm") {
+            return "Use the other block to sample rhythm"
+
+        } else if (this.user_models[modelName].distribution == "hue") {
+            console.log("taking sample for hue")
+
+        } else {
+            console.log("Taking a numeric sample, so we introduce a time buffer.")
+            const currentTime = Date.now();
+
+            if (currentTime - this.lastSampleTime[modelName] < 400) {
+                return;
+            }
+            this.lastSampleTime[modelName] = currentTime;
         }
-        this.lastSampleTime[modelName] = currentTime; // TTODO add a time buffer for each model sampling!
 
         var user_model = this.user_models[modelName]
 
@@ -838,22 +774,17 @@ class Scratch3Turing {
             .then(response => this.updateInternals(user_model, response, 'posterior'));
 
         // Handle the case where this is the first sample we take - may not work with green flat...
+        // console.log("after taking samples:")
+        // console.log(this.user_models[modelName].data)
 
-        console.log("after taking samples:")
-        console.log(this.user_models[modelName].data)
-        if (random_var_idx == COLOR) {
-            return "I can't do this alone... add me to the workspace!"
+        if (this.user_models[modelName].data.length > 0) {
+            const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
+            const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
+            const lastUnit = units[units.length - 1]// gets the last unit    
+            return `${observation} ${lastUnit}`
         } else {
-            if (this.user_models[modelName].data.length > 0) {
-                const observation = this.user_models[modelName].data[this.user_models[modelName].data.length - 1] // gets most recent sample
-                const units = this.user_models[modelName].dataSpecs.units; // gets units for samples
-                const lastUnit = units[units.length - 1]// gets the last unit    
-                return `${observation} ${lastUnit}`
-            } else {
-                if (random_var_idx == TIME) {
-
-                    return "You haven't used this block in a project, so it has started a stopwatch until clicked again..."
-                }
+            if (random_var_idx == TIME) {
+                return "You haven't used this block in a project, so it has started a stopwatch until clicked again..."
             }
         }
     }
@@ -928,15 +859,29 @@ class Scratch3Turing {
     }
 
     // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
-    takeSampleAsNumber(args, util) {
+    takeSampleFromUser(args, util) {
         var modelName = args.MODEL
         if (this.user_models[modelName] == undefined) {
             return "No model called " + modelName
         }
-        if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined) {
-            return "Oops, this should be a number.";
+
+        if (this.user_models[modelName].distribution == "hue") {
+            return "You're modelling HUE. Use the other sample block!"
+
+        } else if (this.user_models[modelName].distribution == "rhythm") {
+            message = this._getThenSendSample(util, user_model, RHYTHM)
+            this.conditionOnPrior(user_model)
+                .then(response => this.updateInternals(user_model, response, 'posterior'));
+            return "You're modelling rhythm... " + args.OBSERVATION
+            
+        } else {
+            if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined || isNaN(Number(args.OBSERVATION))) {
+                return "Oops, this should be a number.";
+            }
         }
+
         var observation = Number(args.OBSERVATION);
+
         if (typeof util.target != undefined && typeof this.user_models[modelName] != undefined) {
             user_model = this.user_models[modelName]
             this.user_models[modelName].data.push(observation);
@@ -964,7 +909,7 @@ class Scratch3Turing {
     extractSample = (util, user_model, rv, groundTruth) => {
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
-        if (rv == TIME && sample > 1000000 && user_model.data.length < 1) {
+        if ((rv == TIME || rv == RHYTHM) && sample > 1000000 && user_model.data.length < 1) {
             console.log("RETURNING THIS!!")
             user_model.timer.start();
             console.log(sample)
@@ -1216,9 +1161,9 @@ class Scratch3Turing {
 
         const fills = {
             "yellow": "#FEF200",
-            "yellow-orange":"#FFC501",
+            "yellow-orange": "#FFC501",
             "yellow-green": "#8BC800",
-            'green':"#00A650",
+            'green': "#00A650",
             "blue-green": "#01A99C",
             'blue': "#0054A5",
             "blue-violet": "#2E3192",
@@ -1240,7 +1185,7 @@ class Scratch3Turing {
             const freq = user_model.hueData.hue.slice(range[0], range[1]).reduce((acc, curr) => acc + curr, 0);
 
             // Add data to pie chart data list
-            pieChartData.push({ name: color, freq: freq, fill: fills[color]});
+            pieChartData.push({ name: color, freq: freq, fill: fills[color] });
         }
 
         console.log("Format of PIE CHART DATA!!!")
@@ -1531,6 +1476,8 @@ class Scratch3Turing {
 
     _onResetTimer() {
         console.log("RECEIVED PROJECT START SYMBOL! time to start timers...")
+        this.globalTimer.start()
+
         for (const modelName in this.user_models) {
             this.user_models[modelName].timer.start()
         }

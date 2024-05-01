@@ -34,7 +34,7 @@ function getIconFromType(type) {
     case 'Y':
       return yIcon;
     default:
-      return surpriseIcon; // Return null for any other type
+      return surpriseIcon; // Return the surprise icon for any other option TTODO maybe define another type here for RHYTHM
   }
 }
 const TuringSelectorItem = props => {

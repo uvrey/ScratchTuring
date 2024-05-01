@@ -339,6 +339,23 @@ const getHuePanel = (props) => {
   );
 };
 
+const getRhythmPanel = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      <h1> RHYTHM STUFF</h1>
+      {/* <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button> */}
+      {/* <MyPieChart data={props.data.rhythmPieData} />
+      <BarChart width={800} height={300} data={props.data.rhythmPlotData}>
+        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
+        <XAxis label="Hue" tick={<CustomHue />} />
+        <YAxis dots={false} yAxis={-5} />
+      </BarChart> */}
+      {/* <RhythmTimeline /> */}
+    </Box>
+  );
+};
+
+
 
 const getPanel = (props) => {
   switch (props.data.user_model.distribution) {
