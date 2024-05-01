@@ -20,6 +20,7 @@ import Color from './color.js'
 
 import { Doughnut } from 'react-chartjs-2'
 import { HuePanel } from './turing-hue-panel.jsx';
+import { ProportionPanel } from './turing-proportion-chart.jsx'
 
 // import { Doughnut } from 'react-chartjs-2';
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
@@ -38,7 +39,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
   return (
-    <foreignObject className={styles.labelWrapper} x="0" y="0"> 
+    <foreignObject className={styles.labelWrapper} x="0" y="0">
       <div className={styles.customLabel}>
         Label
       </div>
@@ -305,6 +306,32 @@ const getHueDistributionData = () => {
   return Array(361).fill(0).map((_, i) => ({ angle: i, density: 1 / 360 }));
 }
 
+const customFill = () => {
+  return "#d41444"
+}
+
+const MyPieChart = ({ data }) => {
+
+  // Define custom fill function for pie 
+
+  // const customFill = (data) => {
+  //   const category = data.category; // Assuming 'category' property in data
+  //   return getColorByCategory(category);
+  // };
+  return (
+    <PieChart width={700} height={700}>
+      <Pie
+        data={data}
+        dataKey="freq"
+        outerRadius={250}
+        fill={data.fill} // Apply custom fill function
+      />
+      <Legend />
+    </PieChart>
+  );
+};
+
+
 const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
@@ -318,8 +345,21 @@ const getHuePanel = (props) => {
       <Legend />
     </PieChart> */}
       {/* <Doughnut data={props.data.huePlotData} /> */}
-{/* 
-      <HuePanel data={props.data.huePlotData}/> */}
+
+      {/* <HuePanel data={props.data.huePlotData}/> */}
+      {/* 
+      <ProportionPanel data={props.data.huePropPlotData}/> */}
+
+      {console.log("we want this pie chart...")}
+
+      < MyPieChart data={props.data.huePieData}  />
+
+      {/* <PieChart width={700} height={700}>
+        <Pie data={props.data.huePieData} dataKey="freq" outerRadius={250} />
+        <Legend />
+      </PieChart> */}
+
+
       {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
       {console.log(props.data)}
 

@@ -840,7 +840,7 @@ class Scratch3Turing {
         // Handle the case where this is the first sample we take - may not work with green flat...
 
         console.log("after taking samples:")
-        console.log(this.user_models[modelName].data) 
+        console.log(this.user_models[modelName].data)
         if (random_var_idx == COLOR) {
             return "I can't do this alone... add me to the workspace!"
         } else {
@@ -956,41 +956,28 @@ class Scratch3Turing {
     updateHueData(user_model, hue) {
         console.log("\n-------------------------------------------\n updating with hue")
         var hue = Math.floor(hue % 360)
-        user_model.hueData.hue[hue] =  user_model.hueData.hue[hue] + 1
-        user_model.hueData.hueCounts += 1 
+        user_model.hueData.hue[hue] = user_model.hueData.hue[hue] + 1
+        user_model.hueData.hueCounts += 1
         user_model.hueData.hueProportions[hue] = user_model.hueData.hue[hue] / user_model.hueData.hueCounts
     }
 
     extractSample = (util, user_model, rv, groundTruth) => {
-        
-        console.log("EXTRACTING SAMPLE FOR _________________" + RANDOM_VAR_NAMES[rv])
-
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
-        console.log("SAMPLE FOUND!")
-        console.log(sample)
-
-
-        if (rv == TIME && sample > 1000000) {
+        if (rv == TIME && sample > 1000000 && user_model.data.length < 1) {
             console.log("RETURNING THIS!!")
-            user_model.timer.start(); 
+            user_model.timer.start();
             console.log(sample)
             return sample
         }
 
         this.updateSampleSpecs(user_model, rv) // update if not a TIME without timer already started.
 
-        
         if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
             user_model.timer.start(); // Start a new timer only for TIME
         }
-        // if (user_model.data.length < 1) {
-        //     user_model.timer.start();
-        // }
 
         if (rv == COLOR) {
-            // user_model.hueData.hsv.push(Color.rgbToHsv(sample))
-            // user_model.hueData.hex.push(Color.rgbToHex(sample))
             this.updateHueData(user_model, Color.rgbToHsv(sample).h)
             sample = Color.rgbToHex(sample)
         }
@@ -1202,17 +1189,70 @@ class Scratch3Turing {
     _getHuePlotData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
-            data.push({hue: i, value: user_model.hueData.hue[i]})
+            data.push({ hue: i, value: user_model.hueData.hue[i] })
         }
         console.log("Prepared this hue data to plot...")
         console.log(data)
         return data
     }
 
+
+    mapToPieChartData(user_model) {
+        // Define color ranges for each category
+        const colorRanges = {
+            'yellow': [45, 75],
+            "yellow-orange": [75, 90],
+            "yellow-green": [90, 120],
+            'green': [120, 180],
+            "blue-green": [180, 210],
+            'blue': [210, 270],
+            "blue-violet": [270, 300],
+            'violet': [300, 330],
+            "red-violet": [330, 345],
+            'red': [345, 15],
+            "red-orange": [15, 45],
+            'orange': [45, 75],
+        };
+
+        const fills = {
+            "yellow": "#FEF200",
+            "yellow-orange":"#FFC501",
+            "yellow-green": "#8BC800",
+            'green':"#00A650",
+            "blue-green": "#01A99C",
+            'blue': "#0054A5",
+            "blue-violet": "#2E3192",
+            'violet': "#652D90",
+            "red-violet": "#92278F",
+            'red': "#EE1D23",
+            "red-orange": "#F36523",
+            'orange': "#FF9400",
+        }
+
+        // Initialize pie chart data
+        const pieChartData = [];
+
+        // Loop through color ranges
+        for (const color of Object.keys(colorRanges)) {
+            const range = colorRanges[color];
+
+            // Calculate frequency for the range
+            const freq = user_model.hueData.hue.slice(range[0], range[1]).reduce((acc, curr) => acc + curr, 0);
+
+            // Add data to pie chart data list
+            pieChartData.push({ name: color, freq: freq, fill: fills[color]});
+        }
+
+        console.log("Format of PIE CHART DATA!!!")
+        console.log(pieChartData)
+        return pieChartData;
+    }
+
+
     _getHueProportionData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
-            data.push({hue: i, value: user_model.hueData.hueProportions[i]})
+            data.push({ hue: i, value: user_model.hueData.hueProportions[i] })
         }
         console.log("Prepared this hue data to plot...")
         console.log(data)
@@ -1229,7 +1269,7 @@ class Scratch3Turing {
                 dataSpecs: user_model.dataSpecs,
                 hueData: user_model.hueData,
                 huePlotData: this._getHuePlotData(user_model),
-                huePropData: this._getHueProportionData(user_model),
+                huePieData: this.mapToPieChartData(user_model),
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
                     'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },
