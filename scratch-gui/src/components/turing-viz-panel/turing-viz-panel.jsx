@@ -8,6 +8,7 @@ import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Cell, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
+import arrowIcon from './arrow.svg'
 import FontDashboard from './font--dashboard.svg'
 import FontScratchTuring from './font--scratchturing.svg'
 import FontBarChart from './font--barChart.svg'
@@ -316,8 +317,49 @@ const getParameterLabels = (props) => {
   }
 };
 
+const colorRanges = {
+  'yellow': [45, 75],
+  "yellow-orange": [75, 90],
+  "yellow-green": [90, 120],
+  'green': [120, 180],
+  "blue-green": [180, 210],
+  'blue': [210, 270],
+  "blue-violet": [270, 300],
+  'violet': [300, 330],
+  "red-violet": [330, 345],
+  'red': [345, 15],
+  "red-orange": [15, 45],
+  'orange': [45, 75],
+};
 
-const MyPieChart = ({ data }) => {
+function getColorRange(hue) {
+  // Handle wrap around the color wheel
+  hue = (hue + 360) % 360;
+  for (const color in colorRanges) {
+    const range = colorRanges[color];
+    const lower = range[0];
+    const upper = range[1];
+    // Check if hue is within range, accounting for wrap around
+    if (lower <= upper) {
+      if (lower <= hue && hue <= upper) {
+        return color;
+      }
+    } else {
+      if (hue <= upper || lower <= hue) {
+        return color;
+      }
+    }
+  }
+  return null; // Use null instead of None in JavaScript
+}
+
+const HueTooltip = ({ props }) => { // TTODO in progress. 
+  return (
+    <Tooltip />
+  )
+}
+
+const HuePieChart = ({ data }) => {
   return (
     <PieChart width={500} height={500}>
       <Pie
@@ -327,6 +369,22 @@ const MyPieChart = ({ data }) => {
         fill={data.fill} // Apply custom fill function
       />
       {/* <Legend /> */}
+      <Tooltip />
+    </PieChart>
+  );
+};
+
+const RhythmPieChart = ({ data }) => {
+  return (
+    <PieChart width={500} height={500}>
+      <Pie
+        data={data}
+        dataKey="proportion"
+        outerRadius={200}
+        fill={data.fill} // Apply custom fill function
+      />
+      <Legend dataKey="rhythm" />
+      <Tooltip />
     </PieChart>
   );
 };
@@ -335,17 +393,19 @@ const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
-      <h1>Proportion of Hues</h1>
-      <MyPieChart data={props.data.huePieData} />
-      <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+        <h1>Proportion of Hues</h1>
+        <HuePieChart data={props.data.huePieData} />
+        {/* <img src={arrowIcon}/> */}
+        <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
       </Box>
       <Box className={styles.dataCol}>
-      <h1>Hue Distribution</h1>
-      <BarChart width={800} height={400} data={props.data.huePlotData}>
-        <Bar type="monotone" dataKey="value" stroke={props.data.huePlotData.stroke} dot={false} />
-        <XAxis label="Hue" tick={<CustomHue />} />
-        <YAxis dots={false} yAxis={-5} />
-      </BarChart>
+        <h1>Hue Distribution</h1>
+        <BarChart width={800} height={400} data={props.data.huePlotData}>
+          <Bar type="monotone" dataKey="value" stroke={props.data.huePlotData.stroke} dot={false} />
+          <XAxis label="Hue" tick={<CustomHue />} />
+          <YAxis dots={false} yAxis={-5} />
+        </BarChart>
+        < Tooltip />
       </Box>
     </Box>
   );
@@ -354,23 +414,33 @@ const getHuePanel = (props) => {
 const getRhythmPanel = (props) => {
   return (
     <Box className={styles.dataRow}>
-      <h1> RHYTHM STUFF</h1>
+      <Box className={styles.dataCol}>
+        <h1>Proportion of Hues</h1>
+        <RhythmPieChart data={props.data.rhythmPieData} />
+        {/* <img src={arrowIcon}/> */}
+        <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      </Box>
 
-      <ScatterChart
-        width={400}
-        height={300}
-        margin={{
-          top: 20,
-          right: 20,
-          bottom: 20,
-          left: 20,
-        }}>
-        <CartesianGrid />
-        <XAxis type="number" dataKey="x" name="timestamp" unit="" />
-        <YAxis type="number" dataKey="y" name="value" unit="" />
-        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="TIMELINE" data={props.data.rhythmTimelineData} fill="#FF5959" />
-      </ScatterChart>
+      <Box className={styles.dataCol}>
+        {console.log("OUR RHYTHMS!")}
+
+        <h1> Rhythm Samples</h1>
+        <ScatterChart
+          width={400}
+          height={300}
+          margin={{
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20,
+          }}>
+          <CartesianGrid />
+          <XAxis type="number" dataKey="x" name="timestamp" unit="" />
+          <YAxis type="number" dataKey="y" name="value" unit="" />
+          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+          <Scatter name="TIMELINE" data={props.data.rhythmTimelineData} fill={props.data.rhythmTimelineData.fill} />
+        </ScatterChart>
+      </Box>
 
       {/* <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button> */}
       {/* <MyPieChart data={props.data.rhythmPieData} /> */}

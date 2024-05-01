@@ -793,7 +793,11 @@ class Scratch3Turing {
         console.log("\n-------------------------------------------\n updating with hue")
         user_model.rhythmData.rhythms.push(rhythm)
         user_model.rhythmData.timeStamps.push(timeStamp)
-        user_model.rhythmData.rhythmCounts[rhythm] = user_model.rhythmData.rhythmCounts[rhythm] + 1
+        if ( user_model.rhythmData.rhythmCounts[rhythm]  == undefined) {
+            user_model.rhythmData.rhythmCounts[rhythm] = 1
+        } else {
+            user_model.rhythmData.rhythmCounts[rhythm] = user_model.rhythmData.rhythmCounts[rhythm] + 1
+        }
         user_model.rhythmData.rhythmTotal += 1
         user_model.rhythmData.rhythmProportions[rhythm] = user_model.rhythmData.rhythmCounts[rhythm] / user_model.rhythmData.rhythmTotal // TODO might not be needed
     }
@@ -1134,9 +1138,24 @@ class Scratch3Turing {
     _getRhythmTimelineData(user_model) {
         var data = []
         for (var i = 0; i < user_model.rhythmData.rhythms.length; i++) {
-            data.push({x: user_model.rhythmData.timeStamps[i], y: 1, z: 1})
+            data.push({x: user_model.rhythmData.timeStamps[i], y: 1, z: 1, fill: this._getColorFromPalette()}) // TODO get appropriate colour for the particular type of data
         }
         console.log("Prepared this rhythm timeline data to plot...")
+        console.log(data)
+        return data
+    }
+
+    _getRhythmProportionData(user_model) {
+        console.log("@@@@@@@@@@@ when getting rhythm props we have:")
+        console.log(user_model.rhythmData)
+
+        console.log("rhythm counts")
+        console.log(Object.keys(user_model.rhythmData.rhythmCounts))
+        var data = []
+        for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {
+            data.push({ rhythm: rhythm, proportion: user_model.rhythmData.rhythmProportions[rhythm], fill: this._getColorFromPalette()})
+        }
+        console.log("RHYTHM PIE DATA? ")
         console.log(data)
         return data
     }
@@ -1146,8 +1165,6 @@ class Scratch3Turing {
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
             data.push({ hue: i, value: user_model.hueData.hueProportions[i] })
         }
-        // console.log("Prepared this hue data to plot...")
-        // console.log(data)
         return data
     }
 
@@ -1163,6 +1180,7 @@ class Scratch3Turing {
                 huePlotData: this._getHuePlotData(user_model),
                 huePieData: this.mapToPieChartData(user_model),
                 rhythmTimelineData: this._getRhythmTimelineData(user_model),
+                rhythmPieData: this._getRhythmProportionData(user_model),
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
                     'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },

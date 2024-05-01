@@ -91,7 +91,7 @@ const TuringSelectorItem = props => {
           (<div
             className={styles.spriteName}
           >
-            {props.sample}
+            {props.rhythmSample}
           </div>) // we want to see the NAME of the rhythm here. 
         ) : (
           <div

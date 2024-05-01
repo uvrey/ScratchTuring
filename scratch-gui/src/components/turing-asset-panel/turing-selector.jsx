@@ -112,6 +112,7 @@ const TuringSelector = props => {
                             onDeleteButtonClick={onDeleteClick}
                             data={props.data}
                             sample={sample}
+                            rhythmSample= {props.data.user_model.distribution == "rhythm" ? (props.data.user_model.rhythmData.rhythms[index]) : (0)}
                             randomVarName={props.data.dataSpecs.randomVars[index]}
                         />
                     </SortableAsset>
