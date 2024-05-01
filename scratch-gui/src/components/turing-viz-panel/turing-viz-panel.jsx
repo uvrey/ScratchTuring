@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import FontDashboard from './font--dashboard.svg'
@@ -17,10 +17,35 @@ import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
 import Carousel from './carousel.jsx'
 import Color from './color.js'
+import styled from "styled-components";
+
 
 import { Chart } from 'react-chartjs-2'
 import { HuePanel } from './turing-hue-panel.jsx';
 import { ProportionPanel } from './turing-proportion-chart.jsx'
+
+
+
+/** CREDIT THIS CODE **/
+import gsap from "gsap";
+
+
+const randomNumber = (min, max) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+let pos = 0;
+export const randomRotate = selector => {
+  let x = randomNumber(720, 1440); //between 2-4 wheel turns
+  pos = pos + x;
+  gsap.to(selector, {
+    duration: 3,
+    rotation: pos,
+    transformOrigin: "50% 50%",
+    ease: " power4. out"
+  });
+};
+
+
 
 // import { Doughnut } from 'react-chartjs-2';
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
@@ -310,14 +335,21 @@ const customFill = () => {
   return "#d41444"
 }
 
+const StyledChartWrapper = styled.div`
+  position: relative;
+  height: 95vh;
+  max-height: 720px;
+  background: #fff;
+`;
+const StyledSpinDiv = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 999;
+`;
+
 const MyPieChart = ({ data }) => {
-
-  // Define custom fill function for pie 
-
-  // const customFill = (data) => {
-  //   const category = data.category; // Assuming 'category' property in data
-  //   return getColorByCategory(category);
-  // };
   return (
     <PieChart width={700} height={700}>
       <Pie
@@ -331,174 +363,19 @@ const MyPieChart = ({ data }) => {
   );
 };
 
-
 const getHuePanel = (props) => {
-  const spinBtn = document.getElementById("spin-btn");
-  const finalValue = document.getElementById("final-value");
-  const rotationValues = [
-    { minDegree: 0, maxDegree: 30, value: 2 },
-    { minDegree: 31, maxDegree: 90, value: 1 },
-    { minDegree: 91, maxDegree: 150, value: 6 },
-    { minDegree: 151, maxDegree: 210, value: 5 },
-    { minDegree: 211, maxDegree: 270, value: 4 },
-    { minDegree: 271, maxDegree: 330, value: 3 },
-    { minDegree: 331, maxDegree: 360, value: 2 },
-  ];
-  const [chartRotation, setChartRotation] = React.useState(0); // State for chart rotation
-
-  const valueGenerator = (angleValue) => {
-    for (let i of rotationValues) {
-      if (angleValue >= i.minDegree && angleValue <= i.maxDegree) {
-        finalValue.innerHTML = `<p>Value: ${i.value}</p>`;
-        spinBtn.disabled = false;
-        break;
-      }
-    }
-  };
-
-  const handleSpinClick = () => {
-    spinBtn.disabled = true;
-    finalValue.innerHTML = `<p>Good Luck!</p>`;
-
-    let interval = setInterval(() => {
-      setChartRotation((prevRotation) => (prevRotation + 5) % 360); // Update rotation with modulo for 0-360 range
-
-      if (chartRotation >= 360) {
-        clearInterval(interval); // Clear the initial spinning interval
-
-        // Generate random stop time between 2-4 seconds
-        const stopTime = Math.floor(Math.random() * (4000 - 2000 + 1)) + 2000;
-
-        setTimeout(() => {
-          const decelerationInterval = setInterval(() => {
-            setChartRotation((prevRotation) => (prevRotation - 10) % 360); // Decelerate
-            if (chartRotation === 0) {
-              const randomDegree = Math.floor(Math.random() * (355 - 0 + 1) + 0);
-              valueGenerator(randomDegree);
-              // clearInterval(decelerationInterval); // Clear deceleration interval
-            }
-          }, 1); // Slower interval for deceleration
-        }, stopTime);
-      }
-    }, 10); // Initial faster interval for spinning
-  };
-
-  const stopSpinClick = () => {
-    setChartRotation(0)
-  }
-
-
   return (
     <Box className={styles.dataRow}>
-      <div className="container">
-        <PieChart width={700} height={700} style={{ transform: `rotate(${chartRotation}deg)` }} >
-          <Pie
-            data={props.data.huePieData}
-            dataKey="freq"
-            outerRadius={250}
-            fill={data.fill} // Apply custom fill function (if needed)
-          />
-          <Legend />
-        </PieChart>
-        <button id="spin-btn" onClick={handleSpinClick}>Spin</button>
-        <button id="spin-btn" onClick={stopSpinClick}>Stop</button>
-        <img src="spinner-arrow-.svg" alt="spinner-arrow" />
-      </div>
-      <div id="final-value">
-        <p>Click On The Spin Button To Start</p>
-      </div>
-
-
+      <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      <MyPieChart data={props.data.huePieData} />
       <BarChart width={800} height={300} data={props.data.huePlotData}>
         <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
         <XAxis label="Hue" tick={<CustomHue />} />
         <YAxis dots={false} yAxis={-5} />
       </BarChart>
-
     </Box>
   );
 };
-
-
-// const getHuePanel = (props) => {
-//   const wheel = document.getElementById("wheel");
-//   const spinBtn = document.getElementById("spin-btn");
-//   const finalValue = document.getElementById("final-value");
-//   const rotationValues = [
-//     { minDegree: 0, maxDegree: 30, value: 2 },
-//     { minDegree: 31, maxDegree: 90, value: 1 },
-//     { minDegree: 91, maxDegree: 150, value: 6 },
-//     { minDegree: 151, maxDegree: 210, value: 5 },
-//     { minDegree: 211, maxDegree: 270, value: 4 },
-//     { minDegree: 271, maxDegree: 330, value: 3 },
-//     { minDegree: 331, maxDegree: 360, value: 2 },
-//   ];
-//   let myChart = (
-//     <PieChart width={700} height={700}>
-//       <Pie
-//         data={data}
-//         dataKey="freq"
-//         outerRadius={250}
-//         fill={data.fill} // Apply custom fill function
-//       />
-//       <Legend />
-//     </PieChart>
-//   );
-//   const valueGenerator = (angleValue) => {
-//     for (let i of rotationValues) {
-//       if (angleValue >= i.minDegree && angleValue <= i.maxDegree) {
-//         finalValue.innerHTML = `<p>Value: ${i.value}</p>`;
-//         spinBtn.disabled = false;
-//         break;
-//       }
-//     }
-//   };
-//   let count = 0;
-//   let resultValue = 101;
-//   spinBtn.addEventListener("click", () => {
-//     spinBtn.disabled = true;
-//     finalValue.innerHTML = `<p>Good Luck!</p>`;
-//     let randomDegree = Math.floor(Math.random() * (355 - 0 + 1) + 0);
-//     let rotationInterval = window.setInterval(() => {
-//       myChart.options.rotation = myChart.options.rotation + resultValue;
-//       myChart.update();
-//       if (myChart.options.rotation >= 360) {
-//         count += 1;
-//         resultValue -= 5;
-//         myChart.options.rotation = 0;
-//       } else if (count > 15 && myChart.options.rotation == randomDegree) {
-//         valueGenerator(randomDegree);
-//         clearInterval(rotationInterval);
-//         count = 0;
-//         resultValue = 101;
-//       }
-//     }, 10);
-//   });
-
-
-//   return (
-//     <Box className={styles.dataRow}>
-//       <div class="container">
-//         < MyPieChart data={props.data.huePieData} />
-//         <button id="spin-btn">Spin</button>
-//         <img src="spinner-arrow-.svg" alt="spinner-arrow" />
-//       </div>
-//       <div id="final-value">
-//         <p>Click On The Spin Button To Start</p>
-//       </div>
-//     </Box>
-//   );
-// }
-
-{/* < MyPieChart data={props.data.huePieData}  /> */ }
-
-{/* <PieChart width={700} height={700}>
-        <Pie data={props.data.huePieData} dataKey="freq" outerRadius={250} />
-        <Legend />
-      </PieChart> */}
-
-// {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
-// {console.log(props.data)}
 
 
 const getPanel = (props) => {
