@@ -82,7 +82,7 @@ const hueToHex = (hue) => {
 
 const hexToHue = (hex) => {
   const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
-  return hueToHex({ h: hsv.h, s: 100, v: 100 })
+  return hueToHex(hsv.h)
 }
 
 const formatId = (modelName, label) => {
@@ -384,7 +384,34 @@ const getKeyStats = (props) => {
         </div>
         <div>
           <img src={FontCurrentSample} className={styles.statsHeading} />
-          {(props.data.samples.length == 0) ? (<p className={styles.stat}>none</p>) : (<p className={styles.stat}>{props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}</p>)}
+          {props.data.samples.length === 0 ? (
+            <p className={styles.stat}>none</p>
+          ) : (
+            props.data.user_model.distribution === "hue" ? (
+              <>
+              <p
+                style={{
+                  backgroundColor: props.data.samples[props.data.samples.length - 1],
+                  color: props.data.samples[props.data.samples.length - 1],
+                }}
+                className={styles.stat}
+              >X
+              </p>
+              <b>Converted to a hue: </b>
+              <p
+              style={{
+                backgroundColor: hexToHue(props.data.samples[props.data.samples.length - 1]),
+                color: hexToHue(props.data.samples[props.data.samples.length - 1]),
+              }}
+              className={styles.stat}
+            >X</p>
+            </>
+            ) : (
+              <p className={styles.stat}>
+                {props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}
+              </p>
+            )
+          )}
         </div>
         <div>
           <img src={FontNumSamples} className={styles.statsHeading} />
