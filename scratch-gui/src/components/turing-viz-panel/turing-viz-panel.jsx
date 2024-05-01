@@ -316,16 +316,17 @@ const getParameterLabels = (props) => {
   }
 };
 
+
 const MyPieChart = ({ data }) => {
   return (
-    <PieChart width={700} height={700}>
+    <PieChart width={500} height={500}>
       <Pie
         data={data}
         dataKey="freq"
-        outerRadius={250}
+        outerRadius={200}
         fill={data.fill} // Apply custom fill function
       />
-      <Legend />
+      {/* <Legend /> */}
     </PieChart>
   );
 };
@@ -335,8 +336,8 @@ const getHuePanel = (props) => {
     <Box className={styles.dataRow}>
       <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button>
       <MyPieChart data={props.data.huePieData} />
-      <BarChart width={800} height={300} data={props.data.huePlotData}>
-        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
+      <BarChart width={800} height={400} data={props.data.huePlotData}>
+        <Bar type="monotone" dataKey="value" stroke={props.data.huePlotData.stroke} dot={false} />
         <XAxis label="Hue" tick={<CustomHue />} />
         <YAxis dots={false} yAxis={-5} />
       </BarChart>

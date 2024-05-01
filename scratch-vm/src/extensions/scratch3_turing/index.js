@@ -1135,7 +1135,7 @@ class Scratch3Turing {
     _getHuePlotData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
-            data.push({ hue: i, value: user_model.hueData.hue[i] })
+            data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this.hueToHex(i)})
         }
         console.log("Prepared this hue data to plot...")
         console.log(data)
