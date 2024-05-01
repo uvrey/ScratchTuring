@@ -19,7 +19,7 @@ import Carousel from './carousel.jsx'
 import Color from './color.js'
 
 import { Doughnut } from 'react-chartjs-2'
-import HuePanel from './turing-hue-panel.jsx';
+import { HuePanel } from './turing-hue-panel.jsx';
 
 // import { Doughnut } from 'react-chartjs-2';
 // import MeanPlot from '../mean-plot/mean-p[].jsx'
@@ -127,36 +127,6 @@ const getGaussianPanel = (props) => {
   )
 }
 
-const getHueDistributionData = () => {
-  return Array(361).fill(0).map((_, i) => ({ angle: i, density: 1 / 360 }));
-}
-
-const getHuePanel = (props) => {
-  return (
-    <Box className={styles.dataRow}>
-      {/* <LineChart width={800} height={300} data={getHueDistributionData()}>
-      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="4px" dot= {false} />
-      <XAxis label="Hue" tick={<CustomHue />}/>
-      <YAxis  dots={false} yAxis={-5}/>
-    </LineChart> */}
-      {/* <PieChart width={300} height={300} data={props.data.huePropData}>
-      <Pie dataKey="value" outerRadius={200} fill="#d41444"/>
-      <Legend />
-    </PieChart> */}
-      {/* <Doughnut data={props.data.huePlotData} /> */}
-{/* 
-      <HuePanel data={props.data.huePlotData}/> */}
-      {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
-      {console.log(props.data)}
-
-      <BarChart width={800} height={300} data={props.data.huePlotData}>
-        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
-        <XAxis label="Hue" tick={<CustomHue />} />
-        <YAxis dots={false} yAxis={-5} />
-      </BarChart>
-    </Box>
-  );
-}
 
 const getParameterLabels = (props) => {
   switch (props.data.user_model.distribution) {
@@ -330,6 +300,38 @@ const getParameterLabels = (props) => {
       return (<h1>Unknown distribution</h1>);
   }
 };
+
+const getHueDistributionData = () => {
+  return Array(361).fill(0).map((_, i) => ({ angle: i, density: 1 / 360 }));
+}
+
+const getHuePanel = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      {/* <LineChart width={800} height={300} data={getHueDistributionData()}>
+      <Line type="monotone" dataKey="density" stroke="#8884d8" strokeWeight="4px" dot= {false} />
+      <XAxis label="Hue" tick={<CustomHue />}/>
+      <YAxis  dots={false} yAxis={-5}/>
+    </LineChart> */}
+      {/* <PieChart width={300} height={300} data={props.data.huePropData}>
+      <Pie dataKey="value" outerRadius={200} fill="#d41444"/>
+      <Legend />
+    </PieChart> */}
+      {/* <Doughnut data={props.data.huePlotData} /> */}
+{/* 
+      <HuePanel data={props.data.huePlotData}/> */}
+      {console.log("WE NOW WANT TO PLOT SOMETHING :))")}
+      {console.log(props.data)}
+
+      <BarChart width={800} height={300} data={props.data.huePlotData}>
+        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
+        <XAxis label="Hue" tick={<CustomHue />} />
+        <YAxis dots={false} yAxis={-5} />
+      </BarChart>
+    </Box>
+  );
+}
+
 
 const getPanel = (props) => {
   switch (props.data.user_model.distribution) {

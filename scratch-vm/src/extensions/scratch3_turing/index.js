@@ -838,6 +838,9 @@ class Scratch3Turing {
             .then(response => this.updateInternals(user_model, response, 'posterior'));
 
         // Handle the case where this is the first sample we take - may not work with green flat...
+
+        console.log("after taking samples:")
+        console.log(this.user_models[modelName].data) 
         if (random_var_idx == COLOR) {
             return "I can't do this alone... add me to the workspace!"
         } else {
@@ -848,6 +851,7 @@ class Scratch3Turing {
                 return `${observation} ${lastUnit}`
             } else {
                 if (random_var_idx == TIME) {
+
                     return "You haven't used this block in a project, so it has started a stopwatch until clicked again..."
                 }
             }
@@ -958,26 +962,31 @@ class Scratch3Turing {
     }
 
     extractSample = (util, user_model, rv, groundTruth) => {
+        
+        console.log("EXTRACTING SAMPLE FOR _________________" + RANDOM_VAR_NAMES[rv])
 
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
         console.log("SAMPLE FOUND!")
         console.log(sample)
 
-        if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
-            user_model.timer.start(); // Start a new timer only for TIME
-        }
 
         if (rv == TIME && sample > 1000000) {
+            console.log("RETURNING THIS!!")
+            user_model.timer.start(); 
             console.log(sample)
-            return "Started timer..."
+            return sample
         }
 
         this.updateSampleSpecs(user_model, rv) // update if not a TIME without timer already started.
 
-        if (user_model.data.length < 1) {
-            user_model.timer.start();
+        
+        if (user_model.dataSpecs.rvIndices[user_model.dataSpecs.rvIndices.length - 1] === TIME) {
+            user_model.timer.start(); // Start a new timer only for TIME
         }
+        // if (user_model.data.length < 1) {
+        //     user_model.timer.start();
+        // }
 
         if (rv == COLOR) {
             // user_model.hueData.hsv.push(Color.rgbToHsv(sample))
@@ -1000,6 +1009,8 @@ class Scratch3Turing {
         var newSample;
         observation = this.extractSample(util, user_model, rvIndex, groundTruth)
 
+        console.log("after taking samples: ")
+        console.log(user_model.data)
         // TTODO update line list visualisations... Can I get turing to do this for me?
         this.updateVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
         this._runtime.emit('TURING_DATA', this.visualisationData)
