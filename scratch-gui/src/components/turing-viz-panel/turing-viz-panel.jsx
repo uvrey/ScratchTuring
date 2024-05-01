@@ -15,16 +15,7 @@ import FontDist from './font--normalDist.svg'
 import FontCurrentSample from './font--currentSample.svg'
 import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
-import Carousel from './carousel.jsx'
 import Color from './color.js'
-import styled from "styled-components";
-
-
-import { Chart } from 'react-chartjs-2'
-import { HuePanel } from './turing-hue-panel.jsx';
-import { ProportionPanel } from './turing-proportion-chart.jsx'
-
-
 
 /** CREDIT THIS CODE **/
 import gsap from "gsap";
@@ -44,11 +35,6 @@ export const randomRotate = selector => {
     ease: " power4. out"
   });
 };
-
-
-
-// import { Doughnut } from 'react-chartjs-2';
-// import MeanPlot from '../mean-plot/mean-p[].jsx'
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -89,7 +75,6 @@ const CustomHue = (props) => { // TODO modify this so it returns rectangles with
  * @param {!string} hex Hex representation of the color.
  * @return {RGBObject} null on failure, or rgb: {r: red [0,255], g: green [0,255], b: blue [0,255]}.
  */
-
 const hueToHex = (hue) => {
   const hsv = { h: hue, s: 100, v: 100 }
   return Color.rgbToHex(Color.hsvToRgb(hsv))
@@ -152,7 +137,6 @@ const getGaussianPanel = (props) => {
     </Box>
   )
 }
-
 
 const getParameterLabels = (props) => {
   switch (props.data.user_model.distribution) {
@@ -326,28 +310,6 @@ const getParameterLabels = (props) => {
       return (<h1>Unknown distribution</h1>);
   }
 };
-
-const getHueDistributionData = () => {
-  return Array(361).fill(0).map((_, i) => ({ angle: i, density: 1 / 360 }));
-}
-
-const customFill = () => {
-  return "#d41444"
-}
-
-const StyledChartWrapper = styled.div`
-  position: relative;
-  height: 95vh;
-  max-height: 720px;
-  background: #fff;
-`;
-const StyledSpinDiv = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  z-index: 999;
-`;
 
 const MyPieChart = ({ data }) => {
   return (
