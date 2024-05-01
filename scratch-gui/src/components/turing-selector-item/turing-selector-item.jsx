@@ -17,6 +17,7 @@ import erasorIcon from './icon--eraser.svg'
 import timeIcon from './icon--time.svg'
 import octopusIcon from './icon--purpleOctopus.svg'
 import surpriseIcon from '../action-menu/icon--graySurprise.svg'
+import Color from '../turing-viz-panel/color.js'
 
 // // react-contextmenu requires unique id to match trigger and context menu
 let contextMenuId = 0;
@@ -37,6 +38,19 @@ function getIconFromType(type) {
       return surpriseIcon; // Return the surprise icon for any other option TTODO maybe define another type here for RHYTHM
   }
 }
+
+const hueToHex = (hue) => {
+  const hsv = { h: hue, s: 100, v: 100 }
+  return Color.rgbToHex(Color.hsvToRgb(hsv))
+}
+
+const hexToHue = (hex) => {
+  const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
+  console.log("getting: ") 
+  console.log(hsv)
+  return hueToHex(hsv.h)
+}
+
 const TuringSelectorItem = props => {
   return (
     <ContextMenuTrigger
@@ -57,12 +71,8 @@ const TuringSelectorItem = props => {
       <div className={styles.number}>{props.number}</div> {/* Display number once */}
       <div className={styles.spriteImageOuter}>
         <div className={styles.spriteImageInner}>
-          {/* {console.log("Inside turing selector, we have... ")}
-          {console.log(props.data)}
-          {console.log("random varname?" + props.randomVarName)} */}
-          {/* Display swatch or icon */}
           {props.randomVarName === 'COLOR' ? (
-            <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }}/>
+            <div className={styles.colorSwatch} style={{ backgroundColor: props.sample }} />
           ) : (
             <img
               className={styles.spriteImage}
@@ -73,8 +83,18 @@ const TuringSelectorItem = props => {
         </div>
       </div>
       <div className={styles.spriteInfo}>
-        <div className={styles.spriteName}>{props.sample} {props.data.user_model.unit}</div>
+        {props.randomVarName === 'RHYTHM' ? (
+          null
+        ) : (
+          <div
+            className={styles.spriteName}
+            style={props.randomVarName === "COLOR" ? { backgroundColor: hexToHue(props.sample), color: hexToHue(props.sample)} : null}
+          >
+            {props.sample}{props.data.user_model.unit}
+          </div>
+        )}
       </div>
+
     </ContextMenuTrigger>
   );
 }

@@ -80,6 +80,11 @@ const hueToHex = (hue) => {
   return Color.rgbToHex(Color.hsvToRgb(hsv))
 }
 
+const hexToHue = (hex) => {
+  const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
+  return hueToHex({ h: hsv.h, s: 100, v: 100 })
+}
+
 const formatId = (modelName, label) => {
   return modelName + "_" + label
 }

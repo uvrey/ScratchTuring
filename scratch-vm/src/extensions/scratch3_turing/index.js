@@ -869,9 +869,10 @@ class Scratch3Turing {
             return "You're modelling HUE. Use the other sample block!"
 
         } else if (this.user_models[modelName].distribution == "rhythm") {
-            message = this._getThenSendSample(util, user_model, RHYTHM)
+            message = this._getThenSendSample(util, this.user_models[modelName], RHYTHM)
             this.conditionOnPrior(user_model)
                 .then(response => this.updateInternals(user_model, response, 'posterior'));
+
             return "You're modelling rhythm... " + args.OBSERVATION
             
         } else {
@@ -1141,7 +1142,6 @@ class Scratch3Turing {
         return data
     }
 
-
     mapToPieChartData(user_model) {
         // Define color ranges for each category
         const colorRanges = {
@@ -1160,20 +1160,20 @@ class Scratch3Turing {
         };
 
         const fills = {
-            "yellow": "#FEF200",
-            "yellow-orange": "#FFC501",
-            "yellow-green": "#8BC800",
-            'green': "#00A650",
-            "blue-green": "#01A99C",
-            'blue': "#0054A5",
-            "blue-violet": "#2E3192",
-            'violet': "#652D90",
-            "red-violet": "#92278F",
-            'red': "#EE1D23",
-            "red-orange": "#F36523",
-            'orange': "#FF9400",
-        }
-
+            "yellow": "#fff200",
+            "yellow-orange": "#ffc400",
+            "yellow-green": "#b1ff00",
+            "green": "#00ff7a",
+            "blue-green": "#00ffeb",
+            "blue": "#0081ff",
+            "blue-violet": "#0007ff",
+            "violet": "#9000ff",
+            "red-violet": "#ff00f7",
+            "red": "#ff0007",
+            "red-orange": "#ff5000",
+            "orange": "#ff9400",
+          };
+        
         // Initialize pie chart data
         const pieChartData = [];
 
@@ -1193,6 +1193,29 @@ class Scratch3Turing {
         return pieChartData;
     }
 
+    hueToHex (hue) {
+        const hsv = { h: hue, s: 100, v: 100 }
+        return Color.rgbToHex(Color.hsvToRgb(hsv))
+    }
+
+    // mapToPieChartData(user_model) {
+    //     // Initialize pie chart data
+    //     const pieChartData = [];
+
+    //     // Loop through color ranges
+    //     console.log("HUES?? !!!!!!!!!!!!!!!!!")
+    //     console.log(user_model.hueData.hue)
+
+    //     for (var i; i < user_model.hueData.hue.length; i++) {
+    //         var freq = user_model.hueData.hue[i]
+    //         var color = this.hueToHex(i)
+    //         pieChartData.push({ name: i, freq: freq, fill: color});
+    //     }
+
+    //     console.log("Format of PIE CHART DATA!!!")
+    //     console.log(pieChartData)
+    //     return pieChartData;
+    // }
 
     _getHueProportionData(user_model) {
         var data = []
