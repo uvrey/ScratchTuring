@@ -17,6 +17,7 @@ import erasorIcon from './icon--eraser.svg'
 import timeIcon from './icon--time.svg'
 import octopusIcon from './icon--purpleOctopus.svg'
 import surpriseIcon from '../action-menu/icon--graySurprise.svg'
+import drumIcon from '../action-menu/icon--drum.svg'
 import Color from '../turing-viz-panel/color.js'
 
 // // react-contextmenu requires unique id to match trigger and context menu
@@ -34,6 +35,8 @@ function getIconFromType(type) {
       return xIcon;
     case 'Y':
       return yIcon;
+    case 'RHYTHM':
+      return drumIcon;
     default:
       return surpriseIcon; // Return the surprise icon for any other option TTODO maybe define another type here for RHYTHM
   }
@@ -46,7 +49,7 @@ const hueToHex = (hue) => {
 
 const hexToHue = (hex) => {
   const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
-  console.log("getting: ") 
+  console.log("getting: ")
   console.log(hsv)
   return hueToHex(hsv.h)
 }
@@ -83,12 +86,17 @@ const TuringSelectorItem = props => {
         </div>
       </div>
       <div className={styles.spriteInfo}>
+        {console.log(props.sample)}
         {props.randomVarName === 'RHYTHM' ? (
-          null
+          (<div
+            className={styles.spriteName}
+          >
+            {props.sample}
+          </div>) // we want to see the NAME of the rhythm here. 
         ) : (
           <div
             className={styles.spriteName}
-            style={props.randomVarName === "COLOR" ? { backgroundColor: hexToHue(props.sample), color: hexToHue(props.sample)} : null}
+            style={props.randomVarName === "COLOR" ? { backgroundColor: hexToHue(props.sample), color: hexToHue(props.sample) } : null}
           >
             {props.sample}{props.data.user_model.unit}
           </div>

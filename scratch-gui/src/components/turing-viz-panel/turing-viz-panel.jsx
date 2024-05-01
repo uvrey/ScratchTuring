@@ -76,7 +76,7 @@ const CustomHue = (props) => { // TODO modify this so it returns rectangles with
  * @return {RGBObject} null on failure, or rgb: {r: red [0,255], g: green [0,255], b: blue [0,255]}.
  */
 const hueToHex = (hue) => {
-  const hsv = { h: hue, s: 100, v: 100 }
+  const hsv = { h: hue, s: 100, v: 80 }
   return Color.rgbToHex(Color.hsvToRgb(hsv))
 }
 
@@ -349,11 +349,28 @@ const getRhythmPanel = (props) => {
   return (
     <Box className={styles.dataRow}>
       <h1> RHYTHM STUFF</h1>
+
+      <ScatterChart
+        width={400}
+        height={300}
+        margin={{
+          top: 20,
+          right: 20,
+          bottom: 20,
+          left: 20,
+        }}>
+        <CartesianGrid />
+        <XAxis type="number" dataKey="x" name="timestamp" unit="" />
+        <YAxis type="number" dataKey="y" name="value" unit="" />
+        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+        <Scatter name="TIMELINE" data={props.data.rhythmTimelineData} fill="#FF5959" />
+      </ScatterChart>
+
       {/* <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button> */}
-      {/* <MyPieChart data={props.data.rhythmPieData} />
-      <BarChart width={800} height={300} data={props.data.rhythmPlotData}>
+      {/* <MyPieChart data={props.data.rhythmPieData} /> */}
+      {/* <BarChart width={800} height={300} data={props.data.rhythmTimelineData}>
         <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
-        <XAxis label="Hue" tick={<CustomHue />} />
+        <XAxis label="Timeline" />
         <YAxis dots={false} yAxis={-5} />
       </BarChart> */}
       {/* <RhythmTimeline /> */}
@@ -389,23 +406,23 @@ const getKeyStats = (props) => {
           ) : (
             props.data.user_model.distribution === "hue" ? (
               <>
-              <p
-                style={{
-                  backgroundColor: props.data.samples[props.data.samples.length - 1],
-                  color: props.data.samples[props.data.samples.length - 1],
-                }}
-                className={styles.stat}
-              >X
-              </p>
-              <b>Converted to a hue: </b>
-              <p
-              style={{
-                backgroundColor: hexToHue(props.data.samples[props.data.samples.length - 1]),
-                color: hexToHue(props.data.samples[props.data.samples.length - 1]),
-              }}
-              className={styles.stat}
-            >X</p>
-            </>
+                <p
+                  style={{
+                    backgroundColor: props.data.samples[props.data.samples.length - 1],
+                    color: props.data.samples[props.data.samples.length - 1],
+                  }}
+                  className={styles.stat}
+                >X
+                </p>
+                <b>Converted to a hue: </b>
+                <p
+                  style={{
+                    backgroundColor: hexToHue(props.data.samples[props.data.samples.length - 1]),
+                    color: hexToHue(props.data.samples[props.data.samples.length - 1]),
+                  }}
+                  className={styles.stat}
+                >X</p>
+              </>
             ) : (
               <p className={styles.stat}>
                 {props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}

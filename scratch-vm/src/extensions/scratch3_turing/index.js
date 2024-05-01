@@ -27,13 +27,14 @@ const SIZE = 1
 const X = 2
 const Y = 3
 const COLOR = 4
-const NONE = 5
-const CUSTOM = 6
-const RHYTHM = 7
+const RHYTHM = 5
+const NONE = 6
+const CUSTOM = 7
 
-const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NONE', 'NUMERIC', 'OBJECT']
+
+const MODES = ['NUMERIC', 'NUMERIC', 'NUMERIC', 'NUMERIC', 'COLOR', 'NUMERIC', 'NONE', 'NUMERIC']
 const UNITS = ['s', '', '', '', '', '', '', '', '', '']
-const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'COLOR', 'NONE', 'CUSTOM', 'RHYTHM']
+const RANDOM_VAR_NAMES = ['TIME TAKEN', 'SIZE', 'X', 'Y', 'COLOR', 'RHYTHM', 'NONE', 'CUSTOM']
 const DISTRIBUTIONS = ['gaussian', 'hue', 'rhythm']
 
 window.addEventListener("beforeunload", (event) => {
@@ -59,8 +60,8 @@ class Scratch3Turing {
             (util, model) => util.target.x,
             (util, model) => util.target.y,
             (util, model) => TuringSensing.fetchColor(util.target),
+            (util, model) => this.globalTimer.timeElapsed() / 1000, // Get global timer for the timeline
             (util, model) => NONE,
-            (util, model) => this.globalTimer.timeElapsed() / 1000 // Get global timer for the timeline
         ];
 
         this.user_models = {} // each target has its own model
@@ -123,7 +124,7 @@ class Scratch3Turing {
 
 
     _initAPI() {
-        console.log("initialising Turing API")
+      //  console.log("initialising Turing API")
         const userName = this._generateRandomUserName(16);
         console.log(userName); // Output: a random string of length 16
 
@@ -289,79 +290,8 @@ class Scratch3Turing {
             }
             model_list.push(item)
         }
-
-        console.log("trying to return...")
-        console.log(model_list)
         return model_list
     }
-
-    test() {
-        console.log("Trying to build up a menu nicely, user_models? ")
-        console.log(this.user_models)
-
-        if (this.user_models == undefined) {
-            console.log("USER MODELS ARE UNDEFINED!!")
-            return [
-                {
-                    name: formatMessage({
-                        id: 'turing.modelList.none',
-                        default: 'no models defined',
-                        description: 'No models defined'
-                    }),
-                },
-            ]
-        }
-        else if (this.user_models.length < 1) {
-            console.log("USER MODELS ARE SHORT!!")
-            return [
-                {
-                    name: formatMessage({
-                        id: 'turing.modelList.none',
-                        default: 'no models defined',
-                        description: 'No models defined'
-                    }),
-                },
-            ]
-        }
-        else if (this.user_models = {}) {
-            console.log("USER MODELS ARE EMPTY!!")
-            return [
-                {
-                    name: formatMessage({
-                        id: 'turing.modelList.none',
-                        default: 'no models defined',
-                        description: 'No models defined'
-                    }),
-                },
-            ]
-        } else {
-            console.log("USER model exists!!")
-            return [
-                {
-                    name: formatMessage({
-                        id: 'turing.distInfo.gaussian',
-                        default: 'GAUSSIAN',
-                        description: 'Gaussian distribution.'
-                    }),
-                },
-                // {
-                //     name: formatMessage({
-                //         id: 'turing.distInfo.poisson',
-                //         default: 'POISSON',
-                //         description: 'poisson'
-                //     }),
-                // },
-                // {
-                //     name: formatMessage({
-                //         id: 'turing.distInfo.binomial',
-                //         default: 'BINOMIAL',
-                //         description: 'binomial'
-                //     }),
-                // }
-            ]
-        }
-    }
-
 
     /**
      * @returns {object} metadata for this extension and its blocks.
@@ -469,15 +399,6 @@ class Scratch3Turing {
                 //         description: 'turing.clearSamples'
                 //     })
                 // },
-                // {
-                //     opcode: 'clearGroundTruth',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.clearGroundTruth',
-                //         default:  'clear ground truth',
-                //         description: 'turing.clearGroundTruth'
-                //     })
-                // },
             ],
             menus: {
                 NUMERIC_MENU: {
@@ -508,57 +429,6 @@ class Scratch3Turing {
         // TTODO remove the model in Turing also. 
     }
 
-    sampleRhythm(args, util) {
-        var rhythm = args.RHYTHM
-    }
-
-    getDistributionData(user_model) {
-        const modelTypes = ["prior", "posterior"]
-        var plotData = {}
-
-        for (const modelType of modelTypes) {
-            if (user_model.models[modelType].data != null) {
-                plotData[modelType] = user_model.models[modelType.data]  // just use raw samples for now
-            }
-        }
-        // Choose number of bins for the histogram
-        console.log("distribution data??")
-        console.log(plotData)
-        return plotData
-    }
-
-
-
-    // Function to create histogram data for plotting
-    createHistogramData(samples, binCount) {
-        console.log("iterating through:")
-        console.log(samples)
-
-        const min = Math.min(...samples);
-        const max = Math.max(...samples);
-        const binWidth = (max - min) / binCount;
-
-        const histogram = [];
-        for (let i = 0; i < binCount; i++) {
-            const binStart = min + i * binWidth;
-            const binEnd = binStart + binWidth;
-            let count = 0;
-            for (const sample of samples) {
-                if (sample >= binStart && sample < binEnd) {
-                    count++;
-                }
-            }
-            histogram.push({ x: binStart + binWidth / 2, count });
-        }
-        return histogram;
-    }
-
-    // defineModel(args, util) {
-    //    // var random_var_idx = args.RANDOM_VAR - 1
-    //     var modelName = args.NAME
-    //     this.defineTargetModel(util, random_var_idx, modelName)
-    //     return util.target.getName() + " is modelling " + modelName + " as " + RANDOM_VAR_NAMES[random_var_idx]
-    // }
 
     buildModelStrings() {
         var modelList = []
@@ -670,7 +540,14 @@ class Scratch3Turing {
             hueData: {
                 hue: Array(360).fill(0),
                 hueProportions: Array(360).fill(0),
-                hueCounts: 0
+                hueCount: 0
+            },
+            rhythmData: {
+                rhythms: [],
+                timeStamps: [],
+                rhythmProportions: {},
+                rhythmCounts: {},
+                rhythmTotal: 0
             },
             data: [],
             labels: [],
@@ -869,12 +746,17 @@ class Scratch3Turing {
             return "You're modelling HUE. Use the other sample block!"
 
         } else if (this.user_models[modelName].distribution == "rhythm") {
-            message = this._getThenSendSample(util, this.user_models[modelName], RHYTHM)
-            this.conditionOnPrior(user_model)
-                .then(response => this.updateInternals(user_model, response, 'posterior'));
+            // TODO return the rhythm you want to sample at the point in time 
+            // Get the 1) time elapsed since start of the project; this helps us to place the rhythm on a timeline. 
+            // Get the name of the rhythm and proportion of rhythm categories to each other, potentially make a dictionary like in the case of hue??
 
-            return "You're modelling rhythm... " + args.OBSERVATION
-            
+            message = this._getRhythmSample(util, this.user_models[modelName], args.OBSERVATION)
+
+            this.conditionOnPrior(this.user_models[modelName])
+                .then(response => this.updateInternals(this.user_models[modelName], response, 'posterior'));
+
+            return args.OBSERVATION
+
         } else {
             if (Number(args.OBSERVATION) === null || Number(args.OBSERVATION) === undefined || isNaN(Number(args.OBSERVATION))) {
                 return "Oops, this should be a number.";
@@ -903,15 +785,26 @@ class Scratch3Turing {
         console.log("\n-------------------------------------------\n updating with hue")
         var hue = Math.floor(hue % 360)
         user_model.hueData.hue[hue] = user_model.hueData.hue[hue] + 1
-        user_model.hueData.hueCounts += 1
-        user_model.hueData.hueProportions[hue] = user_model.hueData.hue[hue] / user_model.hueData.hueCounts
+        user_model.hueData.hueCount += 1
+        user_model.hueData.hueProportions[hue] = user_model.hueData.hue[hue] / user_model.hueData.hueCount // TODO might not be needed
     }
+
+    updateRhythmData(user_model, rhythm, timeStamp) {
+        console.log("\n-------------------------------------------\n updating with hue")
+        user_model.rhythmData.rhythms.push(rhythm)
+        user_model.rhythmData.timeStamps.push(timeStamp)
+        user_model.rhythmData.rhythmCounts[rhythm] = user_model.rhythmData.rhythmCounts[rhythm] + 1
+        user_model.rhythmData.rhythmTotal += 1
+        user_model.rhythmData.rhythmProportions[rhythm] = user_model.rhythmData.rhythmCounts[rhythm] / user_model.rhythmData.rhythmTotal // TODO might not be needed
+    }
+
 
     extractSample = (util, user_model, rv, groundTruth) => {
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
         if ((rv == TIME || rv == RHYTHM) && sample > 1000000 && user_model.data.length < 1) {
             console.log("RETURNING THIS!!")
+            this.globalTimer.start()
             user_model.timer.start();
             console.log(sample)
             return sample
@@ -939,8 +832,7 @@ class Scratch3Turing {
 
     _getThenSendSample(util, user_model, rvIndex, groundTruth = false) {
         console.log("---------->")
-        var newSample;
-        observation = this.extractSample(util, user_model, rvIndex, groundTruth)
+        var observation = this.extractSample(util, user_model, rvIndex, groundTruth)
 
         console.log("after taking samples: ")
         console.log(user_model.data)
@@ -949,6 +841,28 @@ class Scratch3Turing {
         this._runtime.emit('TURING_DATA', this.visualisationData)
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
         return observation
+    }
+
+    _getRhythmSample(util, user_model, rhythm) {
+        console.log("RHYTHM SAMPLE---------->")
+        var timeStamp = this.extractSample(util, user_model, RHYTHM, groundTruth= false) // TTODO remove groundTruth
+
+        console.log(timeStamp)
+
+        if (timeStamp > 1000000 && user_model.data.length < 1) {
+            return 
+        }
+
+        this.updateRhythmData(user_model, rhythm, timeStamp) // TO FIX THIS
+
+        console.log("after taking samples: ")
+        console.log(user_model.data)
+
+        // TTODO update line list visualisations... Can I get turing to do this for me?
+        this.updateVisualisationData(user_model, 'posterior') // keys define the list of data that's changed? 
+        this._runtime.emit('TURING_DATA', this.visualisationData)
+        this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
+        return rhythm + ": " + timeStamp
     }
 
     _getDistLines(user_model) {
@@ -1135,7 +1049,7 @@ class Scratch3Turing {
     _getHuePlotData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
-            data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this.hueToHex(i)})
+            data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this.hueToHex(i) })
         }
         console.log("Prepared this hue data to plot...")
         console.log(data)
@@ -1172,8 +1086,8 @@ class Scratch3Turing {
             "red": "#ff0007",
             "red-orange": "#ff5000",
             "orange": "#ff9400",
-          };
-        
+        };
+
         // Initialize pie chart data
         const pieChartData = [];
 
@@ -1193,7 +1107,7 @@ class Scratch3Turing {
         return pieChartData;
     }
 
-    hueToHex (hue) {
+    hueToHex(hue) {
         const hsv = { h: hue, s: 100, v: 100 }
         return Color.rgbToHex(Color.hsvToRgb(hsv))
     }
@@ -1217,13 +1131,23 @@ class Scratch3Turing {
     //     return pieChartData;
     // }
 
+    _getRhythmTimelineData(user_model) {
+        var data = []
+        for (var i = 0; i < user_model.rhythmData.rhythms.length; i++) {
+            data.push({x: user_model.rhythmData.timeStamps[i], y: 1, z: 1})
+        }
+        console.log("Prepared this rhythm timeline data to plot...")
+        console.log(data)
+        return data
+    }
+
     _getHueProportionData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
             data.push({ hue: i, value: user_model.hueData.hueProportions[i] })
         }
-        console.log("Prepared this hue data to plot...")
-        console.log(data)
+        // console.log("Prepared this hue data to plot...")
+        // console.log(data)
         return data
     }
 
@@ -1238,6 +1162,7 @@ class Scratch3Turing {
                 hueData: user_model.hueData,
                 huePlotData: this._getHuePlotData(user_model),
                 huePieData: this.mapToPieChartData(user_model),
+                rhythmTimelineData: this._getRhythmTimelineData(user_model),
                 activeDists: this.getActiveDists(user_model.models),
                 styles: {
                     'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "4px", chartName: "Original Belief" },
@@ -1295,7 +1220,7 @@ class Scratch3Turing {
         };
 
         const message = await this._sendRequesttoServer(url, payload);
-        console.log("Server responded: ", message);
+        //console.log("Server responded: ", message);
         return message;
     }
 
@@ -1312,7 +1237,7 @@ class Scratch3Turing {
             body: JSON.stringify(dict)
         };
         const message = await this._sendRequesttoServer(url, payload);
-        console.log("Server responded: ", message);
+       // console.log("Server responded: ", message);
         return message;
     }
 
@@ -1329,7 +1254,7 @@ class Scratch3Turing {
             body: JSON.stringify(dict)
         };
         const message = await this._sendRequesttoServer(url, payload);
-        console.log("Server responded: ", message);
+        //console.log("Server responded: ", message);
         return message;
     }
 
@@ -1418,7 +1343,7 @@ class Scratch3Turing {
     }
 
     _createModelinTuring(modelDict) {
-        console.log("Sending model information to Turing to create it :)")
+      //  console.log("Sending model information to Turing to create it :)")
 
         // build request to Turing
         const url = this.api_host + "/api/turing/v1/createModel";
@@ -1433,14 +1358,14 @@ class Scratch3Turing {
     }
 
     _onClearSamples(modelName) {
-        console.log("clearing samples for " + targetName)
+    //    console.log("clearing samples for " + targetName)
         this.user_models[modelName].data = []
         this.observations = []
         this.user_models[modelName].models.posterior = this.getClearedModel()
         this.user_models[modelName].dataSpecs = getClearedSampleSpecs // clear sample specifications
 
-        console.log(":0 :0 after clearing, this is usermodels...")
-        console.log(this.user_models)
+     //   console.log(":0 :0 after clearing, this is usermodels...")
+    //    console.log(this.user_models)
         this.user_models[modelName]
 
         this.updateVisualisationData(this.user_models[modelName])
@@ -1467,39 +1392,10 @@ class Scratch3Turing {
         this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
     }
 
-    // setPrior(args, util) {
-    //     var prior = args.PRIOR
-    //     var random_var_idx = args.RANDOM_VAR - 1
-
-    //     console.log("Setting prior to " + RANDOM_VAR_NAMES[prior])
-
-    //     if (this.state.random_var != random_var_idx) {
-    //         this._setRandomVariable(random_var_idx)
-    //     }
-
-    //     // Compatibility checks with type of random variable chosen
-    //     if (!this._checkCompatibility(prior)) {
-    //         return this._getCaution()
-    //     }
-
-    //     // set the new prior in the line charts
-    //     this.state.prior = Number(prior)
-    //     this._updatePrior(prior)
-    //     this._onClearSamples()
-
-    //     this.updateVisualisationData(this.observations, 'prior')
-
-    //     console.log("emitting ")
-    //     console.log(this.visualisationData)
-
-    //     this._runtime.emit('TURING_DATA', this.visualisationData)
-    //     this._runtime.emit('TURING_DATA_STATE', this.getTargetsWithDistsAsDict())
-    //     return this._getAffirmation()
-    // }
-
     _onResetTimer() {
-        console.log("RECEIVED PROJECT START SYMBOL! time to start timers...")
+      //  console.log("RECEIVED PROJECT START SYMBOL! time to start timers...")
         this.globalTimer.start()
+        this.globalTimer.timeElapsed()
 
         for (const modelName in this.user_models) {
             this.user_models[modelName].timer.start()
