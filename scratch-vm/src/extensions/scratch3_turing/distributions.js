@@ -99,7 +99,43 @@ const generateProbabilityData = (lines) => {
     });
   });
 
+  console.log("????????????probability dataa? ")
+  console.log(data)
   return data;
 };
+
+const findMinMaxList = (data) => {
+  if (data.length === 0) return { min: null, max: null }; // Handle empty array case
+  return {
+    min: Math.min(...data),
+    max: Math.max(...data),
+  };
+}
+
+// TODO generate probability data for curve plots... gaussian, poisson, binomial etc. 
+const generateGaussianProbabilityData = (id, mean, stdv) => {
+  const data = [];
+
+  //obtaining an overall min and max and the input points
+  const { min, max } = findMinMaxList(inputData);
+  const inputs = getInputs(min, max, 200);
+
+  //building the data for each input
+  inputs.forEach((input) => {
+    const lineProbs = {};
+
+    lines.forEach(({ id, mean, stdv }) => {
+      lineProbs[id] = probFunc(input, mean, stdv);
+    });
+
+    data.push({
+      input,
+      ...lineProbs,
+    });
+  });
+
+  return data;
+};
+
 
 export { generateProbabilityData };
