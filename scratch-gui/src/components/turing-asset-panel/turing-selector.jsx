@@ -12,6 +12,7 @@ import yIcon from './icon--y.svg';
 import loudnessIcon from './icon--loudness.svg';
 import sizeIcon from './icon--size.svg';
 import erasorIcon from './icon--eraser.svg'
+import octopusIcon from './icon--octopus.svg'
 // import {defineMessages, FormattedMessage, intlShape} from 'react-intl';
 // import styles from './turing-selector.css';
 // import VM from 'scratch-vm';
@@ -32,12 +33,16 @@ import VM from 'scratch-vm'
 
 import styles from './turing-selector.css';
 
+
+var SAMPLE_COUNTS = {}
+
 const TuringSelector = props => {
     const {
         buttons,
         containerRef,
         dragType,
         isRtl,
+        items,
         selectedItemIndex,
         draggingIndex,
         draggingType,
@@ -53,73 +58,69 @@ const TuringSelector = props => {
     const isRelevantDrag = draggingType === dragType;
     let newButtonSection = null;
 
-    function getIconFromType(type) {
-      switch (type) {
-          case 'TIME':
-              return timeIcon;
-          case 'SIZE':
-              return sizeIcon;
-          case 'LOUDNESS':
-              return loudnessIcon;
-          case 'X':
-              return xIcon;
-          case 'Y':
-              return yIcon;
-          default:
-              return erasorIcon; // Return null for any other type
-      }
-  }
+    function onClearSamples(targetName) {
+        props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
+    }
 
-  const onClearSamples = () => {
-    props.vm.runtime.emit('CLEAR_SAMPLES');
-  }
-  
+    function getKey(sample) {
+        if (SAMPLE_COUNTS[sample] == undefined) {
+            SAMPLE_COUNTS[sample] = 0
+            return sample+''
+        } else {
+            SAMPLE_COUNTS[sample] = SAMPLE_COUNTS[sample] + 1
+            return sample + "_" + SAMPLE_COUNTS[sample]
+        }
+    }
+
     newButtonSection = (
-      <Box className={styles.newButtons}>
-          <ActionMenu
-              img={erasorIcon}
-              title={"Clear Samples"}
-              onClick={onClearSamples}
-          />
-      </Box>
-  );
+        <Box className={styles.newButtons}>
+            <ActionMenu
+                img={erasorIcon}
+                title={"Clear Samples"}
+                onClick={() => onClearSamples(props.vm.editingTarget.getName())}
+            />
+        </Box>
+    );
 
     return (
         <Box
-        className={styles.wrapper}
-        componentRef={containerRef}
-    >
-        <Box className={styles.listArea}>
-            {props.items.map((sample, index) => (
-                <SortableAsset
-                    id={sample}
-                    index={isRelevantDrag ? ordering.indexOf(index) : index}
-                    key={sample}
-                    onAddSortable={onAddSortable}
-                    onRemoveSortable={onRemoveSortable}
-                >
-                    <TuringSelectorItem
-                        className={classNames(styles.listItem, {
-                            [styles.placeholder]: isRelevantDrag && index === draggingIndex
-                        })}
-                        // dragPayload={item.dragPayload}
-                        dragType={dragType}
-                        id={index}
-                        index={index}
-                        name={sample}
-                        number={index + 1}
-                        selected={index === selectedItemIndex}
-                        onClick={onItemClick}
-                        onDeleteButtonClick={onDeleteClick}
-                        data={props.data}
-                        item={sample}
-                    />
-                </SortableAsset>
-            ))}
+            className={styles.wrapper}
+            componentRef={containerRef}
+        >
+            {/* <h2>Inside turing selector we want to display... {props.activeModel}</h2> */}
+            <Box className={styles.listArea}>
+                {props.items.map((sample, index) => (
+                    <SortableAsset
+                        id={sample}
+                        index={isRelevantDrag ? ordering.indexOf(index) : index}
+                        key={getKey(sample)}
+                        onAddSortable={onAddSortable}
+                        onRemoveSortable={onRemoveSortable}
+                    >
+                        <TuringSelectorItem
+                            className={classNames(styles.listItem, {
+                                [styles.placeholder]: isRelevantDrag && index === draggingIndex
+                            })}
+                            // dragPayload={item.dragPayload}
+                            dragType={dragType}
+                            id={index}
+                            index={index}
+                            name={sample => typeof sample !== 'string' ? sample.toString() : sample}
+                            number={index + 1}
+                            selected={index === selectedItemIndex}
+                            onClick={onItemClick}
+                            onDeleteButtonClick={onDeleteClick}
+                            data={props.data}
+                            sample={sample}
+                            rhythmSample= {props.data.user_model.distribution == "rhythm" ? (props.data.user_model.rhythmData.rhythms[index]) : (0)}
+                            randomVarName={props.data.dataSpecs.randomVars[index]}
+                        />
+                    </SortableAsset>
+                ))}
+            </Box>
+            {newButtonSection}
         </Box>
-        {newButtonSection}
-    </Box>
-      ); 
+    );
 };
 
 TuringSelector.propTypes = {
@@ -133,7 +134,7 @@ TuringSelector.propTypes = {
     draggingIndex: PropTypes.number,
     draggingType: PropTypes.oneOf(Object.keys(DragConstants)),
     isRtl: PropTypes.bool,
-    data: PropTypes.object.isRequired,
+    data: PropTypes.object,
     // samples: PropTypes.array,
     vm: PropTypes.instanceOf(VM),
     onAddSortable: PropTypes.func,
@@ -143,8 +144,9 @@ TuringSelector.propTypes = {
     onItemClick: PropTypes.func.isRequired,
     onRemoveSortable: PropTypes.func,
     ordering: PropTypes.arrayOf(PropTypes.number),
-    selectedItemIndex: PropTypes.number.isRequired,
+    selectedItemIndex: PropTypes.number,
     items: PropTypes.array,
+    activeModels: PropTypes.array
 };
 
 export default SortableHOC(TuringSelector); // make sortable at some point? TODO

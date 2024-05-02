@@ -43,10 +43,6 @@ const ArgumentType = {
      */
     IMAGE: 'image',
 
-    /**
-     * Model to define with parameters??
-     */
-    MODEL: 'model'
 };
 
 module.exports = ArgumentType;

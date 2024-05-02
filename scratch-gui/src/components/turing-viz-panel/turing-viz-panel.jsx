@@ -5,172 +5,563 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
+import arrowIcon from './arrow.svg'
 import FontDashboard from './font--dashboard.svg'
 import FontScratchTuring from './font--scratchturing.svg'
-import octopusIcon from './icon--octopus.svg'
 import FontBarChart from './font--barChart.svg'
 import FontDist from './font--normalDist.svg'
 import FontCurrentSample from './font--currentSample.svg'
 import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
-// import MeanPlot from '../mean-plot/mean-p[].jsx'
+import Color from './color.js'
+
+/** CREDIT THIS CODE **/
+import gsap from "gsap";
 
 
-const ThreeColumnLayout = ({ children }) => {
+const randomNumber = (min, max) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+let pos = 0;
+export const randomRotate = selector => {
+  let x = randomNumber(720, 1440); //between 2-4 wheel turns
+  pos = pos + x;
+  gsap.to(selector, {
+    duration: 3,
+    rotation: pos,
+    transformOrigin: "50% 50%",
+    ease: " power4. out"
+  });
+};
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className={styles.customTooltip}>
+        <p className={styles.chartLabel}>{`Average: ${payload[0].value} sec`}</p>
+        <p className="intro"></p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
   return (
-    <div className="three-column-layout">
-      {children}
-    </div>
+    <foreignObject className={styles.labelWrapper} x="0" y="0">
+      <div className={styles.customLabel}>
+        Label
+      </div>
+    </foreignObject>
   );
 };
 
-const ThreeColumnLayoutItem = ({ children }) => {
+const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
+  // console.log(props.payload)
+  const hue = props.payload.value % 360
   return (
-    <div className="three-column-layout-item">{children}</div>
+    <foreignObject className={styles.labelWrapper} y={260} x={props.payload.tickCoord}>
+      <div className={styles.colorSwatch} style={{ backgroundColor: hueToHex(hue) }} />
+    </foreignObject>
   );
 };
 
-const getIntroOfPage = (label) => {
-    if (label === 'Page A') {
-      return "Page A is about men's clothing";
-    }
-    if (label === 'Page B') {
-      return "Page B is about women's dress";
-    }
-    if (label === 'Page C') {
-      return "Page C is about women's bag";
-    }
-    if (label === 'Page D') {
-      return 'Page D is about household goods';
-    }
-    if (label === 'Page E') {
-      return 'Page E is about food';
-    }
-    if (label === 'Page F') {
-      return 'Page F is about baby food';
-    }
-    return '';
-  };
+/**
+ * Convert a hex color (e.g., F00, #03F, #0033FF) to an RGB color object.
+ * CC-BY-SA Tim Down:
+ * https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+ * @param {!string} hex Hex representation of the color.
+ * @return {RGBObject} null on failure, or rgb: {r: red [0,255], g: green [0,255], b: blue [0,255]}.
+ */
+const hueToHex = (hue) => {
+  const hsv = { h: hue, s: 80, v: 80 }
+  return Color.rgbToHex(Color.hsvToRgb(hsv))
+}
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className={styles.customTooltip}>
-          <p className={styles.chartLabel}>{`Average: ${payload[0].value} sec`}</p>
-          <p className="intro">{getIntroOfPage(label)}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+const hexToHue = (hex) => {
+  const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
+  return hueToHex(hsv.h)
+}
 
-const TuringVizPanel = props => (
-        <Box className={styles.body}>
-            <Box className={styles.dataCol}>
-              
-                <img src={FontDashboard} className={styles.dashboard} />
+const formatId = (modelName, label) => {
+  return modelName + "_" + label
+}
 
-                <h1>{props.data.user_model.targetSprite}</h1>
-                <h1>{props.data.user_model.modelName}</h1>
-
-                {props.dataIsSet ? (
-                  // <div>data is set</div>
-                  <Box className={styles.keyStats}>
-                  <div>
-                      <img src={FontType} className={styles.statsHeading} />
-                      {props.data.user_model.type === 'COLOR' ?   (<p className={styles.stat}>{props.data.user_model.modelName}</p>) : (<p className={styles.stat}>{props.data.user_model.type}</p>)}
-                  </div>
-                  <div>
-                  <img src={FontCurrentSample} className={styles.statsHeading} />
-                    <p className={styles.stat}>{props.data.samples[props.data.samples.length-1]}{props.data.user_model.unit}</p>
-                  </div>
-                  <div>
-                  <img src={FontNumSamples} className={styles.statsHeading} />
-                    <p className={styles.stat}>{props.data.samples.length}</p>
-                  </div>
-                  </Box>    
-                ): (null)}
-
-                <Box className={styles.dataRow}>
-                <Box className={styles.dataCol}>
-                <img src={FontBarChart} className={styles.visHeading} />
-
-                {props.dataIsSet ? (
-                  <BarChart width={500} height={300} data={props.data.barData} className={styles.chartElement}>
-                      <Bar key={props.data.barData.type} fill="#855CD6" isAnimationActive={true} dataKey="value" barsize={10}/>
-                  <XAxis dataKey="type" />
-                  <Tooltip content={<CustomTooltip/>}/>
-                  <YAxis />
-                  </BarChart>) 
-                  : (null)}
-                </Box>
-
-                <Box className={styles.dataCol}>
-                <img src={FontDist} className={styles.visHeading} />
-                {console.log("We want to potentially plot this stuff...")}
-                {console.log(props.data.distData)}
-                {props.dataIsSet ? (
-                <LineChart width={600} height={300} data={props.data.distData}>
-                <XAxis
-                    allowDecimals={false}
-                    dataKey="input"
-                    type="number"
-                />
-                <YAxis allowDecimals={true} />
-                <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-
-                {props.data.activeDists.map((key) => (
-                    <Line
-                    key={key}
-                    dataKey={key}
-                    type = "monotone"
-                    stroke={"#de4414"}
-                    dot={false}
-                    isAnimationActive={true}
-                    strokeWidth="1.5px"
-                    />
-                ))}
-                <Legend />
-                <Tooltip />
-                </LineChart>
-                ) : (null)}
-                </Box>
-                </Box>
-                <button
-                    className={styles.mapOptionsButton}
-                    onClick={props.onCoords}
-                >Get posterior from Turing (10000 samples)</button>
-                </Box>
+const getGaussianPanel = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      {getParameterLabels(props)}
+      <Box className={styles.dataCol}>
+        <img src={FontDist} className={styles.visHeading} />
+        <LineChart width={900} height={600} data={props.data.distData}>
+          <XAxis
+            allowDecimals={false}
+            dataKey="input"
+            type="number"
+            tick={CustomLabel}
+          />
+          <YAxis allowDecimals={true} />
+          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          {props.docTags}
+          {props.data.activeDists.map((key) => (
+            <Line
+              key={props.data.styles[key].chartName}
+              dataKey={key}
+              type="monotone"
+              stroke={props.data.styles[key].stroke}
+              dot={props.data.styles[key].dots}
+              isAnimationActive={true}
+              strokeWidth={props.data.styles[key].strokeWidth}
+            />
+          ))}
+          <ReferenceLine x={0} label={CustomLabel} />
+          <Legend />
+          <Tooltip />
+        </LineChart>
       </Box>
+      <ScatterChart
+        width={400}
+        height={300}
+        margin={{
+          top: 20,
+          right: 20,
+          bottom: 20,
+          left: 20,
+        }}
+      >
+        <CartesianGrid />
+        <XAxis type="number" dataKey="x" name="sample" unit="" />
+        <YAxis type="number" dataKey="y" name="value" unit="" />
+        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+        <Scatter name="Sample Space" data={props.data.sampleSpace} fill="#FF5959" />
+      </ScatterChart>
+      <Box>
+      </Box>
+    </Box>
+  )
+}
+
+const getParameterLabels = (props) => {
+  switch (props.data.user_model.distribution) {
+    case 'gaussian':
+      return (
+        <div>
+          {/* <label htmlFor="groundTruth"> //TTODO
+            <p>Show Custom Distribution</p>
+            <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
+          </label> */}
+          <Box className={styles.paramBox}>
+            <h3>Ground Truth</h3>
+            <Box className={styles.sliderBox}>
+              <h4><b>mean (μ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "customParams_mu")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "customParamsValue_mu")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "customParamsValue_mu")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "customParams_mu")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+            <Box className={styles.sliderBox}>
+              <h4><b>stdv (σ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "customParams_stdv")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "customParamsValue_stdv")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "customParamsValue_stdv")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "customParams_stdv")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+
+            <Box className={styles.buttonRow}>
+              <button
+                className={styles.mapOptionsButton}
+                onClick={() => props.updateChart(props.activeModel, props.vm, props.updateCustom, 'custom')}
+              >
+                <FormattedMessage
+                  defaultMessage="Update Ground Truth"
+                  description="Button in prompt for starting a search"
+                  id="gui.mapModal.groundTruth"
+                />
+                <img
+                  className={styles.buttonIconRight}
+                // src={surpriseIcon}
+                />
+              </button>
+            </Box>
+          </Box>
+
+          <Box className={styles.paramBox}>
+            <h3>Prior</h3>
+            <Box className={styles.sliderBox}>
+
+              <h4><b>mean (μ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "priorParams_mu")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_mu"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "priorParamsValue_mu")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "priorParamsValue_mu")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_mu"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "priorParams_mu")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+            <Box className={styles.sliderBox}>
+              <h4><b>stdv (σ)</b></h4>
+              <input
+                type="range"
+                id={formatId(props.activeModel, "priorParams_stdv")}
+                min="0"
+                max="100"
+                step="0.05"
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_stdv"), 0.1119)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(props.activeModel, "priorParamsValue_stdv")).value = newValue;
+                }}
+              />
+              <input
+                type="text"
+                id={formatId(props.activeModel, "priorParamsValue_stdv")}
+                maxLength="4" // Restrict to 8 characters
+                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_stdv"), 14.25)} // Set initial value
+                className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                    document.getElementById(formatId(props.activeModel, "priorParams_stdv")).value = newValue;
+                  }
+                }}
+              />
+            </Box>
+            <Box className={styles.buttonRow}>
+              <button
+                className={styles.mapOptionsButton}
+                onClick={() => props.updateChart(props.activeModel, props.vm, props.updatePrior, 'prior')}
+              >
+                <FormattedMessage
+                  defaultMessage="Update Belief"
+                  description="Button in prompt for starting a search"
+                  id="gui.vizPanel.updateBelief"
+                />
+                <img
+                  className={styles.buttonIconRight}
+                // src={compassIcon}
+                />
+              </button>
+            </Box>
+          </Box>
+        </div>
+      ); // Use PascalCase for model names
+    case 'color':
+      return (<div>Hue: <h1>λ</h1></div>)
+    case 'rhythm':
+      return (<div>Rhythm: <h1>n</h1><h1>p</h1></div>)
+    default:
+      return (<h1>Unknown distribution</h1>);
+  }
+};
+
+const colorRanges = {
+  'yellow': [45, 75],
+  "yellow-orange": [75, 90],
+  "yellow-green": [90, 120],
+  'green': [120, 180],
+  "blue-green": [180, 210],
+  'blue': [210, 270],
+  "blue-violet": [270, 300],
+  'violet': [300, 330],
+  "red-violet": [330, 345],
+  'red': [345, 15],
+  "red-orange": [15, 45],
+  'orange': [45, 75],
+};
+
+function getColorRange(hue) {
+  // Handle wrap around the color wheel
+  hue = (hue + 360) % 360;
+  for (const color in colorRanges) {
+    const range = colorRanges[color];
+    const lower = range[0];
+    const upper = range[1];
+    // Check if hue is within range, accounting for wrap around
+    if (lower <= upper) {
+      if (lower <= hue && hue <= upper) {
+        return color;
+      }
+    } else {
+      if (hue <= upper || lower <= hue) {
+        return color;
+      }
+    }
+  }
+  return null; // Use null instead of None in JavaScript
+}
+
+const HueTooltip = ({ props }) => { // TTODO in progress. 
+  return (
+    <Tooltip />
+  )
+}
+
+const HuePieChart = ({ data }) => {
+  return (
+    <PieChart width={500} height={500}>
+      <Pie
+        data={data}
+        dataKey="freq"
+        outerRadius={200}
+        fill={data.fill} // Apply custom fill function
+      />
+      {/* <Legend /> */}
+      <Tooltip />
+    </PieChart>
+  );
+};
+
+const RhythmPieChart = ({ data }) => {
+  return (
+    <PieChart width={500} height={500}>
+      <Pie
+        data={data}
+        dataKey="proportion"
+        outerRadius={200}
+        fill={data.fill} // Apply custom fill function
+      />
+      <Legend dataKey="rhythm" />
+      <Tooltip />
+    </PieChart>
+  );
+};
+
+const getHuePanel = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      <Box className={styles.dataCol}>
+        <h1>Proportion of Hues</h1>
+        <HuePieChart data={props.data.huePieData} />
+        {/* <img src={arrowIcon}/> */}
+        <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      </Box>
+      <Box className={styles.dataCol}>
+        <h1>Hue Distribution</h1>
+        <BarChart width={800} height={400} data={props.data.huePlotData}>
+          <Bar type="monotone" dataKey="value" stroke={props.data.huePlotData.stroke} dot={false} />
+          <XAxis label="Hue" tick={<CustomHue />} />
+          <YAxis dots={false} yAxis={-5} />
+        </BarChart>
+        < Tooltip />
+      </Box>
+    </Box>
+  );
+};
+
+const getRhythmPanel = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      <Box className={styles.dataCol}>
+        <h1>Proportion of Hues</h1>
+        <RhythmPieChart data={props.data.rhythmPieData} />
+        {/* <img src={arrowIcon}/> */}
+        <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      </Box>
+
+      <Box className={styles.dataCol}>
+        {console.log("OUR RHYTHMS!")}
+
+        <h1> Rhythm Samples</h1>
+        <ScatterChart
+          width={400}
+          height={300}
+          margin={{
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20,
+          }}>
+          <CartesianGrid />
+          <XAxis type="number" dataKey="x" name="timestamp" unit="" />
+          <YAxis type="number" dataKey="y" name="value" unit="" />
+          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+          <Scatter name="TIMELINE" data={props.data.rhythmTimelineData} fill={props.data.rhythmTimelineData.fill} />
+        </ScatterChart>
+      </Box>
+
+      {/* <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button> */}
+      {/* <MyPieChart data={props.data.rhythmPieData} /> */}
+      {/* <BarChart width={800} height={300} data={props.data.rhythmTimelineData}>
+        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
+        <XAxis label="Timeline" />
+        <YAxis dots={false} yAxis={-5} />
+      </BarChart> */}
+      {/* <RhythmTimeline /> */}
+    </Box>
+  );
+};
+
+
+
+const getPanel = (props) => {
+  switch (props.data.user_model.distribution) {
+    case 'gaussian':
+      return getGaussianPanel(props)
+    case 'hue':
+      return getHuePanel(props)
+    case 'rhythm':
+      return getRhythmPanel(props)
+  }
+}
+
+const getKeyStats = (props) => {
+  return (
+    <Box className={styles.dataRow}>
+      <Box className={styles.keyStats}>
+        <div>
+          <img src={FontType} className={styles.statsHeading} />
+          <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
+        </div>
+        <div>
+          <img src={FontCurrentSample} className={styles.statsHeading} />
+          {props.data.samples.length === 0 ? (
+            <p className={styles.stat}>none</p>
+          ) : (
+            props.data.user_model.distribution === "hue" ? (
+              <>
+                <p
+                  style={{
+                    backgroundColor: props.data.samples[props.data.samples.length - 1],
+                    color: props.data.samples[props.data.samples.length - 1],
+                  }}
+                  className={styles.stat}
+                >X
+                </p>
+                <b>Converted to a hue: </b>
+                <p
+                  style={{
+                    backgroundColor: hexToHue(props.data.samples[props.data.samples.length - 1]),
+                    color: hexToHue(props.data.samples[props.data.samples.length - 1]),
+                  }}
+                  className={styles.stat}
+                >X</p>
+              </>
+            ) : (
+              <p className={styles.stat}>
+                {props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}
+              </p>
+            )
+          )}
+        </div>
+        <div>
+          <img src={FontNumSamples} className={styles.statsHeading} />
+          <p className={styles.stat}>{props.data.samples.length}</p>
+        </div>
+      </Box>
+    </Box>);
+}
+const TuringVizPanel = props => (
+  <Box className={styles.body}>
+    <Box className={styles.dataCol}>
+
+      <Box className={styles.buttonRow}>
+        {props.activeModels.map((modelName, index) => (
+          <button
+            key={modelName}  // Add a unique key for each button
+            className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
+            onClick={() => props.activateModelDashboard(modelName, index)}
+          >
+            {modelName}
+          </button>
+        ))}
+      </Box>
+
+      <img src={FontDashboard} className={styles.dashboard} />
+      {console.log("INSIDE VIZ PANEL! Props are..")}
+      {console.log(props)}
+      {getKeyStats(props)}
+      {getPanel(props)}
+    </Box>
+  </Box>
 );
 
 TuringVizPanel.propTypes = {
-    data: PropTypes.object,
-    vm: PropTypes.instanceOf(VM),
-    dataIsSet: PropTypes.bool
+  data: PropTypes.object,
+  vm: PropTypes.instanceOf(VM),
+  activeModels: PropTypes.array
 };
 
 TuringVizPanel.defaultProps = {
-    connectingMessage: 'Connecting'
+  connectingMessage: 'Connecting'
 };
 
 export {
-    TuringVizPanel as default,
+  TuringVizPanel as default,
 };
 
 
-            {/* <Box className={styles.dataRow}> */}
-                {/* <Gaussian 
+{/* <Box className={styles.dataRow}> */ }
+{/* <Gaussian 
                     name="Gaussian"
                     data={props.data.distData}
                     lines={props.data.distLines}
                 >
                 </Gaussian> */}
 
-                {/* <MeanPlot 
+{/* <MeanPlot 
                     name="Gaussian"
                     data={props.data.distData}
                     lines={props.data.distLines}

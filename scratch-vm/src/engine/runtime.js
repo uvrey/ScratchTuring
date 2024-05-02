@@ -103,12 +103,6 @@ const ArgumentTypeMap = (() => {
         // They are more analagous to the label on a block.
         fieldType: 'field_image'
     };
-    map[ArgumentType.MODEL] = {
-        shadow: {
-            type: 'model_menu',
-            fieldName: 'MODEL'
-        }
-    };
     return map;
 })();
 
@@ -497,6 +491,18 @@ class Runtime extends EventEmitter {
         return 'PROJECT_START';
     }
 
+    static get UPDATE_CUSTOM_PARAMS () {
+        return 'UPDATE_CUSTOM_PARAMS';
+    }
+
+    static get UPDATE_PRIOR_PARAMS () {
+        return 'UPDATE_PRIOR_PARAMS';
+    }
+
+    static get UPDATE_GROUND_TRUTH_PARAMS () {
+        return 'UPDATE_GROUND_TRUTH_PARAMS';
+    }
+
     /**
      * Event name when threads start running.
      * Used by the UI to indicate running status.
@@ -567,12 +573,11 @@ class Runtime extends EventEmitter {
 
     static get TURING_CLOSE_LOAD () {
         return 'TURING_CLOSE_LOAD';
-    }
-
+    }    
+    
     static get TURING_DATA_STATE () {
         return 'TURING_DATA_STATE';
     }
-
 
     static get TURING_ACTIVE () {
         return 'TURING_ACTIVE';

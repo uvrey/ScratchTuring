@@ -7,6 +7,57 @@
 }
 
 
+
+.arrow-icon {
+    width: 20px;
+}
+
+
+#wheel {
+    max-height: inherit;
+    width: inherit;
+    top: 0;
+    padding: 0;
+  }
+  @keyframes rotate {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  #spin-btn {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    height: 26%;
+    width: 26%;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 0;
+    background: radial-gradient(#fdcf3b 50%, #d88a40 85%);
+    color: #c66e16;
+    text-transform: uppercase;
+    font-size: 1.8em;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .img-spin-wheel {
+    position: absolute;
+    width: 4em;
+    top: 45%;
+    right: -8%;
+  }
+  #final-value {
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 1.5em;
+    color: #202020;
+    font-weight: 500;
+  }
+
+  
+  /***** SPINNING WHEEL ABOC ****/
+
 /* @font-face {
     font-family: "ScratchFont";
     src: url("./scratch-font.ttf") format("truetype");
@@ -18,6 +69,166 @@
     color: white;
     -webkit-text-stroke: 5px $looks-secondary;
 } */
+
+.slider-value-background {
+    background-color: $looks-secondary; /* Add your desired background color */
+    padding: 2px; /* Add some padding around the text */
+    border-radius: 2px; /* Add a slight border radius for aesthetics */
+  }
+  
+/* Range */
+.slider-value {
+    /* display: inline-block; */
+    position: absolute;
+    margin-top: 10px;
+    font-size: 10px;
+    /* font-weight: 600; */
+    font-size: 0.8rem;
+    text-align: center;
+    color: #ffffff;
+    padding: 0.1em 0.1em 0.1em 0.5em;
+    margin-left: 0.6em;
+}
+
+.zoom-pitch {
+    /* Set a minimum width to prevent excessive shrinking */
+    max-width: 4.5em;
+    /* Remove default browser styling (optional) */
+    -webkit-appearance: none;
+  }
+  
+.long-lat { /* Default rule for all text inputs */
+    /* Set a minimum width to prevent excessive shrinking (optional) */
+    max-width: 6em; /* Adjust as needed */
+    /* Remove default browser styling (optional) */
+    -webkit-appearance: none;
+  }
+  
+
+input[type=range] {
+    -webkit-appearance: none;
+    width: 75%;
+    margin-bottom: 1.5em;
+  }
+
+  input[type=range]:focus {
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 0.2em;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background:  $looks-light-transparent;
+    border-radius: 25px;
+    border: 0px solid #000101;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 30px;
+    width: 10px;
+    border-radius: 7px;
+    background: $looks-secondary;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -3.6px;
+  }
+  input[type=range]:focus::-webkit-slider-runnable-track {
+    background: $looks-light-transparent;
+  }
+  input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background:  $looks-light-transparent;
+    border-radius: 25px;
+    border: 0px solid #000101;
+  }
+  input[type=range]::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 30px;
+    width: 10px;
+    border-radius: 7px;
+    background: $looks-secondary;
+    cursor: pointer;
+  }
+  input[type=range]::-ms-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    border-width: 39px 0;
+    color: transparent;
+  }
+  input[type=range]::-ms-fill-lower {
+    background:  $looks-light-transparent;
+    border: 0px solid #000101;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  }
+  input[type=range]::-ms-fill-upper {
+    background:  $looks-light-transparent;
+    border: 0px solid #000101;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  }
+  input[type=range]::-ms-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 30px;
+    width: 10px;
+    border-radius: 7px;
+    background: $looks-secondary;
+    cursor: pointer;
+  }
+  input[type=range]:focus::-ms-fill-lower {
+    background:  $looks-light-transparent;
+  }
+  input[type=range]:focus::-ms-fill-upper {
+    background:  $looks-light-transparent;
+  }
+  
+  #range-wrap {
+    position: relative;
+  }
+  
+/* Stacking sliders vertically */
+/* input[type="range"] {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    color:  $looks-secondary;
+} */
+
+/* Adding some spacing between label and slider */
+input[type="range"] {
+    margin-top: 1em;
+}
+
+.map-options-button {
+    padding: 0.75rem 0.75rem;
+    border-radius: 0.5rem;
+    background: $looks-secondary;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin: 0.25rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    margin: 0.25rem 1rem;
+
+    &:hover {
+        box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+    }
+}
+
 
 .visHeading {
     height: 3em;
@@ -76,7 +287,6 @@
     margin-top:1em;
     margin-right: 2em;
     /* Padding */
-    padding-top: 1em;
     padding-bottom: 1em;
     padding-left: 5em;
     padding-right: 5em;
@@ -118,7 +328,7 @@
     flex-direction: column; 
 }
 
-.panel-button {
+/* .panel-button {
     padding: 0.75rem 0.75rem;
     border-radius: 0.5rem;
     background: $looks-secondary;
@@ -136,9 +346,88 @@
     &:hover {
         box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
     }
+} */
+
+.panel-button {
+    padding: 0.75rem 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #737373;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin: 0.25rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    margin: 0.25rem 1rem;
+    
+  
+    &:hover {
+      box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+    }
+  }
+
+
+  .hueDataChart {
+    width: 500px;
+    height: 200px;
+  }
+  .color-swatch {
+    width: 10px;
+    /* Adjust width as needed */
+    height: 10px;
+    /* Adjust height as needed */
+    /* border-radius: 0.25rem; */
 }
 
+  .custom-label {
+    background: #aaa;
+    color: #111;
+    font-size: 14px;
+  }
+  
+  .label-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+  
 
+  .param-box {
+    background-color: white;
+    outline: $looks-light-transparent;
+    /* Drop shadow */
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 2em;
+    padding: 0.5em;
+    margin: 1em;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    width: 25em; 
+  }
+  
+.active-button {
+    padding: 0.75rem 0.75rem;
+    border-radius: 0.5rem;
+    background-color: $looks-secondary;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin: 0.25rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    margin: 0.25rem 1rem;
+  
+    &:hover {
+      box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+    }
+  }
+  
 .centered-row {
     display: flex;
     flex-direction: row;

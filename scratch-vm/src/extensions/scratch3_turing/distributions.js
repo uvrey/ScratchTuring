@@ -45,6 +45,35 @@ const probFunc = (x, mean, stdv) => {
   );
 };
 
+const betaPDF = (x, a, b) => {
+  // Beta probability density function impementation
+  // using logarithms, no factorials involved.
+  // Overcomes the problem with large integers
+  return Math.exp(lnBetaPDF(x, a, b))
+}
+
+const lnBetaPDF = (x, a, b) => {
+  // Log of the Beta Probability Density Function
+  return ((a - 1) * Math.log(x) + (b - 1) * Math.log(1 - x)) - lnBetaFunc(a, b)
+}
+
+const lnBetaFunc = (a, b) => {
+  // Log Beta Function
+  // ln(Beta(x,y))
+  foo = 0.0;
+
+  for (i = 0; i < a - 2; i++) {
+    foo += Math.log(a - 1 - i);
+  }
+  for (i = 0; i < b - 2; i++) {
+    foo += Math.log(b - 1 - i);
+  }
+  for (i = 0; i < a + b - 2; i++) {
+    foo -= Math.log(a + b - 1 - i);
+  }
+  return foo
+}
+
 const generateProbabilityData = (lines) => {
   if (lines.length < 1) {
     return [];

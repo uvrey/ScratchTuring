@@ -774,24 +774,46 @@ function fetchColor(target, mask3b) {
     // Masked drawable ignores ghost effect
     const effectMask = ~ShaderManager.EFFECT_INFO.ghost.mask;
 
-    // Scratch Space - +y is top
-    for (let y = bounds.bottom; y <= bounds.top; y++) {
-        for (let x = bounds.left; x <= bounds.right; x++) {
-            point[1] = y;
-            point[0] = x;
-            // if we use a mask, check our sample color...
-            if (hasMask ?
-                maskMatches(Drawable.sampleColor4b(point, drawable, color, effectMask), mask3b) :
-                drawable.isTouching(point)) {
-                sampleColor3b(point, candidates, color);
-                if (debugCanvasContext) {
-                    debugCanvasContext.fillRect(x - bounds.left, bounds.bottom - y, 1, 1);
+    try {
+        for (let y = bounds.bottom; y <= bounds.top; y++) {
+            for (let x = bounds.left; x <= bounds.right; x++) {
+                point[1] = y;
+                point[0] = x;
+                // if we use a mask, check our sample color...
+                if (hasMask ?
+                    maskMatches(Drawable.sampleColor4b(point, drawable, color, effectMask), mask3b) :
+                    drawable.isTouching(point)) {
+                    sampleColor3b(point, candidates, color);
+                    if (debugCanvasContext) {
+                        debugCanvasContext.fillRect(x - bounds.left, bounds.bottom - y, 1, 1);
+                    }
+                    return {r: color[0], g: color[1], b: color[2]}
                 }
-                return {r: color[0], g: color[1], b: color[2]}
             }
         }
+        return {r: color[0], g: color[1], b: color[2]}
+    } catch (error) {
+        return {r: 255, g: 255, b: 255}
     }
-    return {r: color[0], g: color[1], b: color[2]}
+
+    // // Scratch Space - +y is top
+    // for (let y = bounds.bottom; y <= bounds.top; y++) {
+    //     for (let x = bounds.left; x <= bounds.right; x++) {
+    //         point[1] = y;
+    //         point[0] = x;
+    //         // if we use a mask, check our sample color...
+    //         if (hasMask ?
+    //             maskMatches(Drawable.sampleColor4b(point, drawable, color, effectMask), mask3b) :
+    //             drawable.isTouching(point)) {
+    //             sampleColor3b(point, candidates, color);
+    //             if (debugCanvasContext) {
+    //                 debugCanvasContext.fillRect(x - bounds.left, bounds.bottom - y, 1, 1);
+    //             }
+    //             return {r: color[0], g: color[1], b: color[2]}
+    //         }
+    //     }
+    // }
+    // return {r: color[0], g: color[1], b: color[2]}
 }
 
 function _getMaxPixelsForCPU() {
