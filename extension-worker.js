@@ -1274,7 +1274,8 @@ var ArgumentType = {
   /**
    * Inline image on block (as part of the label)
    */
-  IMAGE: 'image'
+  IMAGE: 'image',
+  MODEL: 'model'
 };
 module.exports = ArgumentType;
 
