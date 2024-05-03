@@ -91,12 +91,13 @@ const formatId = (modelName, label) => {
 }
 
 const getGaussianPanel = (props) => {
+  const plot = props.data.plot
   return (
     <Box className={styles.dataRow}>
       {getParameterLabels(props)}
       <Box className={styles.dataCol}>
         <img src={FontDist} className={styles.visHeading} />
-        <LineChart width={900} height={600} data={props.data.distData}>
+        <LineChart width={900} height={600} data={plot.gaussian}>
           <XAxis
             allowDecimals={false}
             dataKey="input"
@@ -106,15 +107,15 @@ const getGaussianPanel = (props) => {
           <YAxis allowDecimals={true} />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
           {props.docTags}
-          {props.data.activeDists.map((key) => (
+          {plot.activeDistributions.map((key) => (
             <Line
-              key={props.data.styles[key].chartName}
+              key={plot.styles[key].chartName}
               dataKey={key}
               type="monotone"
-              stroke={props.data.styles[key].stroke}
-              dot={props.data.styles[key].dots}
+              stroke={plot.styles[key].stroke}
+              dot={plot.styles[key].dots}
               isAnimationActive={true}
-              strokeWidth={props.data.styles[key].strokeWidth}
+              strokeWidth={plot.styles[key].strokeWidth}
             />
           ))}
           <ReferenceLine x={0} label={CustomLabel} />
@@ -136,7 +137,7 @@ const getGaussianPanel = (props) => {
         <XAxis type="number" dataKey="x" name="sample" unit="" />
         <YAxis type="number" dataKey="y" name="value" unit="" />
         <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="Sample Space" data={props.data.sampleSpace} fill="#FF5959" />
+        <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
       </ScatterChart>
       <Box>
       </Box>
@@ -145,40 +146,37 @@ const getGaussianPanel = (props) => {
 }
 
 const getParameterLabels = (props) => {
-  switch (props.data.user_model.distribution) {
+  const active = props.activeModel
+  switch (props.data.distribution) {
     case 'gaussian':
       return (
         <div>
-          {/* <label htmlFor="groundTruth"> //TTODO
-            <p>Show Custom Distribution</p>
-            <input type="checkbox" onClick={props.toggleVisibility(props.vm, {modelName: props.activeModel, mode: 'custom'})} id="groundTruth" name="groundTruth" value="yes" />
-          </label> */}
           <Box className={styles.paramBox}>
             <h3>Ground Truth</h3>
             <Box className={styles.sliderBox}>
               <h4><b>mean (μ)</b></h4>
               <input
                 type="range"
-                id={formatId(props.activeModel, "customParams_mu")}
+                id={formatId(active, "customParams_mu")}
                 min="0"
                 max="100"
                 step="0.05"
-                defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 0.1119)}
+                defaultValue={props.getValue(formatId(active, "customParams_mu"), 0.1119)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(props.activeModel, "customParamsValue_mu")).value = newValue;
+                  document.getElementById(formatId(active, "customParamsValue_mu")).value = newValue;
                 }}
               />
               <input
                 type="text"
-                id={formatId(props.activeModel, "customParamsValue_mu")}
+                id={formatId(active, "customParamsValue_mu")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(props.activeModel, "customParams_mu"), 14.25)} // Set initial value
+                defaultValue={props.getValue(formatId(active, "customParams_mu"), 14.25)} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById(formatId(props.activeModel, "customParams_mu")).value = newValue;
+                    document.getElementById(formatId(active, "customParams_mu")).value = newValue;
                   }
                 }}
               />
@@ -187,26 +185,26 @@ const getParameterLabels = (props) => {
               <h4><b>stdv (σ)</b></h4>
               <input
                 type="range"
-                id={formatId(props.activeModel, "customParams_stdv")}
+                id={formatId(active, "customParams_stdv")}
                 min="0"
                 max="100"
                 step="0.05"
-                defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 0.1119)}
+                defaultValue={props.getValue(formatId(active, "customParams_stdv"), 0.1119)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(props.activeModel, "customParamsValue_stdv")).value = newValue;
+                  document.getElementById(formatId(active, "customParamsValue_stdv")).value = newValue;
                 }}
               />
               <input
                 type="text"
-                id={formatId(props.activeModel, "customParamsValue_stdv")}
+                id={formatId(active, "customParamsValue_stdv")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(props.activeModel, "customParams_stdv"), 14.25)} // Set initial value
+                defaultValue={props.getValue(formatId(active, "customParams_stdv"), 14.25)} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById(formatId(props.activeModel, "customParams_stdv")).value = newValue;
+                    document.getElementById(formatId(active, "customParams_stdv")).value = newValue;
                   }
                 }}
               />
@@ -215,7 +213,7 @@ const getParameterLabels = (props) => {
             <Box className={styles.buttonRow}>
               <button
                 className={styles.mapOptionsButton}
-                onClick={() => props.updateChart(props.activeModel, props.vm, props.updateCustom, 'custom')}
+                onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
               >
                 <FormattedMessage
                   defaultMessage="Update Ground Truth"
@@ -237,26 +235,26 @@ const getParameterLabels = (props) => {
               <h4><b>mean (μ)</b></h4>
               <input
                 type="range"
-                id={formatId(props.activeModel, "priorParams_mu")}
+                id={formatId(active, "priorParams_mu")}
                 min="0"
                 max="100"
                 step="0.05"
-                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_mu"), 0.1119)}
+                defaultValue={props.getValue(formatId(active, "priorParams_mu"), 0.1119)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(props.activeModel, "priorParamsValue_mu")).value = newValue;
+                  document.getElementById(formatId(active, "priorParamsValue_mu")).value = newValue;
                 }}
               />
               <input
                 type="text"
-                id={formatId(props.activeModel, "priorParamsValue_mu")}
+                id={formatId(active, "priorParamsValue_mu")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_mu"), 14.25)} // Set initial value
+                defaultValue={props.getValue(formatId(active, "priorParams_mu"), 14.25)} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById(formatId(props.activeModel, "priorParams_mu")).value = newValue;
+                    document.getElementById(formatId(active, "priorParams_mu")).value = newValue;
                   }
                 }}
               />
@@ -265,26 +263,26 @@ const getParameterLabels = (props) => {
               <h4><b>stdv (σ)</b></h4>
               <input
                 type="range"
-                id={formatId(props.activeModel, "priorParams_stdv")}
+                id={formatId(active, "priorParams_stdv")}
                 min="0"
                 max="100"
                 step="0.05"
-                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_stdv"), 0.1119)}
+                defaultValue={props.getValue(formatId(active, "priorParams_stdv"), 0.1119)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(props.activeModel, "priorParamsValue_stdv")).value = newValue;
+                  document.getElementById(formatId(active, "priorParamsValue_stdv")).value = newValue;
                 }}
               />
               <input
                 type="text"
-                id={formatId(props.activeModel, "priorParamsValue_stdv")}
+                id={formatId(active, "priorParamsValue_stdv")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(props.activeModel, "priorParams_stdv"), 14.25)} // Set initial value
+                defaultValue={props.getValue(formatId(active, "priorParams_stdv"), 14.25)} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById(formatId(props.activeModel, "priorParams_stdv")).value = newValue;
+                    document.getElementById(formatId(active, "priorParams_stdv")).value = newValue;
                   }
                 }}
               />
@@ -292,7 +290,7 @@ const getParameterLabels = (props) => {
             <Box className={styles.buttonRow}>
               <button
                 className={styles.mapOptionsButton}
-                onClick={() => props.updateChart(props.activeModel, props.vm, props.updatePrior, 'prior')}
+                onClick={() => props.updateChart(active, props.vm, props.updatePrior, 'prior')}
               >
                 <FormattedMessage
                   defaultMessage="Update Belief"
@@ -359,49 +357,35 @@ const HueTooltip = ({ props }) => { // TTODO in progress.
   )
 }
 
-const HuePieChart = ({ data }) => {
+const Spinner = ({ data, key }) => {
   return (
-    <PieChart width={500} height={500}>
-      <Pie
-        data={data}
-        dataKey="freq"
-        outerRadius={200}
-        fill={data.fill} // Apply custom fill function
-      />
-      {/* <Legend /> */}
-      <Tooltip />
-    </PieChart>
-  );
-};
-
-const RhythmPieChart = ({ data }) => {
-  return (
-    <PieChart width={500} height={500}>
-      <Pie
-        data={data}
-        dataKey="proportion"
-        outerRadius={200}
-        fill={data.fill} // Apply custom fill function
-      />
-      <Legend dataKey="rhythm" />
-      <Tooltip />
-    </PieChart>
+    <>
+      <PieChart width={500} height={500}>
+        <Pie
+          data={data}
+          dataKey={key}
+          outerRadius={200}
+          fill={data.fill} 
+        />
+        <Tooltip />
+      </PieChart>
+      <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+    </>
   );
 };
 
 const getHuePanel = (props) => {
+  const plot = props.data.plot
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
         <h1>Proportion of Hues</h1>
-        <HuePieChart data={props.data.huePieData} />
-        {/* <img src={arrowIcon}/> */}
-        <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+        <Spinner data={plot.pie} key="freq" />
       </Box>
       <Box className={styles.dataCol}>
         <h1>Hue Distribution</h1>
-        <BarChart width={800} height={400} data={props.data.huePlotData}>
-          <Bar type="monotone" dataKey="value" stroke={props.data.huePlotData.stroke} dot={false} />
+        <BarChart width={800} height={400} data={plot.histogram}>
+          <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
           <XAxis label="Hue" tick={<CustomHue />} />
           <YAxis dots={false} yAxis={-5} />
         </BarChart>
@@ -412,18 +396,16 @@ const getHuePanel = (props) => {
 };
 
 const getRhythmPanel = (props) => {
+  const plot = props.data.plot
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
         <h1>Proportion of Hues</h1>
-        <RhythmPieChart data={props.data.rhythmPieData} />
+        <Spinner data={plot.pie} key="proportion" />
         {/* <img src={arrowIcon}/> */}
-        <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
       </Box>
 
       <Box className={styles.dataCol}>
-        {console.log("OUR RHYTHMS!")}
-
         <h1> Rhythm Samples</h1>
         <ScatterChart
           width={400}
@@ -438,26 +420,27 @@ const getRhythmPanel = (props) => {
           <XAxis type="number" dataKey="x" name="timestamp" unit="" />
           <YAxis type="number" dataKey="y" name="value" unit="" />
           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          <Scatter name="TIMELINE" data={props.data.rhythmTimelineData} fill={props.data.rhythmTimelineData.fill} />
+          <Scatter name="Samples over Time" data={plot.timeline} fill={plot.timeline.fill} />
         </ScatterChart>
       </Box>
 
-      {/* <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button> */}
-      {/* <MyPieChart data={props.data.rhythmPieData} /> */}
-      {/* <BarChart width={800} height={300} data={props.data.rhythmTimelineData}>
+      <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+      <RhythmPieChart data={plot.pie} key="proportion" />
+      <BarChart width={800} height={300} data={plot.timeline}>
         <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
         <XAxis label="Timeline" />
         <YAxis dots={false} yAxis={-5} />
-      </BarChart> */}
+      </BarChart>
       {/* <RhythmTimeline /> */}
     </Box>
   );
 };
 
-
-
 const getPanel = (props) => {
-  switch (props.data.user_model.distribution) {
+  {console.log("Deciding which panel to choose:")}
+  {console.log(props.data)}
+  {console.log(props.data.distribution)}
+  switch (props.data.distribution) {
     case 'gaussian':
       return getGaussianPanel(props)
     case 'hue':
@@ -468,24 +451,26 @@ const getPanel = (props) => {
 }
 
 const getKeyStats = (props) => {
+  const data = props.data
+  const samples = props.data.samples
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.keyStats}>
         <div>
           <img src={FontType} className={styles.statsHeading} />
-          <div><p className={styles.stat}>{props.data.user_model.modelName}</p></div>
+          <div><p className={styles.stat}>{data.modelName}</p></div>
         </div>
         <div>
           <img src={FontCurrentSample} className={styles.statsHeading} />
-          {props.data.samples.length === 0 ? (
+          {samples.length === 0 ? (
             <p className={styles.stat}>none</p>
           ) : (
-            props.data.user_model.distribution === "hue" ? (
+            data.distribution === "hue" ? (
               <>
                 <p
                   style={{
-                    backgroundColor: props.data.samples[props.data.samples.length - 1],
-                    color: props.data.samples[props.data.samples.length - 1],
+                    backgroundColor: samples[samples.length - 1],
+                    color: samples[samples.length - 1],
                   }}
                   className={styles.stat}
                 >X
@@ -493,22 +478,22 @@ const getKeyStats = (props) => {
                 <b>Converted to a hue: </b>
                 <p
                   style={{
-                    backgroundColor: hexToHue(props.data.samples[props.data.samples.length - 1]),
-                    color: hexToHue(props.data.samples[props.data.samples.length - 1]),
+                    backgroundColor: hexToHue(samples[samples.length - 1]),
+                    color: hexToHue(samples[samples.length - 1]),
                   }}
                   className={styles.stat}
                 >X</p>
               </>
             ) : (
               <p className={styles.stat}>
-                {props.data.samples[props.data.samples.length - 1]}{props.data.user_model.unit}
+                {samples[samples.length - 1]}{data.unit}
               </p>
             )
           )}
         </div>
         <div>
           <img src={FontNumSamples} className={styles.statsHeading} />
-          <p className={styles.stat}>{props.data.samples.length}</p>
+          <p className={styles.stat}>{samples.length}</p>
         </div>
       </Box>
     </Box>);
@@ -516,22 +501,17 @@ const getKeyStats = (props) => {
 const TuringVizPanel = props => (
   <Box className={styles.body}>
     <Box className={styles.dataCol}>
-
       <Box className={styles.buttonRow}>
         {props.activeModels.map((modelName, index) => (
           <button
-            key={modelName}  // Add a unique key for each button
+            key={modelName}
             className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
-            onClick={() => props.activateModelDashboard(modelName, index)}
-          >
+            onClick={() => props.activateModelDashboard(modelName, index)}>
             {modelName}
           </button>
         ))}
       </Box>
-
-      <img src={FontDashboard} className={styles.dashboard} />
-      {console.log("INSIDE VIZ PANEL! Props are..")}
-      {console.log(props)}
+      <h1>Dashboard</h1>
       {getKeyStats(props)}
       {getPanel(props)}
     </Box>
@@ -551,19 +531,3 @@ TuringVizPanel.defaultProps = {
 export {
   TuringVizPanel as default,
 };
-
-
-{/* <Box className={styles.dataRow}> */ }
-{/* <Gaussian 
-                    name="Gaussian"
-                    data={props.data.distData}
-                    lines={props.data.distLines}
-                >
-                </Gaussian> */}
-
-{/* <MeanPlot 
-                    name="Gaussian"
-                    data={props.data.distData}
-                    lines={props.data.distLines}
-                >
-                </MeanPlot> */}

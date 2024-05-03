@@ -101,7 +101,6 @@ const TuringSelector = props => {
                             className={classNames(styles.listItem, {
                                 [styles.placeholder]: isRelevantDrag && index === draggingIndex
                             })}
-                            // dragPayload={item.dragPayload}
                             dragType={dragType}
                             id={index}
                             index={index}
@@ -112,7 +111,7 @@ const TuringSelector = props => {
                             onDeleteButtonClick={onDeleteClick}
                             data={props.data}
                             sample={sample}
-                            rhythmSample= {props.data.user_model.distribution == "rhythm" ? (props.data.user_model.rhythmData.rhythms[index]) : (0)}
+                            rhythmSample= {props.data.distribution == "rhythm" ? (props.data.plot.rdata.rhythms[index]) : (0)}
                             randomVarName={props.data.dataSpecs.randomVars[index]}
                         />
                     </SortableAsset>
@@ -135,7 +134,6 @@ TuringSelector.propTypes = {
     draggingType: PropTypes.oneOf(Object.keys(DragConstants)),
     isRtl: PropTypes.bool,
     data: PropTypes.object,
-    // samples: PropTypes.array,
     vm: PropTypes.instanceOf(VM),
     onAddSortable: PropTypes.func,
     onDeleteClick: PropTypes.func,
@@ -150,30 +148,3 @@ TuringSelector.propTypes = {
 };
 
 export default SortableHOC(TuringSelector); // make sortable at some point? TODO
-
-
-{/* <SortableAsset
-id={sample.name}
-index={isRelevantDrag ? ordering.indexOf(index) : index}
-key={sample.name}
-onAddSortable={onAddSortable}
-onRemoveSortable={onRemoveSortable}
->
-<TuringSelectorItem
-    asset={sample.asset}
-    className={classNames(styles.listItem, {
-        [styles.placeholder]: isRelevantDrag && index === draggingIndex
-    })}
-    costumeURL={sample.url}
-    details={sample.details}
-    dragPayload={sample.dragPayload}
-    dragType={dragType}
-    id={index}
-    index={index}
-    name={sample.name}
-    number={index + 1 /* 1-indexed */}
-//     selected={index === selectedItemIndex}
-//     onClick={onItemClick}
-//     onDeleteButtonClick={onDeleteClick}
-// />
-// </SortableAsset> */}
