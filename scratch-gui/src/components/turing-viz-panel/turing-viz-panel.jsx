@@ -357,13 +357,13 @@ const HueTooltip = ({ props }) => { // TTODO in progress.
   )
 }
 
-const Spinner = ({ data, key }) => {
+const Spinner = ({ data }) => {
   return (
     <>
       <PieChart width={500} height={500}>
         <Pie
           data={data}
-          dataKey={key}
+          dataKey={"value"}
           outerRadius={200}
           fill={data.fill} 
         />
@@ -400,7 +400,7 @@ const getRhythmPanel = (props) => {
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
-        <h1>Proportion of Hues</h1>
+        <h1>Proportion of Rhythms</h1>
         <Spinner data={plot.pie} key="proportion" />
       </Box>
 
@@ -422,7 +422,6 @@ const getRhythmPanel = (props) => {
           <Scatter name="Samples over Time" data={plot.timeline} fill={plot.timeline.fill} />
         </ScatterChart>
       </Box>
-      <Spinner data={plot.pie} key="proportion" />
       <BarChart width={800} height={300} data={plot.timeline}>
         <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
         <XAxis label="Timeline" />
