@@ -12,6 +12,23 @@
     width: 20px;
 }
 
+.hueSwatch {
+    width: 25px;
+    height: 25px;
+}
+
+.hexSwatch {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #373737;  /* Solid black border */
+    border-radius: 3px;
+}
+
+.hexBox {
+    width: 3em;
+    overflow-y: 'scroll';
+}
+
 
 #wheel {
     max-height: inherit;

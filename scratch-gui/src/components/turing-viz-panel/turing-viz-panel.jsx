@@ -375,13 +375,12 @@ const HueTooltip = ({ active, payload, label, props }) => {
     return (
       <div>
         {/* <p>{`${label}: ${payload[0].value}`}</p> */}
+        <div className={styles.hueBox}>
+          {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
+            <div className={styles.hueSwatch} style={{backgroundColor: hex}}/>
+          ))}
+        </div>
         <p>{`Hue: ${label}`}</p>
-        <div className={styles.hueSwatch}></div>
-        {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
-          <div>
-            {hex}
-          </div>
-        ))}
       </div>
     );
   }
