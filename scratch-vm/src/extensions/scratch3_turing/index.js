@@ -50,7 +50,7 @@ class Scratch3Turing {
          */
         this._runtime = runtime;
 
-        this.api_host = "http://127.0.0.1:8080"
+        this.api_host = "http://165.232.101.180:443"
 
         this._extensionId = 'turing'
 
@@ -302,6 +302,15 @@ class Scratch3Turing {
             name: 'Turing',
 
             blocks: [
+                {
+                    opcode: 'greet',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.greet',
+                        default: 'greet',
+                        description: 'turing.greet'
+                    })
+                },
                 {
                     opcode: 'viewModel',
                     blockType: BlockType.REPORTER,
