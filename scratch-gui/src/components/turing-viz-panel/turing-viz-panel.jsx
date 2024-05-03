@@ -402,7 +402,6 @@ const getRhythmPanel = (props) => {
       <Box className={styles.dataCol}>
         <h1>Proportion of Hues</h1>
         <Spinner data={plot.pie} key="proportion" />
-        {/* <img src={arrowIcon}/> */}
       </Box>
 
       <Box className={styles.dataCol}>
@@ -423,9 +422,7 @@ const getRhythmPanel = (props) => {
           <Scatter name="Samples over Time" data={plot.timeline} fill={plot.timeline.fill} />
         </ScatterChart>
       </Box>
-
-      <button id="spin-btn" onClick={() => randomRotate(".recharts-pie")}>Spin</button>
-      <RhythmPieChart data={plot.pie} key="proportion" />
+      <Spinner data={plot.pie} key="proportion" />
       <BarChart width={800} height={300} data={plot.timeline}>
         <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
         <XAxis label="Timeline" />

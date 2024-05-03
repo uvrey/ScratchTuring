@@ -144,7 +144,8 @@ TuringSelector.propTypes = {
     ordering: PropTypes.arrayOf(PropTypes.number),
     selectedItemIndex: PropTypes.number,
     items: PropTypes.array,
-    activeModels: PropTypes.array
+    activeModels: PropTypes.array,
+    onDrop: PropTypes.func,
 };
 
 export default SortableHOC(TuringSelector); // make sortable at some point? TODO

@@ -237,6 +237,10 @@ class TuringTab extends React.Component {
         }
     }
 
+    handleDrop() {
+        return
+    }
+
     getTuringCheckbox(props) {
         const [selectedKey, setSelectedKey] = useState(null); // Stores the selected key
 
@@ -320,6 +324,7 @@ class TuringTab extends React.Component {
                 selectedSampleIndex={this.state.selectedSampleIndex}
                 onDeleteClick={this.handleDeleteSample}
                 samples={this.getActiveModelSamples()}
+                onDrop={this.handleDrop()}
                 data={this.getActiveModelData()}
                 vm={this.props.vm}
                 onItemClick={this.handleSelectSample}
