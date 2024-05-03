@@ -20,6 +20,14 @@
     border-bottom-left-radius: $space;
 }
 
+.body {
+    background: $ui-white;
+    overflow-y: 'scroll';
+    align-items: center;
+    justify-content: center;
+}
+
+
 .detail-area {
     display: flex;
     flex-grow: 1;
@@ -44,39 +52,37 @@
 .key-stats {
     /* Outline */
     display: flex;
+    position: absolute;
+    bottom: 0;
     flex-direction: row;
     background-color: #ffffff;
-    outline: $looks-light-transparent;
+    border: 2px solid $looks-secondary;
     /* Drop shadow */
-    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
-    border-radius: 2em;
+    /* box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2); */
+    border-radius: 0.3em;
     /* Font color */
     color: black;
-    margin-left: 2em;
-    margin-top:1em;
-    margin-right: 2em;
     /* Padding */
-    padding-bottom: 1em;
-    padding-left: 5em;
-    padding-right: 5em;
+    padding-left: 4em;
+    padding-right: 4em;
+    align-items: center;
     justify-content: space-between;
-    /* align-items: center; */
     text-align: center;
     font-size: 1em;
     /* Width */
-    width: 100%
-  }
+    width: 70%;
+}
 
 
 
-  /* SLIDERS */
-  
+/* SLIDERS */
+
 .slider-value-background {
-    background-color: $looks-secondary; /* Add your desired background color */
-    padding: 2px; /* Add some padding around the text */
-    border-radius: 2px; /* Add a slight border radius for aesthetics */
-  }
-  
+    background-color: $looks-secondary;
+    padding: 2px;
+    border-radius: 2px;
+}
+
 /* Range */
 .slider-value {
     /* display: inline-block; */
@@ -87,7 +93,7 @@
     font-size: 0.8rem;
     text-align: center;
     color: #ffffff;
-    padding: 0.1em 0.1em 0.1em 0.5em;
+    padding: 0.1em 0.1em 0.1em 0.1em;
     margin-left: 0.6em;
 }
 
@@ -96,35 +102,35 @@
     max-width: 4.5em;
     /* Remove default browser styling (optional) */
     -webkit-appearance: none;
-  }
-  
-.long-lat { /* Default rule for all text inputs */
-    /* Set a minimum width to prevent excessive shrinking (optional) */
-    max-width: 6em; /* Adjust as needed */
-    /* Remove default browser styling (optional) */
+}
+
+.long-lat {
+    max-width: 8em;
     -webkit-appearance: none;
-  }
-  
+}
+
 
 input[type=range] {
     -webkit-appearance: none;
     width: 75%;
     margin-bottom: 1.5em;
-  }
+}
 
-  input[type=range]:focus {
+input[type=range]:focus {
     outline: none;
-  }
-  input[type=range]::-webkit-slider-runnable-track {
+}
+
+input[type=range]::-webkit-slider-runnable-track {
     width: 100%;
     height: 0.2em;
     cursor: pointer;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    background:  $looks-light-transparent;
+    background: $looks-light-transparent;
     border-radius: 25px;
     border: 0px solid #000101;
-  }
-  input[type=range]::-webkit-slider-thumb {
+}
+
+input[type=range]::-webkit-slider-thumb {
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
     border: 0px solid #000000;
     height: 30px;
@@ -134,20 +140,23 @@ input[type=range] {
     cursor: pointer;
     -webkit-appearance: none;
     margin-top: -3.6px;
-  }
-  input[type=range]:focus::-webkit-slider-runnable-track {
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
     background: $looks-light-transparent;
-  }
-  input[type=range]::-moz-range-track {
+}
+
+input[type=range]::-moz-range-track {
     width: 100%;
     height: 12.8px;
     cursor: pointer;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    background:  $looks-light-transparent;
+    background: $looks-light-transparent;
     border-radius: 25px;
     border: 0px solid #000101;
-  }
-  input[type=range]::-moz-range-thumb {
+}
+
+input[type=range]::-moz-range-thumb {
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
     border: 0px solid #000000;
     height: 30px;
@@ -155,8 +164,9 @@ input[type=range] {
     border-radius: 7px;
     background: $looks-secondary;
     cursor: pointer;
-  }
-  input[type=range]::-ms-track {
+}
+
+input[type=range]::-ms-track {
     width: 100%;
     height: 12.8px;
     cursor: pointer;
@@ -164,20 +174,23 @@ input[type=range] {
     border-color: transparent;
     border-width: 39px 0;
     color: transparent;
-  }
-  input[type=range]::-ms-fill-lower {
-    background:  $looks-light-transparent;
+}
+
+input[type=range]::-ms-fill-lower {
+    background: $looks-light-transparent;
     border: 0px solid #000101;
     border-radius: 50px;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-  }
-  input[type=range]::-ms-fill-upper {
-    background:  $looks-light-transparent;
+}
+
+input[type=range]::-ms-fill-upper {
+    background: $looks-light-transparent;
     border: 0px solid #000101;
     border-radius: 50px;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-  }
-  input[type=range]::-ms-thumb {
+}
+
+input[type=range]::-ms-thumb {
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
     border: 0px solid #000000;
     height: 30px;
@@ -185,35 +198,49 @@ input[type=range] {
     border-radius: 7px;
     background: $looks-secondary;
     cursor: pointer;
-  }
-  input[type=range]:focus::-ms-fill-lower {
-    background:  $looks-light-transparent;
-  }
-  input[type=range]:focus::-ms-fill-upper {
-    background:  $looks-light-transparent;
-  }
-  
-  #range-wrap {
+}
+
+input[type=range]:focus::-ms-fill-lower {
+    background: $looks-light-transparent;
+}
+
+input[type=range]:focus::-ms-fill-upper {
+    background: $looks-light-transparent;
+}
+
+#range-wrap {
     position: relative;
-  }
-  
+}
+
 input[type="range"] {
     margin-top: 1em;
 }
 
+.param-box {
+    background-color: white;
+    border: 2px solid $looks-secondary;
+    border-radius: 0.3em;
+    align-items: center;
+    flex-direction: column;
+    justify-content: left;
+    text-align: center;
+    margin-top:1em;
+    width:25em;
+}
+
+
 .gaussian-button {
     padding: 0.75rem 0.75rem;
-    border-radius: 0.5rem;
+    border-radius: 0.8rem;
     background: $looks-secondary;
     color: white;
-    font-weight: 600;
+    /* font-weight: 600; */
     font-size: 0.85rem;
-    margin: 0.25rem;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    height: 3rem;
+    height: 2rem;
     margin: 0.25rem 1rem;
 
     &:hover {
@@ -245,7 +272,7 @@ input[type="range"] {
     border-radius: 0.6rem;
     background-color: $looks-secondary;
     color: white;
-    font-weight: 600;
+    /* font-weight: 600; */
     font-size: 0.85rem;
     margin: 0.25rem;
     border: none;
@@ -254,18 +281,39 @@ input[type="range"] {
     align-items: center;
     height: 3rem;
     margin: 0.25rem 1rem;
-  
+
     &:hover {
-      box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+        box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
     }
-  }
-  
-  .active-button {
+}
+
+[dir="ltr"] .button-icon-right {
+    margin-left: 0.5rem;
+}
+
+[dir="rtl"] .button-icon-right {
+    margin-right: 0.5rem;
+}
+
+[dir="ltr"] .button-icon-left {
+    margin-right: 0.5rem;
+}
+
+[dir="rtl"] .button-icon-left {
+    margin-left: 0.5rem;
+}
+
+/* reverse back arrow icon for RTL, don't reverse other connection icons */
+[dir="rtl"] .button-icon-back {
+    transform: scaleX(-1);
+}
+
+.active-button {
     padding: 1rem;
     border-radius: 0.6rem;
     background-color: #ffffff;
     color: $looks-secondary;
-    font-weight: 600;
+    /* font-weight: 600; */
     font-size: 0.85rem;
     margin: 0.25rem;
     border: none;
@@ -274,12 +322,12 @@ input[type="range"] {
     align-items: center;
     height: 3rem;
     margin: 0.25rem 1rem;
-    
-  
+
+
     &:hover {
-      box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+        box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
     }
-  }
+}
 
 
 
@@ -290,16 +338,16 @@ input[type="range"] {
     background-color: $looks-secondary;
     padding: 0.4em;
 }
-  
+
 .data-row {
-    width:100%;
+    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: bottom;
 }
 
 .chart-element {
-    margin-right:1em;
+    margin-right: 1em;
 }
 
 .samples-area {
@@ -310,5 +358,5 @@ input[type="range"] {
 .data-col {
     padding: 1em;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
 }

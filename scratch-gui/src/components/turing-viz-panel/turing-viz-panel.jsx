@@ -152,9 +152,8 @@ const getParameterLabels = (props) => {
       return (
         <div>
           <Box className={styles.paramBox}>
-            <h3>Ground Truth</h3>
+            <h4>True Distribution</h4>
             <Box className={styles.sliderBox}>
-              <h4><b>mean (μ)</b></h4>
               <input
                 type="range"
                 id={formatId(active, "customParams_mu")}
@@ -182,7 +181,6 @@ const getParameterLabels = (props) => {
               />
             </Box>
             <Box className={styles.sliderBox}>
-              <h4><b>stdv (σ)</b></h4>
               <input
                 type="range"
                 id={formatId(active, "customParams_stdv")}
@@ -215,11 +213,12 @@ const getParameterLabels = (props) => {
                 className={styles.gaussianButton}
                 onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
               >
-                <FormattedMessage
+                <h4>Update</h4>
+                {/* <FormattedMessage
                   defaultMessage="Update Ground Truth"
                   description="Button in prompt for starting a search"
                   id="gui.mapModal.groundTruth"
-                />
+                /> */}
                 <img
                   className={styles.buttonIconRight}
                 // src={surpriseIcon}
@@ -229,10 +228,8 @@ const getParameterLabels = (props) => {
           </Box>
 
           <Box className={styles.paramBox}>
-            <h3>Prior</h3>
+            <h4>Expected Distribution</h4>
             <Box className={styles.sliderBox}>
-
-              <h4><b>mean (μ)</b></h4>
               <input
                 type="range"
                 id={formatId(active, "priorParams_mu")}
@@ -260,7 +257,6 @@ const getParameterLabels = (props) => {
               />
             </Box>
             <Box className={styles.sliderBox}>
-              <h4><b>stdv (σ)</b></h4>
               <input
                 type="range"
                 id={formatId(active, "priorParams_stdv")}
@@ -292,11 +288,12 @@ const getParameterLabels = (props) => {
                 className={styles.gaussianButton}
                 onClick={() => props.updateChart(active, props.vm, props.updatePrior, 'prior')}
               >
-                <FormattedMessage
+                <h4>Update</h4>
+                {/* <FormattedMessage
                   defaultMessage="Update Belief"
                   description="Button in prompt for starting a search"
                   id="gui.vizPanel.updateBelief"
-                />
+                /> */}
                 <img
                   className={styles.buttonIconRight}
                 // src={compassIcon}
@@ -306,10 +303,10 @@ const getParameterLabels = (props) => {
           </Box>
         </div>
       ); // Use PascalCase for model names
-    case 'color':
-      return (<div>Hue: <h1>λ</h1></div>)
-    case 'rhythm':
-      return (<div>Rhythm: <h1>n</h1><h1>p</h1></div>)
+    // case 'color':
+    //   return (<div>Hue: <h1>λ</h1></div>)
+    // case 'rhythm':
+    //   return (<div>Rhythm: <h1>n</h1><h1>p</h1></div>)
     default:
       return (<h1>Unknown distribution</h1>);
   }
@@ -391,17 +388,17 @@ const getHuePanel = (props) => {
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
-        <h1>Proportion of Hues</h1>
+        <h4>Proportion of Hues</h4>
         <Spinner data={plot.pie} key="freq" />
       </Box>
       <Box className={styles.dataCol}>
-        <h1>Hue Distribution</h1>
-        <BarChart width={800} height={400} data={plot.histogram}>
+        <h4>Hue Distribution</h4>
+        {/* <BarChart width={800} height={400} data={plot.histogram}>
           <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
           <XAxis label="Hue" tick={<CustomHue />} />
           <YAxis dots={false} yAxis={-5} />
           < Tooltip content={<HueTooltip props={props} />} />
-        </BarChart>
+        </BarChart> */}
       </Box>
     </Box>
   );
@@ -412,12 +409,12 @@ const getRhythmPanel = (props) => {
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
-        <h1>Proportion of Rhythms</h1>
+        <h4>Proportion of Rhythms</h4>
         <Spinner data={plot.pie} key="proportion" />
       </Box>
 
       <Box className={styles.dataCol}>
-        <h1> Rhythm Samples</h1>
+        <h4> Rhythm Samples</h4>
         {/* <ScatterChart
           width={400}
           height={300}
@@ -495,15 +492,15 @@ const getKeyStats = (props) => {
   const data = props.data
   const samples = props.data.samples
   return (
-    <Box className={styles.dataRow}>
+    // <Box className={styles.dataRow}>
       <Box className={styles.keyStats}>
         <div>
-          <h2>Model</h2>
+          <h4>Model</h4>
           {/* <img src={FontType} className={styles.statsHeading} /> */}
           <div><p className={styles.stat}>{data.modelName}</p></div>
         </div>
         <div>
-          <h2>Current Observation</h2>
+          <h4>Current Observation</h4>
           {/* <img src={FontCurrentSample} className={styles.statsHeading} /> */}
           {samples.length === 0 ? (
             <p className={styles.stat}>none</p>
@@ -535,12 +532,12 @@ const getKeyStats = (props) => {
           )}
         </div>
         <div>
-          <h2>Number of Observations</h2>
-          {/* <img src={FontNumSamples} className={styles.statsHeading} /> */}
+          <h4>How many observations?</h4>
           <p className={styles.stat}>{samples.length}</p>
         </div>
       </Box>
-    </Box>);
+    // </Box>
+  );
 }
 const TuringVizPanel = props => (
   <Box className={styles.body}>
@@ -550,15 +547,14 @@ const TuringVizPanel = props => (
           key={modelName}
           className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
           onClick={() => props.activateModelDashboard(modelName, index)}>
-          {modelName}
+          <h4>{modelName}</h4>
         </button>
       ))}
     </Box>
     <Box className={styles.vizPanel}>
       <Box className={styles.dataCol}>
-        {/* <h1>Dashboard</h1> */}
-        {getKeyStats(props)}
         {getPanel(props)}
+        {getKeyStats(props)}
       </Box>
     </Box>
   </Box>
