@@ -168,7 +168,6 @@ const mapStateToProps = state => {
         soundsTabVisible: state.scratchGui.editorTab.activeTabIndex === SOUNDS_TAB_INDEX,
         turingTabVisible: state.scratchGui.editorTab.activeTabIndex === TURING_TAB_INDEX,
         turingExtensionActive: state.scratchGui.turingData.turingActive,
-        turingDataState: state.scratchGui.turingData.turingActive,
         targetIsStage: (
             state.scratchGui.targets.stage &&
             state.scratchGui.targets.stage.id === state.scratchGui.targets.editingTarget

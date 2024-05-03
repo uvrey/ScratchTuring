@@ -246,7 +246,7 @@ const alerts = [
         clearList: [],
         content: (
             <FormattedMessage
-                defaultMessage="Fetching model from Turing..."
+                defaultMessage="Fetching data from Turing..."
                 description="Message indicating that data is in process of being fetched from Turing"
                 id="gui.alerts.fetchingTuring"
             />

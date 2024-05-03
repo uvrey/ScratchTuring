@@ -33,7 +33,6 @@
 
 [dir="rtl"] .detail-area {
     border-right: 1px solid $ui-black-transparent;
-
 }
   
 .data-row {
@@ -68,4 +67,3 @@
     font-size: 0.875rem;
     cursor: pointer;
 }
-

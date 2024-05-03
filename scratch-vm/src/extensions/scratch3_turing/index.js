@@ -50,7 +50,7 @@ class Scratch3Turing {
          */
         this._runtime = runtime;
 
-        this.api_host = "http://165.232.101.180:8055"
+        this.api_host = "http://165.232.101.180:443"
 
         this._extensionId = 'turing'
 
@@ -302,6 +302,15 @@ class Scratch3Turing {
             name: 'Turing',
 
             blocks: [
+                {
+                    opcode: 'greet',
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: 'turing.greet',
+                        default: 'greet',
+                        description: 'turing.greet'
+                    })
+                },
                 {
                     opcode: 'viewModel',
                     blockType: BlockType.REPORTER,
@@ -1115,6 +1124,25 @@ class Scratch3Turing {
         const hsv = { h: hue, s: 100, v: 100 }
         return Color.rgbToHex(Color.hsvToRgb(hsv))
     }
+
+    // mapToPieChartData(user_model) {
+    //     // Initialize pie chart data
+    //     const pieChartData = [];
+
+    //     // Loop through color ranges
+    //     console.log("HUES?? !!!!!!!!!!!!!!!!!")
+    //     console.log(user_model.hueData.hue)
+
+    //     for (var i; i < user_model.hueData.hue.length; i++) {
+    //         var freq = user_model.hueData.hue[i]
+    //         var color = this.hueToHex(i)
+    //         pieChartData.push({ name: i, freq: freq, fill: color});
+    //     }
+
+    //     console.log("Format of PIE CHART DATA!!!")
+    //     console.log(pieChartData)
+    //     return pieChartData;
+    // }
 
     _getRhythmTimelineData(user_model) {
         var data = []

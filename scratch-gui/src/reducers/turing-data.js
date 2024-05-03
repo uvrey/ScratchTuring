@@ -9,6 +9,16 @@ const initialState = {
   turingActive: false // TODO set this to false and then trigger when extension opens
 };
 
+// data: {
+//     state: {}, // type of problem (ie. time taken, proportion, likelihood - affects visualisations)
+//     samples: [], // updates the samples list for testing
+//     barData: [], // plots bar chart data
+//     distData: [], // plots normal distribution
+//     distLines: [],
+//     domain: [-1,1],
+//     mode: '', // HUE or NUMERIC
+// },
+
 const reducer = function (state, action) {
   if (typeof state === 'undefined') state = initialState;
   switch (action.type) {
@@ -61,4 +71,3 @@ export {
   setTuringActive,
   setTuringDataState
 };
-
