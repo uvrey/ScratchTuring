@@ -351,12 +351,6 @@ function getColorRange(hue) {
   return null; // Use null instead of None in JavaScript
 }
 
-const HueTooltip = ({ props }) => { // TTODO in progress. 
-  return (
-    <Tooltip />
-  )
-}
-
 const Spinner = ({ data }) => {
   return (
     <>
@@ -374,6 +368,25 @@ const Spinner = ({ data }) => {
   );
 };
 
+const HueTooltip = ({ active, payload, label, props }) => {
+  console.log("PROPS?")
+  console.log(props)
+  if (active && payload && payload.length) { // Check if tooltip is active and has data
+    return (
+      <div>
+        {/* <p>{`${label}: ${payload[0].value}`}</p> */}
+        <p>{`Hue: ${label}`}</p>
+        <div className={styles.hueSwatch}></div>
+        {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
+          <div>
+            {hex}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 const getHuePanel = (props) => {
   const plot = props.data.plot
   return (
@@ -388,8 +401,8 @@ const getHuePanel = (props) => {
           <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
           <XAxis label="Hue" tick={<CustomHue />} />
           <YAxis dots={false} yAxis={-5} />
+          < Tooltip content={<HueTooltip props={props} />} />
         </BarChart>
-        < Tooltip />
       </Box>
     </Box>
   );
