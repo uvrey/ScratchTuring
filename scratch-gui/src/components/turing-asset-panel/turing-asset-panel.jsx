@@ -8,15 +8,13 @@ import { FormattedMessage } from 'react-intl';
 const TuringAssetPanel = props => (
 
     <Box className={styles.wrapper}>
-        <Box className={styles.wrapper}>
-            <TuringSelector
-                className={styles.selector}
-                modelName={props.activeModels[props.activeModelIndex]}
-                {...props}
-            />
-            <Box className={styles.detailArea}>
-                {props.children}
-            </Box>
+        <TuringSelector
+            className={styles.selector}
+            modelName={props.activeModels[props.activeModelIndex]}
+            {...props}
+        />
+        <Box className={styles.detailArea}>
+            {props.children}
         </Box>
     </Box>
 );

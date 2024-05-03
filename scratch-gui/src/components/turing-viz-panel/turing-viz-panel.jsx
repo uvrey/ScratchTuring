@@ -96,8 +96,8 @@ const getGaussianPanel = (props) => {
     <Box className={styles.dataRow}>
       {getParameterLabels(props)}
       <Box className={styles.dataCol}>
-        <img src={FontDist} className={styles.visHeading} />
-        <LineChart width={900} height={600} data={plot.gaussian}>
+        {/* <img src={FontDist} className={styles.visHeading} /> */}
+        {/* <LineChart width={900} height={600} data={plot.gaussian}>
           <XAxis
             allowDecimals={false}
             dataKey="input"
@@ -121,7 +121,7 @@ const getGaussianPanel = (props) => {
           <ReferenceLine x={0} label={CustomLabel} />
           <Legend />
           <Tooltip />
-        </LineChart>
+        </LineChart> */}
       </Box>
       <ScatterChart
         width={400}
@@ -210,9 +210,9 @@ const getParameterLabels = (props) => {
               />
             </Box>
 
-            <Box className={styles.buttonRow}>
+            <Box className={styles.gaussianButtonRow}>
               <button
-                className={styles.mapOptionsButton}
+                className={styles.gaussianButton}
                 onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
               >
                 <FormattedMessage
@@ -287,9 +287,9 @@ const getParameterLabels = (props) => {
                 }}
               />
             </Box>
-            <Box className={styles.buttonRow}>
+            <Box className={styles.gaussianButtonRow}>
               <button
-                className={styles.mapOptionsButton}
+                className={styles.gaussianButton}
                 onClick={() => props.updateChart(active, props.vm, props.updatePrior, 'prior')}
               >
                 <FormattedMessage
@@ -377,7 +377,7 @@ const HueTooltip = ({ active, payload, label, props }) => {
         {/* <p>{`${label}: ${payload[0].value}`}</p> */}
         <div className={styles.hueBox}>
           {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
-            <div className={styles.hueSwatch} style={{backgroundColor: hex}}/>
+            <div className={styles.hueSwatch} style={{ backgroundColor: hex }} />
           ))}
         </div>
         <p>{`Hue: ${label}`}</p>
@@ -498,11 +498,13 @@ const getKeyStats = (props) => {
     <Box className={styles.dataRow}>
       <Box className={styles.keyStats}>
         <div>
-          <img src={FontType} className={styles.statsHeading} />
+          <h2>Model</h2>
+          {/* <img src={FontType} className={styles.statsHeading} /> */}
           <div><p className={styles.stat}>{data.modelName}</p></div>
         </div>
         <div>
-          <img src={FontCurrentSample} className={styles.statsHeading} />
+          <h2>Current Observation</h2>
+          {/* <img src={FontCurrentSample} className={styles.statsHeading} /> */}
           {samples.length === 0 ? (
             <p className={styles.stat}>none</p>
           ) : (
@@ -533,7 +535,8 @@ const getKeyStats = (props) => {
           )}
         </div>
         <div>
-          <img src={FontNumSamples} className={styles.statsHeading} />
+          <h2>Number of Observations</h2>
+          {/* <img src={FontNumSamples} className={styles.statsHeading} /> */}
           <p className={styles.stat}>{samples.length}</p>
         </div>
       </Box>
@@ -541,20 +544,22 @@ const getKeyStats = (props) => {
 }
 const TuringVizPanel = props => (
   <Box className={styles.body}>
-    <Box className={styles.dataCol}>
-      <Box className={styles.buttonRow}>
-        {props.activeModels.map((modelName, index) => (
-          <button
-            key={modelName}
-            className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
-            onClick={() => props.activateModelDashboard(modelName, index)}>
-            {modelName}
-          </button>
-        ))}
+    <Box className={styles.buttonRow}>
+      {props.activeModels.map((modelName, index) => (
+        <button
+          key={modelName}
+          className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
+          onClick={() => props.activateModelDashboard(modelName, index)}>
+          {modelName}
+        </button>
+      ))}
+    </Box>
+    <Box className={styles.vizPanel}>
+      <Box className={styles.dataCol}>
+        {/* <h1>Dashboard</h1> */}
+        {getKeyStats(props)}
+        {getPanel(props)}
       </Box>
-      <h1>Dashboard</h1>
-      {getKeyStats(props)}
-      {getPanel(props)}
     </Box>
   </Box>
 );
