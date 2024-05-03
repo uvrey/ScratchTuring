@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -365,7 +365,7 @@ const Spinner = ({ data }) => {
           data={data}
           dataKey={"value"}
           outerRadius={200}
-          fill={data.fill} 
+          fill={data.fill}
         />
         <Tooltip />
       </PieChart>
@@ -406,7 +406,7 @@ const getRhythmPanel = (props) => {
 
       <Box className={styles.dataCol}>
         <h1> Rhythm Samples</h1>
-        <ScatterChart
+        {/* <ScatterChart
           width={400}
           height={300}
           margin={{
@@ -420,22 +420,55 @@ const getRhythmPanel = (props) => {
           <YAxis type="number" dataKey="y" name="value" unit="" />
           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
           <Scatter name="Samples over Time" data={plot.timeline} fill={plot.timeline.fill} />
-        </ScatterChart>
+        </ScatterChart> */}
+
+
+        {/* <ScatterChart
+          margin={{
+            top: 10,
+            right: 0,
+            bottom: 0,
+            left: 0,
+          }}
+        >
+          <XAxis
+            type="category"
+            dataKey="value"
+            interval={0}
+            tick={{ fontSize: 0 }}
+            tickLine={{ transform: 'translate(0, -6)' }}
+          />
+          <YAxis
+            type="number"
+            dataKey="index"
+            name="RT"
+            height={10}
+            width={80}
+            tick={false}
+            tickLine={false}
+            axisLine={false}
+            label={{ value: 'RHYTHMTYPE', position: 'insideRight' }}
+          />
+          <ZAxis type="number" dataKey="value" />
+          <Tooltip cursor={{ strokeDasharray: '3 3' }} wrapperStyle={{ zIndex: 100 }} />
+          <Scatter data={plot.timeline} fill="#8884d8" />
+        </ScatterChart> */}
+
       </Box>
-      <BarChart width={800} height={300} data={plot.timeline}>
+      {/* <BarChart width={800} height={300} data={plot.timeline}>
         <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
         <XAxis label="Timeline" />
         <YAxis dots={false} yAxis={-5} />
-      </BarChart>
+      </BarChart> */}
       {/* <RhythmTimeline /> */}
     </Box>
   );
 };
 
 const getPanel = (props) => {
-  {console.log("Deciding which panel to choose:")}
-  {console.log(props.data)}
-  {console.log(props.data.distribution)}
+  { console.log("Deciding which panel to choose:") }
+  { console.log(props.data) }
+  { console.log(props.data.distribution) }
   switch (props.data.distribution) {
     case 'gaussian':
       return getGaussianPanel(props)
