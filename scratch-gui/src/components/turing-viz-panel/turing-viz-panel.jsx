@@ -97,13 +97,24 @@ const GaussianTooltip = ({ active, payload, label }) => {
       <div className={styles.gaussianTooltip}>
         <p>
           {`Odds of ${label.toFixed(2)} are `}
-          <b style={{color: "#9966FF"}} className={styles.odds}>{`${(100 * payload[0].value).toFixed(3)}%`}</b>
+          <b style={{ color: "#9966FF" }} className={styles.odds}>{`${(100 * payload[0].value).toFixed(3)}%`}</b>
         </p>
       </div>
     );
   }
   return null;
 }
+
+const GaussianLegend = ({ payload, plot }) => (
+  <div style={{ justifyContent: "center" }}>
+    <h4 style={{ marginBottom: "3px", fontSize: "0.8rem" }}>KEY</h4>
+    {/* {console.log("GAUSSIAN LEGEND PAYLOAD?")}
+    {console.log(payload)} */}
+    {payload.map((item) => (
+      item.dataKey.includes("ps") ? (null) : (<b style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
+    ))}
+  </div>
+);
 
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
@@ -129,20 +140,19 @@ const getGaussianPanel = (props) => {
               {console.log(plot.activeDistributions)}
               {plot.activeDistributions.map((key) => (
                 <Line
-                  key={plot.styles[key].chartName}
+                  key={key.includes("ps") ? plot.styles['ps-options'].chartName : plot.styles[key].chartName}
                   dataKey={key}
                   type="monotone"
-                  stroke={plot.styles[key].stroke}
-                  dot={plot.styles[key].dots}
+                  stroke={key.includes("ps") ? plot.styles['ps-options'].stroke : plot.styles[key].stroke}
+                  dot={key.includes("ps") ? plot.styles['ps-options'].dots : plot.styles[key].dots}
                   isAnimationActive={true}
-                  strokeWidth={plot.styles[key].strokeWidth}
+                  strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth}
                   // Apply strokeDasharray conditionally based on the key
-                  strokeDasharray={key === "posterior" ? plot.styles[key].strokeDasharray : null}
+                  strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
                 />
-
               ))}
               <ReferenceLine x={0} label={CustomLabel} />
-              <Legend />
+              <Legend content={<GaussianLegend plot={plot} />} />
               <Tooltip content={<GaussianTooltip />} />
             </LineChart>
           </ResponsiveContainer>

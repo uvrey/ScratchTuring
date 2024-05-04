@@ -78,10 +78,6 @@
     font-size: 0.8rem;
   }
 
-.odds b {
-    color: "#9966FF"
-}
-
 .key-stats {
     /* Outline */
     display: flex;
