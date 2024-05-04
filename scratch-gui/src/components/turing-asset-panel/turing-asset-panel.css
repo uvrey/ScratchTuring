@@ -27,6 +27,7 @@
     /* overflow: visible; */
     overflow-y: scroll;
     flex-direction: column;
+    background-color: #f6f6f6;
 }
 
 [dir="ltr"] .detail-area {

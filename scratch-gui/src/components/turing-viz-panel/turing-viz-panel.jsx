@@ -20,6 +20,7 @@ import Color from './color.js'
 
 /** CREDIT THIS CODE **/
 import gsap from "gsap";
+import { style } from 'scratch-storage';
 
 
 const randomNumber = (min, max) =>
@@ -90,6 +91,17 @@ const formatId = (modelName, label) => {
   return modelName + "_" + label
 }
 
+const GaussianTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) { // Check if tooltip is active and has data
+    return (
+      <div>
+        <p>{`${label}: ${payload[0].value}`}</p>
+      </div>
+    );
+  }
+  return null;
+}
+
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
   return (
@@ -97,33 +109,44 @@ const getGaussianPanel = (props) => {
       {getParameterLabels(props)}
       <Box className={styles.dataCol}>
         {/* <img src={FontDist} className={styles.visHeading} /> */}
-        {/* <LineChart width={900} height={600} data={plot.gaussian}>
-          <XAxis
-            allowDecimals={false}
-            dataKey="input"
-            type="number"
-            tick={CustomLabel}
-          />
-          <YAxis allowDecimals={true} />
-          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-          {props.docTags}
-          {plot.activeDistributions.map((key) => (
-            <Line
-              key={plot.styles[key].chartName}
-              dataKey={key}
-              type="monotone"
-              stroke={plot.styles[key].stroke}
-              dot={plot.styles[key].dots}
-              isAnimationActive={true}
-              strokeWidth={plot.styles[key].strokeWidth}
-            />
-          ))}
-          <ReferenceLine x={0} label={CustomLabel} />
-          <Legend />
-          <Tooltip />
-        </LineChart> */}
+        <Box className={styles.chartBox}>
+          <h3>Distributions</h3>
+          <ResponsiveContainer width={'90%'} aspect={1.5}>
+            <LineChart width={900} height={600} data={plot.gaussian}>
+              <XAxis
+                allowDecimals={false}
+                dataKey="input"
+                type="number"
+              // tick={CustomLabel}
+              />
+              <YAxis allowDecimals={true} />
+              <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+              {props.docTags}
+              {console.log("Getting plot styles from data:")}
+              {console.log(plot.activeDistributions)}
+              {plot.activeDistributions.map((key) => (
+                <Line
+                  key={plot.styles[key].chartName}
+                  dataKey={key}
+                  type="monotone"
+                  stroke={plot.styles[key].stroke}
+                  dot={plot.styles[key].dots}
+                  isAnimationActive={true}
+                  strokeWidth={plot.styles[key].strokeWidth}
+                  // Apply strokeDasharray conditionally based on the key
+                  strokeDasharray={key === "posterior" ? plot.styles[key].strokeDasharray : null}
+                />
+
+              ))}
+              <ReferenceLine x={0} label={CustomLabel} />
+              <Legend />
+              <Tooltip content={<GaussianTooltip />} />
+            </LineChart>
+          </ResponsiveContainer>
+        </Box>
+
       </Box>
-      <ScatterChart
+      {/* <ScatterChart
         width={400}
         height={300}
         margin={{
@@ -138,7 +161,7 @@ const getGaussianPanel = (props) => {
         <YAxis type="number" dataKey="y" name="value" unit="" />
         <Tooltip cursor={{ strokeDasharray: '3 3' }} />
         <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
-      </ScatterChart>
+      </ScatterChart> */}
       <Box>
       </Box>
     </Box>
@@ -150,28 +173,18 @@ const getParameterLabels = (props) => {
   switch (props.data.distribution) {
     case 'gaussian':
       return (
-        <div>
+        <div className={styles.params}>
           <Box className={styles.paramBox}>
             <h4>True Distribution</h4>
-            <Box className={styles.sliderBox}>
-              <input
-                type="range"
-                id={formatId(active, "customParams_mu")}
-                min="0"
-                max="100"
-                step="0.05"
-                defaultValue={props.getValue(formatId(active, "customParams_mu"), 0.1119)}
-                onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(active, "customParamsValue_mu")).value = newValue;
-                }}
-              />
+            <Box className={styles.sbuttonRow}>
+              mean
               <input
                 type="text"
                 id={formatId(active, "customParamsValue_mu")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(active, "customParams_mu"), 14.25)} // Set initial value
+                defaultValue={0} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+                style={{ color: "#45BDE5" }}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
@@ -180,24 +193,14 @@ const getParameterLabels = (props) => {
                 }}
               />
             </Box>
-            <Box className={styles.sliderBox}>
-              <input
-                type="range"
-                id={formatId(active, "customParams_stdv")}
-                min="0"
-                max="100"
-                step="0.05"
-                defaultValue={props.getValue(formatId(active, "customParams_stdv"), 0.1119)}
-                onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(active, "customParamsValue_stdv")).value = newValue;
-                }}
-              />
+            <Box className={styles.sbuttonRow}>
+              stdv
               <input
                 type="text"
                 id={formatId(active, "customParamsValue_stdv")}
+                style={{ color: "#45BDE5" }}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(active, "customParams_stdv"), 14.25)} // Set initial value
+                defaultValue={1} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
@@ -211,14 +214,10 @@ const getParameterLabels = (props) => {
             <Box className={styles.gaussianButtonRow}>
               <button
                 className={styles.gaussianButton}
+                style={{ backgroundColor: "#45BDE5" }}
                 onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
               >
                 <h4>Update</h4>
-                {/* <FormattedMessage
-                  defaultMessage="Update Ground Truth"
-                  description="Button in prompt for starting a search"
-                  id="gui.mapModal.groundTruth"
-                /> */}
                 <img
                   className={styles.buttonIconRight}
                 // src={surpriseIcon}
@@ -229,24 +228,14 @@ const getParameterLabels = (props) => {
 
           <Box className={styles.paramBox}>
             <h4>Expected Distribution</h4>
-            <Box className={styles.sliderBox}>
-              <input
-                type="range"
-                id={formatId(active, "priorParams_mu")}
-                min="0"
-                max="100"
-                step="0.05"
-                defaultValue={props.getValue(formatId(active, "priorParams_mu"), 0.1119)}
-                onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(active, "priorParamsValue_mu")).value = newValue;
-                }}
-              />
+            <Box className={styles.sbuttonRow}>
+              mean
               <input
                 type="text"
                 id={formatId(active, "priorParamsValue_mu")}
+                defaultValue={0}
+                style={{ color: "#FFAB1A" }}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(active, "priorParams_mu"), 14.25)} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
@@ -256,24 +245,14 @@ const getParameterLabels = (props) => {
                 }}
               />
             </Box>
-            <Box className={styles.sliderBox}>
-              <input
-                type="range"
-                id={formatId(active, "priorParams_stdv")}
-                min="0"
-                max="100"
-                step="0.05"
-                defaultValue={props.getValue(formatId(active, "priorParams_stdv"), 0.1119)}
-                onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(active, "priorParamsValue_stdv")).value = newValue;
-                }}
-              />
+            <Box className={styles.sbuttonRow}>
+              stdv
               <input
                 type="text"
                 id={formatId(active, "priorParamsValue_stdv")}
+                style={{ color: "#FFAB1A" }}
+                defaultValue={1}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(formatId(active, "priorParams_stdv"), 14.25)} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
@@ -286,6 +265,7 @@ const getParameterLabels = (props) => {
             <Box className={styles.gaussianButtonRow}>
               <button
                 className={styles.gaussianButton}
+                style={{ backgroundColor: "#FFAB1A" }}
                 onClick={() => props.updateChart(active, props.vm, props.updatePrior, 'prior')}
               >
                 <h4>Update</h4>
@@ -393,12 +373,14 @@ const getHuePanel = (props) => {
       </Box>
       <Box className={styles.dataCol}>
         <h4>Hue Distribution</h4>
-        {/* <BarChart width={800} height={400} data={plot.histogram}>
-          <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
-          <XAxis label="Hue" tick={<CustomHue />} />
-          <YAxis dots={false} yAxis={-5} />
-          < Tooltip content={<HueTooltip props={props} />} />
-        </BarChart> */}
+        <ResponsiveContainer width={"100%"} aspect={1}>
+          <BarChart width={800} height={400} data={plot.histogram}>
+            <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
+            <XAxis label="Hue" tick={<CustomHue />} />
+            <YAxis dots={false} yAxis={-5} />
+            < Tooltip content={<HueTooltip props={props} />} />
+          </BarChart>
+        </ResponsiveContainer>
       </Box>
     </Box>
   );
@@ -493,49 +475,49 @@ const getKeyStats = (props) => {
   const samples = props.data.samples
   return (
     // <Box className={styles.dataRow}>
-      <Box className={styles.keyStats}>
-        <div>
-          <h4>Model</h4>
-          {/* <img src={FontType} className={styles.statsHeading} /> */}
-          <div><p className={styles.stat}>{data.modelName}</p></div>
-        </div>
-        <div>
-          <h4>Current Observation</h4>
-          {/* <img src={FontCurrentSample} className={styles.statsHeading} /> */}
-          {samples.length === 0 ? (
-            <p className={styles.stat}>none</p>
-          ) : (
-            data.distribution === "hue" ? (
-              <>
-                <p
-                  style={{
-                    backgroundColor: samples[samples.length - 1],
-                    color: samples[samples.length - 1],
-                  }}
-                  className={styles.stat}
-                >X
-                </p>
-                <b>Converted to a hue: </b>
-                <p
-                  style={{
-                    backgroundColor: hexToHue(samples[samples.length - 1]),
-                    color: hexToHue(samples[samples.length - 1]),
-                  }}
-                  className={styles.stat}
-                >X</p>
-              </>
-            ) : (
-              <p className={styles.stat}>
-                {samples[samples.length - 1]}{data.unit}
+    <Box className={styles.keyStats}>
+      <div>
+        <h4>Model</h4>
+        {/* <img src={FontType} className={styles.statsHeading} /> */}
+        <div><p className={styles.stat}>{data.modelName}</p></div>
+      </div>
+      <div>
+        <h4>Current Observation</h4>
+        {/* <img src={FontCurrentSample} className={styles.statsHeading} /> */}
+        {samples.length === 0 ? (
+          <p className={styles.stat}>none</p>
+        ) : (
+          data.distribution === "hue" ? (
+            <>
+              <p
+                style={{
+                  backgroundColor: samples[samples.length - 1],
+                  color: samples[samples.length - 1],
+                }}
+                className={styles.stat}
+              >X
               </p>
-            )
-          )}
-        </div>
-        <div>
-          <h4>How many observations?</h4>
-          <p className={styles.stat}>{samples.length}</p>
-        </div>
-      </Box>
+              <b>Converted to a hue: </b>
+              <p
+                style={{
+                  backgroundColor: hexToHue(samples[samples.length - 1]),
+                  color: hexToHue(samples[samples.length - 1]),
+                }}
+                className={styles.stat}
+              >X</p>
+            </>
+          ) : (
+            <p className={styles.stat}>
+              {samples[samples.length - 1]}{data.unit}
+            </p>
+          )
+        )}
+      </div>
+      <div>
+        <h4>How many observations?</h4>
+        <p className={styles.stat}>{samples.length}</p>
+      </div>
+    </Box>
     // </Box>
   );
 }

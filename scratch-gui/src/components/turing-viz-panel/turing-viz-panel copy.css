@@ -390,7 +390,7 @@ input[type="range"] {
     border-radius: 0.5rem;
     background-color: #737373;
     color: white;
-    font-weight: 600;
+    /* font-weight: 600; */
     font-size: 0.85rem;
     margin: 0.25rem;
     border: none;

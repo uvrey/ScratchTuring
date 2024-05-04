@@ -5,9 +5,10 @@
     display: flex;
     flex-grow: 1;
     border: 1px solid $ui-black-transparent;
-    background: white;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 0.85rem;
+    align-items: center;
+    justify-content: center;
 }
 
 [dir="ltr"] .wrapper {
@@ -21,15 +22,32 @@
 }
 
 .body {
-    background: $ui-white;
+    background: #f6f6f6;
     overflow-y: 'scroll';
     align-items: center;
     justify-content: center;
 }
 
+.chart-box {
+    background-color: white;
+    padding: 0.3em;
+    border-radius: 0.3em;
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 100%;
+    min-width: 40em;
+    margin-left: 1.5em;
+    /* height: 30em; */ 
+    /* min-width: 10em; */
+    justify-content: center;
+    text-align: center;
+    align-items: bottom;
+}
 
 .detail-area {
     display: flex;
+    height: 200px;
+    width: 200px;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: visible;
@@ -53,10 +71,11 @@
     /* Outline */
     display: flex;
     position: absolute;
+    margin-bottom: 2em;
     bottom: 0;
     flex-direction: row;
     background-color: #ffffff;
-    border: 2px solid $looks-secondary;
+    /* border: 2px solid $looks-secondary; */
     /* Drop shadow */
     /* box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2); */
     border-radius: 0.3em;
@@ -70,7 +89,7 @@
     text-align: center;
     font-size: 1em;
     /* Width */
-    width: 70%;
+    width: 80%;
 }
 
 
@@ -78,23 +97,26 @@
 /* SLIDERS */
 
 .slider-value-background {
-    background-color: $looks-secondary;
+    background-color: white;
     padding: 2px;
     border-radius: 2px;
+    border: 2px solid $looks-light-transparent;
+    margin-left: 5em;
 }
+
+
 
 /* Range */
 .slider-value {
     /* display: inline-block; */
     position: absolute;
-    margin-top: 10px;
     font-size: 10px;
-    /* font-weight: 600; */
+    font-weight: 600;
     font-size: 0.8rem;
     text-align: center;
-    color: #ffffff;
+    color:  #45BDE5;
     padding: 0.1em 0.1em 0.1em 0.1em;
-    margin-left: 0.6em;
+    margin-left: 5em;
 }
 
 .zoom-pitch {
@@ -218,45 +240,60 @@ input[type="range"] {
 
 .param-box {
     background-color: white;
-    border: 2px solid $looks-secondary;
+    /* border: 2px solid #gggggg; */
     border-radius: 0.3em;
     align-items: center;
     flex-direction: column;
-    justify-content: left;
+    justify-content: center;
+    flex-grow: 1;
     text-align: center;
     margin-top:1em;
     width:25em;
+    max-width: 15em;
+    padding: 0.5em;
 }
 
 
 .gaussian-button {
     padding: 0.75rem 0.75rem;
-    border-radius: 0.8rem;
+    border-radius: 0.3rem;
     background: $looks-secondary;
+    /* border: 10px solid  $looks-secondary; */
     color: white;
-    /* font-weight: 600; */
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     height: 2rem;
-    margin: 0.25rem 1rem;
+    text-align: center;
+    /* margin: 0.25rem 1rem; */
+    margin-left: 4em;
+    margin-top: 1.2em;
 
     &:hover {
-        box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+        box-shadow: 0px 2px 2px rgba(59, 5, 79, 0.2);
     }
 }
 
 
 .gaussian-button-row {
-    font-weight: bolder;
     text-align: center;
     display: flex;
     border-radius: 0.5em;
     padding: 0.5em;
 }
 
+.sbutton-row {
+    font-weight: bolder;
+    text-align: center;
+    display: flex;
+    background-color: white;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    margin-top: 1em;
+    margin-left: 1.5em;
+}
 
 .button-row {
     font-weight: bolder;
