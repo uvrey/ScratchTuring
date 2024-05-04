@@ -94,8 +94,11 @@ const formatId = (modelName, label) => {
 const GaussianTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) { // Check if tooltip is active and has data
     return (
-      <div>
-        <p>{`${label}: ${payload[0].value}`}</p>
+      <div className={styles.gaussianTooltip}>
+        <p>
+          {`Odds of ${label.toFixed(2)} are `}
+          <b style={{color: "#9966FF"}} className={styles.odds}>{`${(100 * payload[0].value).toFixed(3)}%`}</b>
+        </p>
       </div>
     );
   }
