@@ -111,7 +111,8 @@ const GaussianLegend = ({ payload, plot }) => (
     {/* {console.log("GAUSSIAN LEGEND PAYLOAD?")}
     {console.log(payload)} */}
     {payload.map((item) => (
-      item.dataKey.includes("ps") ? (null) : (<b style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
+      item.dataKey.includes("ps") ? (null) : (
+        <b style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
     ))}
   </div>
 );
@@ -125,7 +126,8 @@ const getGaussianPanel = (props) => {
         {/* <img src={FontDist} className={styles.visHeading} /> */}
         <Box className={styles.chartBox}>
           <h3>Distributions</h3>
-          <ResponsiveContainer width={'90%'} aspect={1.5}>
+          <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
+          <ResponsiveContainer width={'90%'} aspect={1.75}>
             <LineChart width={900} height={600} data={plot.gaussian}>
               <XAxis
                 allowDecimals={false}
@@ -157,7 +159,6 @@ const getGaussianPanel = (props) => {
             </LineChart>
           </ResponsiveContainer>
         </Box>
-
       </Box>
       {/* <ScatterChart
         width={400}
@@ -178,6 +179,58 @@ const getGaussianPanel = (props) => {
       <Box>
       </Box>
     </Box>
+  )
+}
+
+const getPosteriorNs = (props) => {
+  const active = props.activeModel
+  return (
+    <div className={styles.paramBox}>
+      <h4>Possible Updated Beliefs</h4>
+      <Box className={styles.sbuttonRow}>
+        how many?
+        <input
+          type="text"
+          id={formatId(active, "posteriorNValue")}
+          style={{ color: "#00B295", marginLeft: "7.5em" }}
+          maxLength="4" // Restrict to 8 characters
+          defaultValue={2} // Set initial value
+          className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+          onChange={(event) => {
+            const newValue = parseFloat(event.target.value);
+            if (!isNaN(newValue) && newValue >= 0 && newValue <= 5) {
+              document.getElementById(formatId(active, "posteriorN")).value = Math.floor(newValue);
+            }
+          }}
+        />
+      </Box>
+      <Box className={styles.gaussianButtonRow}>
+        {console.log("deciding whether to grey the button out or not. Samples / length = ")}
+        {console.log(props.data)}
+        {console.log(props.data.samples)}
+        {console.log(props.data.samples.length)}
+
+        {props.data.samples.length > 0 ? (  // Only render active button if samples exist
+          <button
+            className={styles.gaussianButton}
+            style={{ backgroundColor: "#00B295" }} // Active button style
+            onClick={() => props.updateChart(active, props.vm, props.updatePosteriorN, 'ps')}
+          >
+            <h4>Update</h4>
+            {/* <img className={styles.buttonIconRight} /> */}
+          </button>
+        ) : (  // Render inactive button without samples
+          <button
+            className={styles.gaussianButton}
+            style={{ backgroundColor: "#ccc",  pointerEvents: "none"}} // Disabled button style (grayed out)
+            disabled // Explicitly disable the button
+          >
+            <h4>Update</h4>
+            {/* <img className={styles.buttonIconRight} /> */}
+          </button>
+        )}
+      </Box>
+    </div>
   )
 }
 
@@ -236,6 +289,17 @@ const getParameterLabels = (props) => {
                 // src={surpriseIcon}
                 />
               </button>
+              {/* <button
+                className={styles.gaussianButton}
+                style={{ backgroundColor: "#ccc" }}
+                onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
+              >
+                <h4>X</h4>
+                <img
+                  className={styles.buttonIconRight}
+                // src={surpriseIcon}
+                />
+              </button> */}
             </Box>
           </Box>
 
@@ -282,11 +346,6 @@ const getParameterLabels = (props) => {
                 onClick={() => props.updateChart(active, props.vm, props.updatePrior, 'prior')}
               >
                 <h4>Update</h4>
-                {/* <FormattedMessage
-                  defaultMessage="Update Belief"
-                  description="Button in prompt for starting a search"
-                  id="gui.vizPanel.updateBelief"
-                /> */}
                 <img
                   className={styles.buttonIconRight}
                 // src={compassIcon}
@@ -294,6 +353,7 @@ const getParameterLabels = (props) => {
               </button>
             </Box>
           </Box>
+          {getPosteriorNs(props)}
         </div>
       ); // Use PascalCase for model names
     // case 'color':

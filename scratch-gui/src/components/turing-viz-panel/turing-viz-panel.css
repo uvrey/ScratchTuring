@@ -30,15 +30,13 @@
 
 .chart-box {
     background-color: white;
-    padding: 0.3em;
+    padding: 1em;
     border-radius: 0.3em;
     flex-grow: 1;
     flex-shrink: 1;
-    width: 100%;
-    min-width: 40em;
-    margin-left: 1.5em;
-    /* height: 30em; */ 
-    /* min-width: 10em; */
+    width: 80%;
+    min-width: 20em;
+    margin: 0em 1em 1em 1.5em;
     justify-content: center;
     text-align: center;
     align-items: bottom;
@@ -76,7 +74,7 @@
 
 .gaussianTooltip p {
     font-size: 0.8rem;
-  }
+}
 
 .key-stats {
     /* Outline */
@@ -103,7 +101,48 @@
     width: 80%;
 }
 
+.chart-checkbox input[type="checkbox"] {
+    /* Hide the default checkbox appearance */
+    display: none;
+}
 
+.chart-checkbox {
+    /* Style the container element */
+    background-color: white;
+    border: 1px solid $looks-light-transparent;
+    width: 18px;
+    /* Adjust width as needed */
+    height: 18px;
+    /* Adjust height as needed */
+    cursor: pointer;
+    /* Indicate interaction on hover */
+}
+
+.chart-checkbox:after {
+    /* Style the "checkmark" element */
+    content: "";
+    display: block;
+    width: 10px;
+    /* Adjust width as needed */
+    height: 10px;
+    /* Adjust height as needed */
+    border: 2px solid $looks-secondary;
+    /* Adjust border color as needed */
+    margin-top: 3px;
+    /* Adjust position as needed */
+    margin-left: 3px;
+    /* Adjust position as needed */
+    background-color: white;
+    /* Adjust background color as needed */
+    transition: background-color 0.2s ease-in-out;
+    /* Add optional transition */
+}
+
+.chart-checkbox:checked:after {
+    /* Style the "checkmark" when checked */
+    background-color: $looks-secondary;
+    /* Adjust color as needed */
+}
 
 /* SLIDERS */
 
@@ -112,6 +151,7 @@
     padding: 2px;
     border-radius: 2px;
     border: 2px solid $looks-light-transparent;
+    margin-top: -2px;
     margin-left: 5em;
 }
 
@@ -125,9 +165,9 @@
     font-weight: 600;
     font-size: 0.8rem;
     text-align: center;
-    color:  #45BDE5;
+    color: #45BDE5;
     padding: 0.1em 0.1em 0.1em 0.1em;
-    margin-left: 5em;
+    margin-left: 6em;
 }
 
 .zoom-pitch {
@@ -153,7 +193,7 @@ input[type=range]:focus {
     outline: none;
 }
 
-input[type=range]::-webkit-slider-runnable-track {
+/* input[type=range]::-webkit-slider-runnable-track {
     width: 100%;
     height: 0.2em;
     cursor: pointer;
@@ -239,7 +279,97 @@ input[type=range]:focus::-ms-fill-lower {
 
 input[type=range]:focus::-ms-fill-upper {
     background: $looks-light-transparent;
+} */
+
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 0.2em;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #00B295;
+    border-radius: 25px;
+    border: 0px solid #000101;
 }
+
+input[type=range]::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 30px;
+    width: 10px;
+    border-radius: 7px;
+    background: #00B295;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -3.6px;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #8ddbce;
+}
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #8ddbce;
+    border-radius: 25px;
+    border: 0px solid #000101;
+}
+
+input[type=range]::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 30px;
+    width: 8px;
+    border-radius: 7px;
+    background: #00B295;
+    cursor: pointer;
+}
+
+input[type=range]::-ms-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    border-width: 39px 0;
+    color: transparent;
+}
+
+input[type=range]::-ms-fill-lower {
+    background: #8ddbce;
+    border: 0px solid #000101;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+
+input[type=range]::-ms-fill-upper {
+    background: #8ddbce;
+    border: 0px solid #000101;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+
+input[type=range]::-ms-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 30px;
+    width: 10px;
+    border-radius: 7px;
+    background: #00B295;
+    cursor: pointer;
+}
+
+input[type=range]:focus::-ms-fill-lower {
+    background: #8ddbce;
+}
+
+input[type=range]:focus::-ms-fill-upper {
+    background: #8ddbce;
+}
+
 
 #range-wrap {
     position: relative;
@@ -258,12 +388,32 @@ input[type="range"] {
     justify-content: center;
     flex-grow: 1;
     text-align: center;
-    margin-top:1em;
-    width:25em;
+    margin-top: 1em;
     max-width: 15em;
+    width: 40em;
     padding: 0.5em;
 }
 
+.posterior-n-box {
+    background-color: white;
+    /* border: 2px solid #gggggg; */
+    border-radius: 0.3em;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    text-align: center;
+    margin-top: 1em;
+    max-width: 30em;
+    padding: 0.5em;
+}
+
+.gaussian-button button:disabled {
+    /* Styles for disabled state */
+    background-color: #ccc; /* Grayed out */
+    cursor: not-allowed; /* Change cursor to indicate non-interactivity */
+    opacity: 0.6; /* Reduce opacity */
+  }
 
 .gaussian-button {
     padding: 0.75rem 0.75rem;
@@ -280,7 +430,7 @@ input[type="range"] {
     text-align: center;
     /* margin: 0.25rem 1rem; */
     margin-left: 4em;
-    margin-top: 1.2em;
+    margin-top: 1em;
 
     &:hover {
         box-shadow: 0px 2px 2px rgba(59, 5, 79, 0.2);
@@ -298,6 +448,7 @@ input[type="range"] {
 .sbutton-row {
     font-weight: bolder;
     text-align: center;
+    align-items: bottom;
     display: flex;
     background-color: white;
     border-radius: 0.5em;
@@ -313,6 +464,7 @@ input[type="range"] {
     background-color: $looks-secondary;
     border-radius: 0.5em;
     padding: 0.5em;
+    max-width: 160em;
 }
 
 .panel-button {

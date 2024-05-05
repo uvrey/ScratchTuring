@@ -28,6 +28,8 @@
     overflow-y: scroll;
     flex-direction: column;
     background-color: #f6f6f6;
+    /* justify-content: center; */
+    /* align-items:center; */
 }
 
 [dir="ltr"] .detail-area {

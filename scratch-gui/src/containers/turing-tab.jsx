@@ -209,6 +209,25 @@ class TuringTab extends React.Component {
             updateFunction(vm, priorData)
             return
         }
+
+        if (mode == 'ps') {
+            const inputs = [modelName + "_posteriorNValue"]; // TODO check if I can use these labels for all models?
+            const values = {};
+
+            for (const inputName of inputs) {
+                const input = document.getElementById(inputName);
+                values[inputName] = parseFloat(input.value);
+            }
+
+            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
+            console.log(values)
+            console.log("--------------")
+
+            // Update models on the backend with new information
+            var psData = { modelName: modelName, n: values[modelName + "_posteriorNValue"]}
+            updateFunction(vm, psData)
+            return
+        }
     }
 
     handleUpdateCustom(vm, data) {
@@ -220,6 +239,10 @@ class TuringTab extends React.Component {
     handleUpdatePrior(vm, data) {
         vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
         //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
+
+    handleUpdatePosteriorN(vm, data) {
+        vm.runtime.emit('UPDATE_POSTERIOR_N', data)
     }
 
     handleUpdateGroundTruth(vm, data) {
@@ -348,6 +371,7 @@ class TuringTab extends React.Component {
                         updateCustom={this.handleUpdateCustom}
                         updatePrior={this.handleUpdatePrior}
                         updateGroundTruth={this.handleUpdateGroundTruth}
+                        updatePosteriorN={this.handleUpdatePosteriorN}
                         toggleVisibility={this.handleToggleVisibility}
                         getValue={this.getStoredValue}
                         updateChart={this.handleUpdateToChart}
