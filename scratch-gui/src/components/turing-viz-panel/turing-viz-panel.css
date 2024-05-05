@@ -29,6 +29,7 @@
 }
 
 .chart-box {
+    display: flex;
     background-color: white;
     padding: 1em;
     border-radius: 0.3em;
@@ -40,6 +41,36 @@
     justify-content: center;
     text-align: center;
     align-items: bottom;
+}
+
+.hchart-box {
+    background-color: white;
+    padding: 1em;
+    border-radius: 0.3em;
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 80%;
+    min-width: 20em;
+    height: 80%;
+    margin: 0em 1em 1em 1.5em;
+    justify-content: center;
+    text-align: center;
+    align-items: bottom;
+}
+
+
+.hueChartBox {
+    background-color: white;
+    display:flex;
+    border-radius: 0.3em;
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 90%;
+    min-width: 30em;
+    /* margin: 0em 1em 1em 1em; */
+    justify-content: center;
+    text-align: center;
+    align-items: center;
 }
 
 .detail-area {
@@ -74,6 +105,10 @@
 
 .gaussianTooltip p {
     font-size: 0.8rem;
+}
+
+.hue-stat {
+    border: 2px solid $looks-light-transparent;
 }
 
 .key-stats {
@@ -527,6 +562,28 @@ input[type="range"] {
     &:hover {
         box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
     }
+}
+
+
+
+.spinButton {
+    padding: 1rem;
+    border-radius: 0.3rem;
+    background-color: $looks-secondary;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    text-align: center;
+    /* margin: 0.25rem 1rem; */
+    width: 100%;
+    &:hover {
+        box-shadow: 0px 5px 5px rgba(59, 5, 79, 0.2);
+    } 
 }
 
 

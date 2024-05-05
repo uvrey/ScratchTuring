@@ -60,15 +60,35 @@ const CustomLabel = (props) => { // TODO modify this so it returns rectangles wi
   );
 };
 
-const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
-  // console.log(props.payload)
-  const hue = props.payload.value % 360
+// const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
+//   const hue = props.payload.value % 360
+//   return (
+//     <foreignObject className={styles.labelWrapper} y={260} x={props.payload.tickCoord}>
+//         <div className={styles.hueBox} style={{ backgroundColor: hueToHex(hue), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding:"0.5em"}}/>
+//     </foreignObject>
+//   );
+// };
+
+const CustomHue = (props) => {
+  const hue = props.payload.value % 360;
+  // Calculate the corresponding color in hex format
+  const color = hueToHex(hue);
+
+  console.log(props.payload)
+
+  // Use an SVG rect instead of foreignObject
   return (
-    <foreignObject className={styles.labelWrapper} y={260} x={props.payload.tickCoord}>
-      <div className={styles.colorSwatch} style={{ backgroundColor: hueToHex(hue) }} />
-    </foreignObject>
+    <rect
+      className={styles.hueBox}
+      x={props.payload.tickCoord}
+      y={props.payload.offset}
+      width="1.2em"
+      height="1.2em"
+      fill={color} // Set fill color to calculated hex
+    />
   );
 };
+
 
 /**
  * Convert a hex color (e.g., F00, #03F, #0033FF) to an RGB color object.
@@ -222,7 +242,7 @@ const getPosteriorNs = (props) => {
         ) : (  // Render inactive button without samples
           <button
             className={styles.gaussianButton}
-            style={{ backgroundColor: "#ccc",  pointerEvents: "none"}} // Disabled button style (grayed out)
+            style={{ backgroundColor: "#ccc", pointerEvents: "none" }} // Disabled button style (grayed out)
             disabled // Explicitly disable the button
           >
             <h4>Update</h4>
@@ -403,18 +423,20 @@ function getColorRange(hue) {
 
 const Spinner = ({ data }) => {
   return (
-    <>
-      <PieChart width={500} height={500}>
+    // <ResponsiveContainer width="99%" aspect={1} styles={{justifyContent: "center"}}>
+    <Box className={styles.hueChartBox}>
+      <PieChart width={300} height={300}>
         <Pie
           data={data}
           dataKey={"value"}
-          outerRadius={200}
+          // outerRadius={100}
           fill={data.fill}
         />
         <Tooltip />
       </PieChart>
-      <button id="spin-btn" className={styles.activeButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
-    </>
+      <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+    </Box>
+    // </ResponsiveContainer>
   );
 };
 
@@ -430,32 +452,125 @@ const HueTooltip = ({ active, payload, label, props }) => {
             <div className={styles.hueSwatch} style={{ backgroundColor: hex }} />
           ))}
         </div>
-        <p>{`Hue: ${label}`}</p>
+        <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em" }} />
       </div>
     );
   }
   return null;
 };
+
+const handleHueClick = (data, index) => {
+  { console.log("WECLICKED THE CHART!!!") }
+  { console.log(data) }
+  { console.log(index) }
+};
+
+const customTooltipContent = (payload) => {
+  // Check if data is available and activeIndex matches clicked bar
+  if (!payload || !data || payload.dataIndex !== activeIndex) {
+    return null; // Hide tooltip if no data or mismatch
+  }
+  const dataPoint = data[activeIndex];
+  return (
+    <div>
+      <p>Name: {dataPoint.name}</p>
+      <p>Value: {dataPoint.value}</p>
+      {/* You can add more information here */}
+    </div>
+  );
+};
+
 const getHuePanel = (props) => {
   const plot = props.data.plot
   return (
+
     <Box className={styles.dataRow}>
-      <Box className={styles.dataCol}>
-        <h4>Proportion of Hues</h4>
-        <Spinner data={plot.pie} key="freq" />
+      <Box className={styles.chartBox}>
+        {props.data.samples.length > 0 ? (
+          <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4>
+            <Box className={styles.hueChartBox}>
+              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em"}}>
+                  <PieChart width={600} height={600}>
+                    <Pie
+                      data={plot.pie}
+                      dataKey={"value"}
+                      outerRadius={150}
+                      fill={plot.pie.fill}
+                    />
+                    <Tooltip />
+                  </PieChart>
+                <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+              </ResponsiveContainer>
+            </Box>
+          </div>
+        ) : (<div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4><p>No samples taken yet!</p></div>)}
       </Box>
-      <Box className={styles.dataCol}>
-        <h4>Hue Distribution</h4>
-        <ResponsiveContainer width={"100%"} aspect={1}>
-          <BarChart width={800} height={400} data={plot.histogram}>
-            <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
-            <XAxis label="Hue" tick={<CustomHue />} />
-            <YAxis dots={false} yAxis={-5} />
-            < Tooltip content={<HueTooltip props={props} />} />
-          </BarChart>
-        </ResponsiveContainer>
+      <Box className={styles.chartBox}>
+        <Box className={styles.hueChartBox}>
+          <ResponsiveContainer width={'99%'} aspect={1.3}>
+            <h4>Hue Distributions</h4>
+            <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
+            <BarChart width={900} height={400} data={plot.histogram} onClick={handleHueClick} style={{ marginTop: "2em" }}>
+              <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
+              <XAxis
+                label="Hue"
+                tick={<CustomHue />}
+                tickInterval={5}
+                axisLine={{
+                  stroke: "#ddd",
+                  strokeWidth: 3,
+                  strokeLinecap: "round", // Set rounded line ends
+                }}
+                tickLine={false}
+              />
+              <YAxis
+                label="Freq"
+                dots={false}
+                yAxis={-5}
+                axisLine={{
+                  stroke: "#ddd",
+                  strokeWidth: 1,
+                  strokeLinecap: "round", // Set rounded line ends
+                }}
+                tickLine={{ strokeWidth: 3 }}
+              />
+              < Tooltip content={<HueTooltip props={props} />} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+      {/* <ScatterChart
+        width={400}
+        height={300}
+        margin={{
+          top: 20,
+          right: 20,
+          bottom: 20,
+          left: 20,
+        }}
+      >
+        <CartesianGrid />
+        <XAxis type="number" dataKey="x" name="sample" unit="" />
+        <YAxis type="number" dataKey="y" name="value" unit="" />
+        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+        <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
+      </ScatterChart> */}
+      <Box>
       </Box>
     </Box>
+
+    // <Box className={styles.dataRow}>
+    //   <Box className={styles.dataCol}>
+    //     <h4>Proportion of Hues</h4>
+    //     <Spinner data={plot.pie} key="freq" />
+    //   </Box>
+    //   <Box className={styles.dataCol}>
+    //     <h4>Hue Distribution</h4>
+    //     <ResponsiveContainer width={"100%"} aspect={1}>
+
+    //     </ResponsiveContainer>
+    //   </Box>
+    // </Box>
   );
 };
 
@@ -465,7 +580,7 @@ const getRhythmPanel = (props) => {
     <Box className={styles.dataRow}>
       <Box className={styles.dataCol}>
         <h4>Proportion of Rhythms</h4>
-        <Spinner data={plot.pie} key="proportion" />
+        <Spinner data={plot.pie} />
       </Box>
 
       <Box className={styles.dataCol}>
@@ -543,6 +658,28 @@ const getPanel = (props) => {
   }
 }
 
+const swatchStyle = (samples) => {
+  return ({
+    backgroundColor: samples.length > 0 ? samples[samples.length - 1] : "#ccc", // Default color
+    color: samples.length > 0 ? samples[samples.length - 1] : "#000", // Default color
+    border: "3px solid $looks-light-transparent",
+    borderRadius: "0.3em",
+    width: "10em"
+  })
+};
+
+
+const hueSwatchStyle = (samples) => {
+  return ({
+    backgroundColor: hexToHue(samples[samples.length - 1]), // Default color
+    color: hexToHue(samples[samples.length - 1]), // Default color
+    border: "2px solid $looks-light-transparent",
+    borderRadius: "0.3em",
+    width: "10em"
+  })
+};
+
+
 const getKeyStats = (props) => {
   const data = props.data
   const samples = props.data.samples
@@ -555,34 +692,38 @@ const getKeyStats = (props) => {
         <div><p className={styles.stat}>{data.modelName}</p></div>
       </div>
       <div>
-        <h4>Current Observation</h4>
         {/* <img src={FontCurrentSample} className={styles.statsHeading} /> */}
         {samples.length === 0 ? (
-          <p className={styles.stat}>none</p>
+          <>
+            <h4>Current Observation</h4>
+            <p className={styles.stat}>none</p>
+          </>
         ) : (
           data.distribution === "hue" ? (
-            <>
-              <p
-                style={{
-                  backgroundColor: samples[samples.length - 1],
-                  color: samples[samples.length - 1],
-                }}
-                className={styles.stat}
-              >X
-              </p>
-              <b>Converted to a hue: </b>
-              <p
-                style={{
-                  backgroundColor: hexToHue(samples[samples.length - 1]),
-                  color: hexToHue(samples[samples.length - 1]),
-                }}
-                className={styles.stat}
-              >X</p>
-            </>
+            <Box className={styles.dataRow}>
+              <Box className={styles.dataCol} style={{ marginRight: "4em" }}>
+                <h4>Current Observation</h4>
+                <p
+                  style={swatchStyle(samples)}
+                  className={styles.hueStat}
+                >X
+                </p>
+              </Box>
+              <Box className={styles.dataCol}>
+                <h4>Current Hue</h4>
+                <p
+                  style={hueSwatchStyle(samples)}
+                  className={styles.hueStat}
+                >X</p>
+              </Box>
+            </Box>
           ) : (
-            <p className={styles.stat}>
-              {samples[samples.length - 1]}{data.unit}
-            </p>
+            <>
+              <h4>Current Observation</h4>
+              <p className={styles.stat}>
+                {samples[samples.length - 1]}{data.unit}
+              </p>
+            </>
           )
         )}
       </div>
