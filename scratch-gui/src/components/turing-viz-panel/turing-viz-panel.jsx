@@ -459,31 +459,37 @@ const HueTooltip = ({ active, payload, label, props }) => {
   return null;
 };
 
+const RhythmTooltip = ({ active, payload, label, props }) => {
+  console.log("PROPS?")
+  console.log(props)
+  if (active && payload && payload.length) { // Check if tooltip is active and has data
+    return (
+      <div>
+        <p>{`${label}: ${payload[0].value}`}</p> 
+      </div>
+      // <div>
+      //   {/* <p>{`${label}: ${payload[0].value}`}</p> */}
+      //   <div className={styles.hueBox}>
+      //     {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
+      //       <div className={styles.hueSwatch} style={{ backgroundColor: hex }} />
+      //     ))}
+      //   </div>
+      //   <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em" }} />
+      // </div>
+    );
+  }
+  return null;
+};
+
 const handleHueClick = (data, index) => {
   { console.log("WECLICKED THE CHART!!!") }
   { console.log(data) }
   { console.log(index) }
 };
 
-const customTooltipContent = (payload) => {
-  // Check if data is available and activeIndex matches clicked bar
-  if (!payload || !data || payload.dataIndex !== activeIndex) {
-    return null; // Hide tooltip if no data or mismatch
-  }
-  const dataPoint = data[activeIndex];
-  return (
-    <div>
-      <p>Name: {dataPoint.name}</p>
-      <p>Value: {dataPoint.value}</p>
-      {/* You can add more information here */}
-    </div>
-  );
-};
-
 const getHuePanel = (props) => {
   const plot = props.data.plot
   return (
-
     <Box className={styles.dataRow}>
       <Box className={styles.chartBox}>
         {props.data.samples.length > 0 ? (
@@ -539,38 +545,9 @@ const getHuePanel = (props) => {
           </ResponsiveContainer>
         </Box>
       </Box>
-      {/* <ScatterChart
-        width={400}
-        height={300}
-        margin={{
-          top: 20,
-          right: 20,
-          bottom: 20,
-          left: 20,
-        }}
-      >
-        <CartesianGrid />
-        <XAxis type="number" dataKey="x" name="sample" unit="" />
-        <YAxis type="number" dataKey="y" name="value" unit="" />
-        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
-      </ScatterChart> */}
       <Box>
       </Box>
     </Box>
-
-    // <Box className={styles.dataRow}>
-    //   <Box className={styles.dataCol}>
-    //     <h4>Proportion of Hues</h4>
-    //     <Spinner data={plot.pie} key="freq" />
-    //   </Box>
-    //   <Box className={styles.dataCol}>
-    //     <h4>Hue Distribution</h4>
-    //     <ResponsiveContainer width={"100%"} aspect={1}>
-
-    //     </ResponsiveContainer>
-    //   </Box>
-    // </Box>
   );
 };
 
@@ -578,71 +555,66 @@ const getRhythmPanel = (props) => {
   const plot = props.data.plot
   return (
     <Box className={styles.dataRow}>
-      <Box className={styles.dataCol}>
-        <h4>Proportion of Rhythms</h4>
-        <Spinner data={plot.pie} />
+      <Box className={styles.chartBox}>
+        {props.data.samples.length > 0 ? (
+          <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythms</h4>
+            <Box className={styles.hueChartBox}>
+              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em"}}>
+                  <PieChart width={600} height={600}>
+                    <Pie
+                      data={plot.pie}
+                      dataKey={"value"}
+                      outerRadius={150}
+                      fill={plot.pie.fill}
+                    />
+                    <Tooltip />
+                  </PieChart>
+                <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+              </ResponsiveContainer>
+            </Box>
+          </div>
+        ) : (<div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythm Timeline</h4><p>No samples taken yet!</p></div>)}
       </Box>
-
-      <Box className={styles.dataCol}>
-        <h4> Rhythm Samples</h4>
-        {/* <ScatterChart
-          width={400}
-          height={300}
-          margin={{
-            top: 20,
-            right: 20,
-            bottom: 20,
-            left: 20,
-          }}>
-          <CartesianGrid />
-          <XAxis type="number" dataKey="x" name="timestamp" unit="" />
-          <YAxis type="number" dataKey="y" name="value" unit="" />
-          <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          <Scatter name="Samples over Time" data={plot.timeline} fill={plot.timeline.fill} />
-        </ScatterChart> */}
-
-
-        {/* <ScatterChart
-          margin={{
-            top: 10,
-            right: 0,
-            bottom: 0,
-            left: 0,
-          }}
-        >
-          <XAxis
-            type="category"
-            dataKey="value"
-            interval={0}
-            tick={{ fontSize: 0 }}
-            tickLine={{ transform: 'translate(0, -6)' }}
-          />
-          <YAxis
-            type="number"
-            dataKey="index"
-            name="RT"
-            height={10}
-            width={80}
-            tick={false}
-            tickLine={false}
-            axisLine={false}
-            label={{ value: 'RHYTHMTYPE', position: 'insideRight' }}
-          />
-          <ZAxis type="number" dataKey="value" />
-          <Tooltip cursor={{ strokeDasharray: '3 3' }} wrapperStyle={{ zIndex: 100 }} />
-          <Scatter data={plot.timeline} fill="#8884d8" />
-        </ScatterChart> */}
-
+      <Box className={styles.chartBox}>
+        <Box className={styles.hueChartBox}>
+          <ResponsiveContainer width={'99%'} aspect={1.3}>
+            <h4>Rhythm Timeline</h4>
+            <p style={{ marginBottom: "1em", width: "100%" }}>What kind of rhythms are there and when are they played?</p>
+            <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
+              <Scatter type="monotone" dataKey="value" stroke={plot.timeline.stroke} dot={false} />
+              <XAxis
+                label="Rhythm"
+                // tick={<CustomHue />}
+                tickInterval={5}
+                axisLine={{
+                  stroke: "#ddd",
+                  strokeWidth: 3,
+                  strokeLinecap: "round", // Set rounded line ends
+                }}
+                tickLine={true}
+              />
+              <YAxis
+                label="Freq"
+                dots={false}
+                yAxis={-5}
+                axisLine={{
+                  stroke: "#ddd",
+                  strokeWidth: 1,
+                  strokeLinecap: "round", // Set rounded line ends
+                }}
+                tickLine={{ strokeWidth: 3 }}
+              />
+              < Tooltip content={<RhythmTooltip props={props} />} />
+            </ScatterChart>
+          </ResponsiveContainer>
+        </Box>
       </Box>
-      {/* <BarChart width={800} height={300} data={plot.timeline}>
-        <Bar type="monotone" dataKey="value" stroke={"#d41444"} strokeWeight="3px" dot={false} />
-        <XAxis label="Timeline" />
-        <YAxis dots={false} yAxis={-5} />
-      </BarChart> */}
-      {/* <RhythmTimeline /> */}
+      <Box>
+      </Box>
     </Box>
   );
 };
+
 
 const getPanel = (props) => {
   { console.log("Deciding which panel to choose:") }
@@ -720,7 +692,7 @@ const getKeyStats = (props) => {
           ) : (
             <>
               <h4>Current Observation</h4>
-              <p className={styles.stat}>
+              <p className={styles.stat}> 
                 {samples[samples.length - 1]}{data.unit}
               </p>
             </>
