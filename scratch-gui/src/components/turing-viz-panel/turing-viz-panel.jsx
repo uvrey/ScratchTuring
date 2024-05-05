@@ -17,7 +17,8 @@ import FontCurrentSample from './font--currentSample.svg'
 import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
 import Color from './color.js'
-
+import arrowLeftIcon from './arrow-left.svg'
+import ZoomChart from './turing-viz-zoomChart.jsx'
 /** CREDIT THIS CODE **/
 import gsap from "gsap";
 import { style } from 'scratch-storage';
@@ -421,25 +422,6 @@ function getColorRange(hue) {
   return null; // Use null instead of None in JavaScript
 }
 
-const Spinner = ({ data }) => {
-  return (
-    // <ResponsiveContainer width="99%" aspect={1} styles={{justifyContent: "center"}}>
-    <Box className={styles.hueChartBox}>
-      <PieChart width={300} height={300}>
-        <Pie
-          data={data}
-          dataKey={"value"}
-          // outerRadius={100}
-          fill={data.fill}
-        />
-        <Tooltip />
-      </PieChart>
-      <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
-    </Box>
-    // </ResponsiveContainer>
-  );
-};
-
 const HueTooltip = ({ active, payload, label, props }) => {
   console.log("PROPS?")
   console.log(props)
@@ -465,7 +447,7 @@ const RhythmTooltip = ({ active, payload, label, props }) => {
   if (active && payload && payload.length) { // Check if tooltip is active and has data
     return (
       <div>
-        <p>{`${label}: ${payload[0].value}`}</p> 
+        <p>{`${label}: ${payload[0].value}`}</p>
       </div>
       // <div>
       //   {/* <p>{`${label}: ${payload[0].value}`}</p> */}
@@ -495,8 +477,9 @@ const getHuePanel = (props) => {
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em"}}>
-                  <PieChart width={600} height={600}>
+              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em" }}>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em" }}>
                     <Pie
                       data={plot.pie}
                       dataKey={"value"}
@@ -505,6 +488,8 @@ const getHuePanel = (props) => {
                     />
                     <Tooltip />
                   </PieChart>
+                  <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
+                </div>
                 <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
               </ResponsiveContainer>
             </Box>
@@ -513,6 +498,7 @@ const getHuePanel = (props) => {
       </Box>
       <Box className={styles.chartBox}>
         <Box className={styles.hueChartBox}>
+          {/* <ZoomChart data={plot.histogram}/> */}
           <ResponsiveContainer width={'99%'} aspect={1.3}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
@@ -553,14 +539,16 @@ const getHuePanel = (props) => {
 
 const getRhythmPanel = (props) => {
   const plot = props.data.plot
+  const active = props.activeModel
   return (
     <Box className={styles.dataRow}>
       <Box className={styles.chartBox}>
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythms</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em"}}>
-                  <PieChart width={600} height={600}>
+              <ResponsiveContainer width={'99%'} aspect={1} style={{ justifyContent: "center" }}>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em" }}>
                     <Pie
                       data={plot.pie}
                       dataKey={"value"}
@@ -569,6 +557,8 @@ const getRhythmPanel = (props) => {
                     />
                     <Tooltip />
                   </PieChart>
+                  <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
+                </div>
                 <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
               </ResponsiveContainer>
             </Box>
@@ -581,7 +571,7 @@ const getRhythmPanel = (props) => {
             <h4>Rhythm Timeline</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of rhythms are there and when are they played?</p>
             <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
-              <Scatter type="monotone" dataKey="value" stroke={plot.timeline.stroke} dot={false} />
+              <Scatter type="monotone" dataKey="x" stroke={plot.timeline.stroke} dot={false} />
               <XAxis
                 label="Rhythm"
                 // tick={<CustomHue />}
@@ -594,7 +584,7 @@ const getRhythmPanel = (props) => {
                 tickLine={true}
               />
               <YAxis
-                label="Freq"
+                label=""
                 dots={false}
                 yAxis={-5}
                 axisLine={{
@@ -606,6 +596,34 @@ const getRhythmPanel = (props) => {
               />
               < Tooltip content={<RhythmTooltip props={props} />} />
             </ScatterChart>
+            <input
+              type="range"
+              id={formatId(active, "viewFactorValue")}
+              min="0"
+              max="200"
+              step="1"
+              defaultValue={0}
+              onChange={(event) => {
+                const newValue = parseFloat(event.target.value);
+                document.getElementById(formatId(active, "viewFactorValue")).value = newValue;
+                props.updateChart(active, props.vm, props.updateViewFactor, 'viewFactor')
+              }}
+            />
+            <input
+              type="text"
+              style={{ display: 'none' }}
+              id={formatId(active, "viewFactorValue")}
+              maxLength="200" // Restrict to 8 characters
+              defaultValue={0} // Set initial value
+              className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
+              onChange={(event) => {
+                const newValue = parseFloat(event.target.value);
+                if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                  document.getElementById(formatId(active, "viewFactor")).value = newValue;
+                  props.updateChart(active, props.vm, props.updateViewFactor, 'viewFactor')
+                }
+              }}
+            />
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -692,7 +710,7 @@ const getKeyStats = (props) => {
           ) : (
             <>
               <h4>Current Observation</h4>
-              <p className={styles.stat}> 
+              <p className={styles.stat}>
                 {samples[samples.length - 1]}{data.unit}
               </p>
             </>
@@ -707,6 +725,8 @@ const getKeyStats = (props) => {
     // </Box>
   );
 }
+
+
 const TuringVizPanel = props => (
   <Box className={styles.body}>
     <Box className={styles.buttonRow}>

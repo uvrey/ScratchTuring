@@ -170,6 +170,26 @@ class TuringTab extends React.Component {
     handleUpdateToChart(modelName, vm, updateFunction, mode) {
         console.log("handling new values in the selection box")
 
+        if (mode == 'viewFactor') {
+            const inputs = [modelName + "_viewFactorValue"]; // TODO check if I can use these labels for all models?
+            const values = {};
+
+            for (const inputName of inputs) {
+
+                const input = document.getElementById(inputName);
+                values[inputName] = parseFloat(input.value);
+            }
+
+            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
+            console.log(values)
+            console.log("--------------")
+
+            // Update models on the backend with new information
+            var customData = { modelName: modelName, viewFactor: values[modelName + "_viewFactorValue"] }
+            updateFunction(vm, customData)
+            return
+        }
+
         if (mode == 'custom') {
             const inputs = [modelName + "_customParamsValue_mu", modelName + "_customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
             const values = {};
@@ -240,6 +260,12 @@ class TuringTab extends React.Component {
         vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
         //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
+
+    handleUpdateViewFactor(vm, data) {
+        vm.runtime.emit('UPDATE_VIEW_FACTOR', data)
+        //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
+
 
     handleUpdatePosteriorN(vm, data) {
         vm.runtime.emit('UPDATE_POSTERIOR_N', data)
@@ -373,6 +399,7 @@ class TuringTab extends React.Component {
                         updateGroundTruth={this.handleUpdateGroundTruth}
                         updatePosteriorN={this.handleUpdatePosteriorN}
                         toggleVisibility={this.handleToggleVisibility}
+                        updateViewFactor={this.handleUpdateViewFactor}
                         getValue={this.getStoredValue}
                         updateChart={this.handleUpdateToChart}
                     />) : (<h1>No models defined... yet!</h1>)}
