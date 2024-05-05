@@ -430,8 +430,10 @@ const HueTooltip = ({ active, payload, label, props }) => {
       <div>
         {/* <p>{`${label}: ${payload[0].value}`}</p> */}
         <div className={styles.hueBox}>
+        {/* {console.log("INSIDE TOOLTIP, WE HAVE A FAMILY")} */}
+        {console.log(props.data.plot.hues.hueFamilies[Number(label)])}
           {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
-            <div className={styles.hueSwatch} style={{ backgroundColor: hex }} />
+            <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em"}}>{hex}</div>
           ))}
         </div>
         <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em" }} />
