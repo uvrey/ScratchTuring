@@ -146,6 +146,7 @@ const getGaussianPanel = (props) => {
       <Box className={styles.dataCol}>
         {/* <img src={FontDist} className={styles.visHeading} /> */}
         <Box className={styles.chartBox}>
+          <Box className={styles.dataCol}>
           <h3>Distributions</h3>
           <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
           <ResponsiveContainer width={'90%'} aspect={1.75}>
@@ -179,6 +180,7 @@ const getGaussianPanel = (props) => {
               <Tooltip content={<GaussianTooltip />} />
             </LineChart>
           </ResponsiveContainer>
+          </Box>
         </Box>
       </Box>
       {/* <ScatterChart
