@@ -339,7 +339,7 @@ const getParameterLabels = (props) => {
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                  if (!isNaN(newValue)) {
                     document.getElementById(formatId(active, "priorParams_mu")).value = newValue;
                   }
                 }}
@@ -356,7 +356,7 @@ const getParameterLabels = (props) => {
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                  if (!isNaN(newValue) && newValue >= 0) {
                     document.getElementById(formatId(active, "priorParams_stdv")).value = newValue;
                   }
                 }}
