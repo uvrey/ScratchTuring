@@ -82,11 +82,9 @@
     overflow: visible;
 }
 
-.viz-panel {
-    /* overflow-y: scroll;
-    display: flex;
-    flex-direction: column; */
-}
+/* .viz-panel {
+   height: 50%
+} */
 
 [dir="ltr"] .detail-area {
     border-left: 1px solid $ui-black-transparent;
@@ -115,7 +113,7 @@
     /* Outline */
     display: flex;
     position: absolute;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
     bottom: 0;
     flex-direction: row;
     background-color: #ffffff;
@@ -426,7 +424,7 @@ input[type="range"] {
     margin-top: 1em;
     max-width: 15em;
     width: 40em;
-    padding: 0.5em;
+    padding: 0.4em;
 }
 
 .posterior-n-box {

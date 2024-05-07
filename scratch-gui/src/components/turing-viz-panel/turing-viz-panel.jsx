@@ -51,18 +51,27 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const CustomLabel = (props) => { // TODO modify this so it returns rectangles with a particular colour
+const CustomLabel = ({ data, color }) => { // Pass color as a prop
+  const width = 20; // Adjust width as needed
+  const height = 10; // Adjust height as needed
+
   return (
     <foreignObject className={styles.labelWrapper} x="0" y="0">
-      <div className={styles.customLabel}>
-        Label
-      </div>
+      <svg width={width} height={height}>
+        <rect x={0} y={0} width={width} height={height} fill={color} /> {/* Colored rectangle */}
+        <text x={width / 2} y={height / 2} dominantBaseline="middle" textAnchor="middle">
+          {data} {/* Text on top of the rectangle */}
+        </text>
+      </svg>
     </foreignObject>
   );
 };
 
+
 const CustomHue = (props) => {
-  const hue = props.payload.value % 360;
+  var shiftFactor = 0
+
+  const hue = (props.payload.value + shiftFactor) % 360;
   // Calculate the corresponding color in hex format
   const color = hueToHex(hue);
 
@@ -129,16 +138,20 @@ const GaussianLegend = ({ payload, plot }) => (
   </div>
 );
 
+const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
+  return <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>{`value: ${payload.value}`}</text>;
+};
+
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
   return (
-    <Box className={styles.dataRow}>
+    <Box className={styles.dataRow} style = {{marginTop: "-1.5em"}}>
       {getParameterLabels(props)}
       <Box className={styles.dataCol}>
         {/* <img src={FontDist} className={styles.visHeading} /> */}
         <Box className={styles.chartBox}>
           <Box className={styles.dataCol}>
-            <h3>Distributions</h3>
+            <h3 style={{marginTop: "-0.2em"}}>Distributions</h3>
             <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
             <ResponsiveContainer width={'90%'} aspect={1.75} style={{ marginBottom: "-1em" }}>
               <LineChart width={900} height={600} data={plot.gaussian}>
@@ -167,11 +180,24 @@ const getGaussianPanel = (props) => {
                   />
                 ))}
 
+                {console.log("MEANS?")}
+                {console.log(plot.means)}
+                {/* {plot.activeDistributions.map((key) => (
+                  <ReferenceLine x={plot.means[key]}
+                    strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
+                    label={"Mean: " + plot.means[key]}
+                    stroke={"#ffffff"}
+                    strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth
+                    }
+                  />
+                ))} */}
+
+                {/* 
                 {console.log("MEANS:")}
                 {console.log(plot.means)}
                 {plot.means.map((mean) => (
-                  <ReferenceLine x={mean} />
-                ))}
+             
+                ))} */}
 
                 {/* <ReferenceLine x={} /> */}
                 <Legend content={<GaussianLegend plot={plot} />} />
@@ -423,16 +449,16 @@ function getColorRange(hue) {
 }
 
 const HueTooltip = ({ active, payload, label, props }) => {
-  console.log("PROPS?")
-  console.log(props)
+  var shiftFactor = -70
+  // const index = Math.abs((Number(label) + shiftFactor) % 360)
+  const index = Number(label)
+
   if (active && payload && payload.length) { // Check if tooltip is active and has data
     return (
       <div>
         {/* <p>{`${label}: ${payload[0].value}`}</p> */}
         <div className={styles.hueBox}>
-          {/* {console.log("INSIDE TOOLTIP, WE HAVE A FAMILY")} */}
-          {console.log(props.data.plot.hues.hueFamilies[Number(label)])}
-          {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
+          {props.data.plot.hues.hueFamilies[index].map((hex, index) => (
             <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
           ))}
         </div>
@@ -474,12 +500,12 @@ const handleHueClick = (data, index) => {
 const getHuePanel = (props) => {
   const plot = props.data.plot
   return (
-    <Box className={styles.dataRow}>
+    <Box className={styles.dataRow} style = {{marginLeft: "-1em"}} >
       <Box className={styles.chartBox}>
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em" }}>
+              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-6em" }}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
                   <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em" }}>
                     <Pie
@@ -501,15 +527,16 @@ const getHuePanel = (props) => {
       <Box className={styles.chartBox}>
         <Box className={styles.hueChartBox}>
           {/* <ZoomChart data={plot.histogram}/> */}
-          <ResponsiveContainer width={'99%'} aspect={1.3}>
+          <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            <BarChart width={900} height={400} data={plot.histogram} onClick={handleHueClick} style={{ marginTop: "2em" }}>
+            <BarChart width={900} height={400} data={plot.histogram} onClick={handleHueClick} style={{ marginTop: "1em" }}>
               <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
               <XAxis
                 label="Hue"
                 tick={<CustomHue />}
-                tickInterval={5}
+                // interval={0}
+                tickInterval={1}
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 3,
@@ -543,12 +570,12 @@ const getRhythmPanel = (props) => {
   const plot = props.data.plot
   const active = props.activeModel
   return (
-    <Box className={styles.dataRow}>
+    <Box className={styles.dataRow} >
       <Box className={styles.chartBox}>
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythms</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1} style={{ justifyContent: "center" }}>
+              <ResponsiveContainer width={'99%'} aspect={1.1} style={{ justifyContent: "center" }}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
                   <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em" }}>
                     <Pie
