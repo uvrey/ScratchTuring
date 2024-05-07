@@ -138,39 +138,46 @@ const getGaussianPanel = (props) => {
         {/* <img src={FontDist} className={styles.visHeading} /> */}
         <Box className={styles.chartBox}>
           <Box className={styles.dataCol}>
-          <h3>Distributions</h3>
-          <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
-          <ResponsiveContainer width={'90%'} aspect={1.75} style={{marginBottom: "-1em"}}>
-            <LineChart width={900} height={600} data={plot.gaussian}>
-              <XAxis
-                allowDecimals={false}
-                dataKey="input"
-                type="number"
-              // tick={CustomLabel}
-              />
-              <YAxis allowDecimals={true} />
-              <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-              {props.docTags}
-              {console.log("Getting plot styles from data:")}
-              {console.log(plot.activeDistributions)}
-              {plot.activeDistributions.map((key) => (
-                <Line
-                  key={key.includes("ps") ? plot.styles['ps-options'].chartName : plot.styles[key].chartName}
-                  dataKey={key}
-                  type="monotone"
-                  stroke={key.includes("ps") ? plot.styles['ps-options'].stroke : plot.styles[key].stroke}
-                  dot={key.includes("ps") ? plot.styles['ps-options'].dots : plot.styles[key].dots}
-                  isAnimationActive={true}
-                  strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth}
-                  // Apply strokeDasharray conditionally based on the key
-                  strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
+            <h3>Distributions</h3>
+            <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
+            <ResponsiveContainer width={'90%'} aspect={1.75} style={{ marginBottom: "-1em" }}>
+              <LineChart width={900} height={600} data={plot.gaussian}>
+                <XAxis
+                  allowDecimals={false}
+                  dataKey="input"
+                  type="number"
+                // tick={CustomLabel}
                 />
-              ))}
-              <ReferenceLine x={0} label={CustomLabel} />
-              <Legend content={<GaussianLegend plot={plot} />} />
-              <Tooltip content={<GaussianTooltip />} />
-            </LineChart>
-          </ResponsiveContainer>
+                <YAxis allowDecimals={true} />
+                <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+                {props.docTags}
+                {console.log("Getting plot styles from data:")}
+                {console.log(plot.activeDistributions)}
+                {plot.activeDistributions.map((key) => (
+                  <Line
+                    key={key.includes("ps") ? plot.styles['ps-options'].chartName : plot.styles[key].chartName}
+                    dataKey={key}
+                    type="monotone"
+                    stroke={key.includes("ps") ? plot.styles['ps-options'].stroke : plot.styles[key].stroke}
+                    dot={key.includes("ps") ? plot.styles['ps-options'].dots : plot.styles[key].dots}
+                    isAnimationActive={true}
+                    strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth}
+                    // Apply strokeDasharray conditionally based on the key
+                    strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
+                  />
+                ))}
+
+                {console.log("MEANS:")}
+                {console.log(plot.means)}
+                {plot.means.map((mean) => (
+                  <ReferenceLine x={mean} />
+                ))}
+
+                {/* <ReferenceLine x={} /> */}
+                <Legend content={<GaussianLegend plot={plot} />} />
+                <Tooltip content={<GaussianTooltip />} />
+              </LineChart>
+            </ResponsiveContainer>
           </Box>
         </Box>
       </Box>
@@ -423,10 +430,10 @@ const HueTooltip = ({ active, payload, label, props }) => {
       <div>
         {/* <p>{`${label}: ${payload[0].value}`}</p> */}
         <div className={styles.hueBox}>
-        {/* {console.log("INSIDE TOOLTIP, WE HAVE A FAMILY")} */}
-        {console.log(props.data.plot.hues.hueFamilies[Number(label)])}
+          {/* {console.log("INSIDE TOOLTIP, WE HAVE A FAMILY")} */}
+          {console.log(props.data.plot.hues.hueFamilies[Number(label)])}
           {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
-            <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em"}}>{hex}</div>
+            <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
           ))}
         </div>
         <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em" }} />
