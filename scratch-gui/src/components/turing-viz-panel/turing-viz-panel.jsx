@@ -61,15 +61,6 @@ const CustomLabel = (props) => { // TODO modify this so it returns rectangles wi
   );
 };
 
-// const CustomHue = (props) => { // TODO modify this so it returns rectangles with a particular colour
-//   const hue = props.payload.value % 360
-//   return (
-//     <foreignObject className={styles.labelWrapper} y={260} x={props.payload.tickCoord}>
-//         <div className={styles.hueBox} style={{ backgroundColor: hueToHex(hue), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding:"0.5em"}}/>
-//     </foreignObject>
-//   );
-// };
-
 const CustomHue = (props) => {
   const hue = props.payload.value % 360;
   // Calculate the corresponding color in hex format
@@ -149,7 +140,7 @@ const getGaussianPanel = (props) => {
           <Box className={styles.dataCol}>
           <h3>Distributions</h3>
           <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
-          <ResponsiveContainer width={'90%'} aspect={1.75}>
+          <ResponsiveContainer width={'90%'} aspect={1.75} style={{marginBottom: "-1em"}}>
             <LineChart width={900} height={600} data={plot.gaussian}>
               <XAxis
                 allowDecimals={false}

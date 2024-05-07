@@ -40,7 +40,7 @@ const reducer = function (state, action) {
 };
 
 const setTuringActive = function () {
-  console.log("setting turing extension active!")
+  // console.log("setting turing extension active!")
   return {
     type: SET_TURING_ACTIVE,
     turingActive: true // Include the data in the action
@@ -48,7 +48,7 @@ const setTuringActive = function () {
 };
 
 const setTuringData = function (data) {
-  console.log("the reducer is updating its state... (turing data): " + data)
+  // console.log("the reducer is updating its state... (turing data): " + data)
   return {
     type: SET_DATA,
     data: data // Include the data in the action
@@ -56,8 +56,6 @@ const setTuringData = function (data) {
 };
 
 const setTuringDataState = function (state) {
-  console.log("the reducer is updating the dataIsSet state... (turing data): " + state)
-  console.log(state)
   return {
     type: SET_DATA_STATE,
     dataIsSet: state // Include the data in the action
