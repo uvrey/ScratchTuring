@@ -145,13 +145,13 @@ const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
   return (
-    <Box className={styles.dataRow} style = {{marginTop: "-1.5em"}}>
+    <Box className={styles.dataRow} style={{ marginTop: "-1.5em" }}>
       {getParameterLabels(props)}
       <Box className={styles.dataCol}>
         {/* <img src={FontDist} className={styles.visHeading} /> */}
         <Box className={styles.chartBox}>
           <Box className={styles.dataCol}>
-            <h3 style={{marginTop: "-0.2em"}}>Distributions</h3>
+            <h3 style={{ marginTop: "-0.2em" }}>Distributions</h3>
             <p style={{ marginBottom: "2em", width: "100%" }}>You can find out more about how the data is distributed here based on what you believe, what you see and what the true distribution actually is.</p>
             <ResponsiveContainer width={'90%'} aspect={1.75} style={{ marginBottom: "-1em" }}>
               <LineChart width={900} height={600} data={plot.gaussian}>
@@ -182,15 +182,16 @@ const getGaussianPanel = (props) => {
 
                 {console.log("MEANS?")}
                 {console.log(plot.means)}
-                {/* {plot.activeDistributions.map((key) => (
+                {plot.activeDistributions.map((key) => (
                   <ReferenceLine x={plot.means[key]}
                     strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
-                    label={"Mean: " + plot.means[key]}
-                    stroke={"#ffffff"}
+                    // label={"Mean: " + plot.means[key]}
+                    stroke={key.includes("ps") ? plot.styles['ps-options'].stroke : plot.styles[key].stroke}
+                    // stroke={"#ffffff"}
                     strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth
                     }
                   />
-                ))} */}
+                ))}
 
                 {/* 
                 {console.log("MEANS:")}
@@ -500,7 +501,7 @@ const handleHueClick = (data, index) => {
 const getHuePanel = (props) => {
   const plot = props.data.plot
   return (
-    <Box className={styles.dataRow} style = {{marginLeft: "-1em"}} >
+    <Box className={styles.dataRow} style={{ marginLeft: "-1em" }} >
       <Box className={styles.chartBox}>
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4>
@@ -747,9 +748,15 @@ const getKeyStats = (props) => {
         )}
       </div>
       <div>
-        <h4>How many observations?</h4>
+        <h4>Number of Observations</h4>
         <p className={styles.stat}>{samples.length}</p>
       </div>
+      {data.distribution === "gaussian" && samples.length > 0 ? (
+        <div>
+          <h4 style={{ color: "#00B295" }}>Mean of Observations</h4>
+          {console.log(samples)}
+          <p className={styles.stat}>{(samples.reduce((acc, v) => acc + v, 0) / samples.length).toFixed(2)}</p>
+        </div>) : (null)}
     </Box>
     // </Box>
   );
