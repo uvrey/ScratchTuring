@@ -170,6 +170,12 @@ class TuringTab extends React.Component {
     handleUpdateToChart(modelName, vm, updateFunction, mode) {
         console.log("handling new values in the selection box")
 
+        if (mode == "meanLines" || mode == "tooltip") {
+            var customData = { modelName: modelName }
+            updateFunction(vm, customData)
+            return
+        }
+
         if (mode == 'viewFactor') {
             const inputs = [modelName + "_viewFactorValue"]; // TODO check if I can use these labels for all models?
             const values = {};
@@ -271,9 +277,18 @@ class TuringTab extends React.Component {
         vm.runtime.emit('UPDATE_POSTERIOR_N', data)
     }
 
+    handleUpdateTooltip(vm, data) {
+        console.log("UPDATING TOOLTIP!")
+        vm.runtime.emit('UPDATE_TOOLTIP', data)
+    }
+
     handleUpdateGroundTruth(vm, data) {
         vm.runtime.emit('UPDATE_GROUND_TRUTH_PARAMS', data)
         //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+    }
+
+    handleUpdateMeanLines(vm, data) {
+        vm.runtime.emit('UPDATE_MEAN_LINES', data)
     }
 
     getStoredValue(value, defaultValue) {
@@ -398,6 +413,8 @@ class TuringTab extends React.Component {
                         updatePrior={this.handleUpdatePrior}
                         updateGroundTruth={this.handleUpdateGroundTruth}
                         updatePosteriorN={this.handleUpdatePosteriorN}
+                        updateMeanLines={this.handleUpdateMeanLines}
+                        updateTooltip={this.handleUpdateTooltip}
                         toggleVisibility={this.handleToggleVisibility}
                         updateViewFactor={this.handleUpdateViewFactor}
                         getValue={this.getStoredValue}

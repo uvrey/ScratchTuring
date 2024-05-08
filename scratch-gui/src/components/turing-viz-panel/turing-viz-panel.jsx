@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { PureComponent } from 'react';
 import Box from '../box/box.jsx';
 import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -39,35 +39,6 @@ export const randomRotate = selector => {
   });
 };
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className={styles.customTooltip}>
-        <p className={styles.chartLabel}>{`Average: ${payload[0].value} sec`}</p>
-        <p className="intro"></p>
-      </div>
-    );
-  }
-  return null;
-};
-
-const CustomLabel = ({ data, color }) => { // Pass color as a prop
-  const width = 20; // Adjust width as needed
-  const height = 10; // Adjust height as needed
-
-  return (
-    <foreignObject className={styles.labelWrapper} x="0" y="0">
-      <svg width={width} height={height}>
-        <rect x={0} y={0} width={width} height={height} fill={color} /> {/* Colored rectangle */}
-        <text x={width / 2} y={height / 2} dominantBaseline="middle" textAnchor="middle">
-          {data} {/* Text on top of the rectangle */}
-        </text>
-      </svg>
-    </foreignObject>
-  );
-};
-
-
 const CustomHue = (props) => {
   var shiftFactor = 0
 
@@ -89,6 +60,12 @@ const CustomHue = (props) => {
     />
   );
 };
+
+const CustomizedLabel = (label) => {
+  return (
+    <div className={styles.meanLabel}>{label}</div>
+  );
+}
 
 
 /**
@@ -112,21 +89,64 @@ const formatId = (modelName, label) => {
   return modelName + "_" + label
 }
 
-const GaussianTooltip = ({ active, payload, label }) => {
+const getMeansComponent = (plot) => {
+  { console.log("GETTTING MEAN COMPONENT...") }
+  return (
+    <div className={styles.dataRow}>
+      {(plot.means).map((key, index) => (
+        <p style={{ color: "#d41444" }}>{key}: {plot.means[key]}</p>
+      ))}
+    </div>
+  )
+}
+
+const GaussianTooltip = ({ active, payload, label, plot }) => {
+
+  console.log("plot?")
+  console.log(plot)
+
+  console.log("helpful tooltip should show??")
+  console.log(plot.helpfulTooltip)
+
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-    return (
-      <div className={styles.gaussianTooltip}>
-        <p>
-          {`Odds of ${label.toFixed(2)} are `}
-          <b style={{ color: "#9966FF" }} className={styles.odds}>{`${(100 * payload[0].value).toFixed(3)}%`}</b>
-        </p>
-      </div>
-    );
+    console.log("tooltip payload?")
+    console.log(payload)
+
+    if (plot.helpfulTooltip) {
+      return (
+        <div className={styles.gaussianTooltip}>
+          {/* {plot.meanLines ? (getMeansComponent(plot)) : null} */}
+          {`Odds of ${label.toFixed(2)} are:`}
+          {payload.map((key, index) => (
+            <p key={payload[index]}> {/* Add unique key for each item */}
+              <b
+                style={{
+                  color: payload[index].dataKey.includes("ps")
+                    ? plot.styles["ps-options"].stroke // Access ps-options style
+                    : plot.styles[payload[index].dataKey].stroke, // Access other styles based on key
+                }}
+                className={styles.odds}
+              >
+                {payload[index].dataKey.includes("ps")
+                  ? "Updated Belief (" + (index) + ")"
+                  : plot.styles[payload[index].dataKey].chartName}: {`${(100 * payload[index].value).toFixed(3)}%`}
+              </b>
+            </p>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <div className={styles.gaussianTooltip}>
+          {label.toFixed(2)}
+        </div>
+      )
+    }
   }
   return null;
 }
 
-const GaussianLegend = ({ payload, plot }) => (
+const GaussianLegend = ({ payload, plot, props }) => (
   <div style={{ justifyContent: "center" }}>
     <h4 style={{ marginBottom: "3px", fontSize: "0.8rem" }}>KEY</h4>
     {/* {console.log("GAUSSIAN LEGEND PAYLOAD?")}
@@ -135,12 +155,85 @@ const GaussianLegend = ({ payload, plot }) => (
       item.dataKey.includes("ps") ? (null) : (
         <b style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
     ))}
+
+    {/* {console.log("Inside legend! ")}
+    {console.log(props)} */}
+    {props.data.samples.length > 0 ? (<b style={{ color: plot.styles["ps-options"].stroke, marginRight: "1.5em" }}>Updated Belief</b>) : (null)}
+
+    <div className="checkpoint-input">
+      <label htmlFor="checkpoint-input">
+        <input
+          id="checkpoint-input"
+          type="checkbox"
+          onChange={() => props.updateChart(props.activeModel, props.vm, props.updateTooltip, 'tooltip')}
+        // Add a default checked state if needed (optional)
+        />
+        Helpful tooltip
+      </label>
+      <label htmlFor="checkpoint-input">
+        <input
+          id="checkpoint-input"
+          type="checkbox"
+          onChange={() => props.updateChart(props.activeModel, props.vm, props.updateMeanLines, 'meanLines')}
+        // Add a default checked state if needed (optional)
+        />
+        Mean Lines
+      </label>
+    </div>
+
   </div>
 );
 
 const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
-  return <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>{`value: ${payload.value}`}</text>;
+  <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>{`value: ${payload.value}`}</text>;
 };
+
+// const MeanLabel = ({ x, y, mean}) => {
+//   return (
+//     // <div>
+//     <foreignObject className={styles.labelWrapper} x={mean} y="0">
+//       <svg width={"3em"} height={"1em"}>
+//         <rect x={0} y={0} width={"3em"} height={"1em"} fill={"#fff"} /> {/* Colored rectangle */}
+//         <text x={"3em" / 2} y={"1em" / 2} dominantBaseline="middle" textAnchor="middle">
+//           {mean} {/* Text on top of the rectangle */}
+//         </text>
+//       </svg>
+//     </foreignObject>
+//   )
+// }
+
+const TooltipReferenceLine = ({ x, children, ...otherProps }) => (
+  <Tooltip content={children} trigger="none"> {/* Disable default trigger */}
+    <ReferenceLine x={x} {...otherProps} />
+  </Tooltip>
+);
+
+
+const formatLabel = () => {
+  console.log("WE ARE SUPPOSED TO FORMAT THIS LABEL?")
+}
+
+// const element = document.getElementById("prior_label");
+
+
+// element.addEventListener("click", () => {
+//   element.style.zIndex = 10; // Set a high z-index value to bring it to front
+// });
+
+
+const CustomLabel = ({...props }) => {
+  { console.log("WE WANT TO USE CUSTOM LABELS & have access to:") }
+  { console.log(props) }
+  return (
+    <g>
+      <foreignObject x={props.viewBox.x} y={props.viewBox.y} width={(String(props.value).length*10 + 5)} height={20}>
+        <div id = {props.id} 
+        style={{backgroundColor: props.fill, margin:"1px", color: "#ffffff",  display: "flex", flexWrap: "wrap", padding: "0.1em"}}>{props.value}
+        </div>
+      </foreignObject>
+    </g>
+  )
+}
 
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
@@ -182,27 +275,29 @@ const getGaussianPanel = (props) => {
 
                 {console.log("MEANS?")}
                 {console.log(plot.means)}
-                {plot.activeDistributions.map((key) => (
-                  <ReferenceLine x={plot.means[key]}
-                    strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
-                    // label={"Mean: " + plot.means[key]}
-                    stroke={key.includes("ps") ? plot.styles['ps-options'].stroke : plot.styles[key].stroke}
-                    // stroke={"#ffffff"}
-                    strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth
-                    }
-                  />
-                ))}
-
-                {/* 
-                {console.log("MEANS:")}
-                {console.log(plot.means)}
-                {plot.means.map((mean) => (
-             
-                ))} */}
-
+                {plot.meanLines ? (
+                  plot.activeDistributions.map((key) => (
+                    <ReferenceLine
+                      x={plot.means[key]}
+                      label={<Label
+                        id={key+"_label"}
+                        value={plot.means[key]}
+                        distName={key}
+                        fill={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
+                        position="insideBottom"
+                        offset={0}
+                        content={<CustomLabel />} />
+                      }
+                      strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                      // label={plot.means[key]}
+                      stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
+                      strokeWidth={key.includes("ps") ? plot.styles["ps-options"].strokeWidth : plot.styles[key].strokeWidth}
+                    />
+                  ))
+                ) : null}
                 {/* <ReferenceLine x={} /> */}
-                <Legend content={<GaussianLegend plot={plot} />} />
-                <Tooltip content={<GaussianTooltip />} />
+                <Legend content={<GaussianLegend plot={plot} props={props} />} />
+                <Tooltip content={<GaussianTooltip plot={plot} />} />
               </LineChart>
             </ResponsiveContainer>
           </Box>
@@ -536,6 +631,7 @@ const getHuePanel = (props) => {
               <XAxis
                 label="Hue"
                 tick={<CustomHue />}
+                offset={0}
                 // interval={0}
                 tickInterval={1}
                 axisLine={{
