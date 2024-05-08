@@ -148,6 +148,12 @@
     display: none;
 }
 
+.checkbox-label {
+    margin-right: 2em;
+    padding-bottom: 1em;
+    color: "#ggg"
+}
+
 .chart-checkbox {
     /* Style the container element */
     background-color: white;

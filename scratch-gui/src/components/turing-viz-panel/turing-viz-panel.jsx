@@ -142,7 +142,7 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
       );
     } else {
       return (
-        <div className={styles.gaussianTooltip}>
+        <div className={styles.gaussianTooltip} style={{maxWidth: "3em"}}>
           {label.toFixed(2)}
         </div>
       )
@@ -153,7 +153,7 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
 
 const GaussianLegend = ({ payload, plot, props }) => (
   <div style={{ justifyContent: "center" }}>
-    <h4 style={{ marginBottom: "3px", fontSize: "0.8rem" }}>KEY</h4>
+    <h4 style={{ marginBottom: "1em", fontSize: "0.8rem" }}>KEY 🗝️</h4>
     {/* {console.log("GAUSSIAN LEGEND PAYLOAD?")}
     {console.log(payload)} */}
     {payload.map((item) => (
@@ -165,19 +165,21 @@ const GaussianLegend = ({ payload, plot, props }) => (
     {console.log(props)} */}
     {props.data.samples.length > 0 ? (<b style={{ color: plot.styles["ps-options"].stroke, marginRight: "1.5em" }}>Updated Belief</b>) : (null)}
 
-    <div className="checkpoint-input">
-      <label htmlFor="checkpoint-input">
+    <div style={{marginTop: "0.5em"}}>
+    <label htmlFor="checkpoint-input-tooltip" className={styles.checkboxLabel}>
         <input
           id="checkpoint-input"
           type="checkbox"
+          className={styles.chartCheckbox}
           onChange={() => props.updateChart(props.activeModel, props.vm, props.updateTooltip, 'tooltip')}
         // Add a default checked state if needed (optional)
         />
         Helpful tooltip
       </label>
-      <label htmlFor="checkpoint-input">
+      <label htmlFor="checkpoint-input-means" className={styles.checkboxLabel}>
         <input
           id="checkpoint-input"
+          className={styles.chartCheckbox}
           type="checkbox"
           onChange={() => props.updateChart(props.activeModel, props.vm, props.updateMeanLines, 'meanLines')}
         // Add a default checked state if needed (optional)
@@ -404,9 +406,9 @@ const getParameterLabels = (props) => {
   switch (props.data.distribution) {
     case 'gaussian':
       return (
-        <div className={styles.params}>
+        <div className={styles.params} style={{marginBottom: "1em"}}>
           <Box className={styles.paramBox}>
-            <h4>True Distribution 🚀</h4>
+            <h4>Ground Truth 🚀</h4>
             <Box className={styles.sbuttonRow}>
               mean
               <input
@@ -469,7 +471,7 @@ const getParameterLabels = (props) => {
           </Box>
 
           <Box className={styles.paramBox}>
-            <h4>Expected Distribution 😎</h4>
+            <h4>Original Belief 😎</h4>
             <Box className={styles.sbuttonRow}>
               mean
               <input
