@@ -91,10 +91,11 @@ const formatId = (modelName, label) => {
 
 const getMeansComponent = (plot) => {
   { console.log("GETTTING MEAN COMPONENT...") }
+  { console.log(plot) }
   return (
     <div className={styles.dataRow}>
-      {(plot.means).map((key, index) => (
-        <p style={{ color: "#d41444" }}>{key}: {plot.means[key]}</p>
+      {Object.entries(plot.means).map(([key, index]) => (
+        <p style={{ color: "#d41444" }}>{key}: {index}</p>
       ))}
     </div>
   )
@@ -115,8 +116,7 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
     if (plot.helpfulTooltip) {
       return (
         <div className={styles.gaussianTooltip}>
-          {/* {plot.meanLines ? (getMeansComponent(plot)) : null} */}
-          {`Odds of ${label.toFixed(2)} are:`}
+          🎲 Likelihood of <b>{label.toFixed(2)}</b> 🎲
           {payload.map((key, index) => (
             <p key={payload[index]}> {/* Add unique key for each item */}
               <b
@@ -127,9 +127,14 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
                 }}
                 className={styles.odds}
               >
-                {payload[index].dataKey.includes("ps")
-                  ? "Updated Belief (" + (index) + ")"
-                  : plot.styles[payload[index].dataKey].chartName}: {`${(100 * payload[index].value).toFixed(3)}%`}
+                {/* {payload[index].dataKey.includes("ps")
+                  ? `Updated Belief (${index + 1})`  // Use index + 1 for human-readable numbering
+                  : plot.styles[payload[index].dataKey].chartName
+                }  */}
+                ➡️ {
+                  `${(100 * payload[index].value).toFixed(3)}%` +
+                  (plot.meanLines ? ` (Mean = ${plot.means[payload[index].dataKey]})` : '')
+                }
               </b>
             </p>
           ))}
@@ -219,16 +224,35 @@ const formatLabel = () => {
 // element.addEventListener("click", () => {
 //   element.style.zIndex = 10; // Set a high z-index value to bring it to front
 // });
-
-
-const CustomLabel = ({...props }) => {
-  { console.log("WE WANT TO USE CUSTOM LABELS & have access to:") }
-  { console.log(props) }
+const HueAxisLabel = ({ ...props }) => {
   return (
     <g>
-      <foreignObject x={props.viewBox.x} y={props.viewBox.y} width={(String(props.value).length*10 + 5)} height={20}>
-        <div id = {props.id} 
-        style={{backgroundColor: props.fill, margin:"1px", color: "#ffffff",  display: "flex", maxWidth: "2em", flexWrap: "wrap", padding: "0.1em"}}>{props.id == "prior_label" || props.id == "custom_label" ? (props.value) : (props.value.toFixed(2))}
+      <defs>
+        <linearGradient id="hueSpectrum" x1="0%" y1="0%" x2="100%" y2="0%">
+          {Array(361)
+            .fill(0)
+            .map((_, i) => (
+              <stop key={i} offset={`${i / 360}%`} stopColor={`hsl(${i}, 100%, 100%)`} />
+            ))}
+        </linearGradient>
+      </defs>
+      <rect
+        x={props.viewBox.x}
+        y={props.viewBox.y}
+        width={props.width || 100} // Set width or use provided props.width
+        height={props.height || 20} // Set height or use provided props.height
+        fill={`url(#hueSpectrum)`}
+      />
+    </g>
+  )
+}
+
+const MeanLabel = ({ ...props }) => {
+  return (
+    <g>
+      <foreignObject x={props.viewBox.x} y={props.viewBox.y} width={(String(props.value).length * 10 + 5)} height={20}>
+        <div id={props.id}
+          style={{ backgroundColor: props.fill, margin: "1px", color: "#ffffff", display: "flex", maxWidth: "2em", flexWrap: "wrap", padding: "0.1em" }}>{props.id == "prior_label" || props.id == "custom_label" ? (props.value) : (props.value.toFixed(2))}
         </div>
       </foreignObject>
     </g>
@@ -273,20 +297,18 @@ const getGaussianPanel = (props) => {
                   />
                 ))}
 
-                {console.log("MEANS?")}
-                {console.log(plot.means)}
                 {plot.meanLines ? (
                   plot.activeDistributions.map((key) => (
                     <ReferenceLine
                       x={plot.means[key]}
                       label={<Label
-                        id={key+"_label"}
+                        id={key + "_label"}
                         value={plot.means[key]}
                         distName={key}
                         fill={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
                         position="insideBottom"
                         offset={0}
-                        content={<CustomLabel />} />
+                        content={<MeanLabel />} />
                       }
                       strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
                       // label={plot.means[key]}
@@ -329,7 +351,7 @@ const getPosteriorNs = (props) => {
   const active = props.activeModel
   return (
     <div className={styles.paramBox}>
-      <h4>Possible Updated Beliefs</h4>
+      <h4> Updated Beliefs 🔍</h4>
       <Box className={styles.sbuttonRow}>
         how many?
         <input
@@ -384,7 +406,7 @@ const getParameterLabels = (props) => {
       return (
         <div className={styles.params}>
           <Box className={styles.paramBox}>
-            <h4>True Distribution</h4>
+            <h4>True Distribution 🚀</h4>
             <Box className={styles.sbuttonRow}>
               mean
               <input
@@ -447,7 +469,7 @@ const getParameterLabels = (props) => {
           </Box>
 
           <Box className={styles.paramBox}>
-            <h4>Expected Distribution</h4>
+            <h4>Expected Distribution 😎</h4>
             <Box className={styles.sbuttonRow}>
               mean
               <input
@@ -546,7 +568,6 @@ function getColorRange(hue) {
 
 const HueTooltip = ({ active, payload, label, props }) => {
   var shiftFactor = -70
-  // const index = Math.abs((Number(label) + shiftFactor) % 360)
   const index = Number(label)
 
   if (active && payload && payload.length) { // Check if tooltip is active and has data
@@ -565,7 +586,7 @@ const HueTooltip = ({ active, payload, label, props }) => {
   return null;
 };
 
-const RhythmTooltip = ({ active, payload, label, props }) => {
+const RhythmTooltip = ({ active, payload, label, ...props }) => {
   console.log("PROPS?")
   console.log(props)
   if (active && payload && payload.length) { // Check if tooltip is active and has data
@@ -573,15 +594,6 @@ const RhythmTooltip = ({ active, payload, label, props }) => {
       <div>
         <p>{`${label}: ${payload[0].value}`}</p>
       </div>
-      // <div>
-      //   {/* <p>{`${label}: ${payload[0].value}`}</p> */}
-      //   <div className={styles.hueBox}>
-      //     {props.data.plot.hues.hueFamilies[Number(label)].map((hex, index) => (
-      //       <div className={styles.hueSwatch} style={{ backgroundColor: hex }} />
-      //     ))}
-      //   </div>
-      //   <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em" }} />
-      // </div>
     );
   }
   return null;
@@ -628,8 +640,9 @@ const getHuePanel = (props) => {
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
             <BarChart width={900} height={400} data={plot.histogram} onClick={handleHueClick} style={{ marginTop: "1em" }}>
               <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
+              <HueAxisLabel />
               <XAxis
-                label="Hue"
+                label={<Label content={<HueAxisLabel />} />}
                 tick={<CustomHue />}
                 offset={0}
                 // interval={0}
