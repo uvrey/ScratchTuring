@@ -332,6 +332,10 @@ class TuringTab extends React.Component {
         );
     }
 
+    handleClearSamples(vm, modelName) {
+        vm.runtime.emit('CLEAR_SAMPLES', {modelName: modelName})
+    }
+
     render() {
         const {
             dispatchUpdateRestore, // eslint-disable-line no-unused-vars
@@ -399,6 +403,7 @@ class TuringTab extends React.Component {
                 activeModelIndex={this.state.activeModelIndex}
                 activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
                 toggleVisbility={this.handleToggleVisibility}
+                onClearSamples={this.handleClearSamples}
             >
                 {this.getActiveModelDataState() ?
                     (<TuringVizPanel

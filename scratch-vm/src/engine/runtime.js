@@ -491,8 +491,26 @@ class Runtime extends EventEmitter {
         return 'PROJECT_START';
     }
 
+    static get UPDATE_POSTERIOR_N () {
+        return 'UPDATE_POSTERIOR_N';
+    }
+
+    
+    static get UPDATE_TOOLTIP () {
+        return 'UPDATE_TOOLTIP';
+    }
+
+    static get UPDATE_MEAN_LINES () {
+        return 'UPDATE_MEAN_LINES';
+    }
+
+
     static get UPDATE_CUSTOM_PARAMS () {
         return 'UPDATE_CUSTOM_PARAMS';
+    }
+
+    static get CLEAR_SAMPLES () {
+        return 'CLEAR_SAMPLES';
     }
 
     static get UPDATE_PRIOR_PARAMS () {

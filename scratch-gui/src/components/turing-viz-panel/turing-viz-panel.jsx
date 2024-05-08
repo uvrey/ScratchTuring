@@ -103,15 +103,15 @@ const getMeansComponent = (plot) => {
 
 const GaussianTooltip = ({ active, payload, label, plot }) => {
 
-  console.log("plot?")
-  console.log(plot)
+  // console.log("plot?")
+  // console.log(plot)
 
-  console.log("helpful tooltip should show??")
-  console.log(plot.helpfulTooltip)
+  // console.log("helpful tooltip should show??")
+  // console.log(plot.helpfulTooltip)
 
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-    console.log("tooltip payload?")
-    console.log(payload)
+    // console.log("tooltip payload?")
+    // console.log(payload)
 
     if (plot.helpfulTooltip) {
       return (
@@ -261,6 +261,15 @@ const MeanLabel = ({ ...props }) => {
   )
 }
 
+const LikelihoodLabel = ({ ...props }) => {
+  return (
+    <h5 style={{ transform: 'rotate(-90deg)', writingMode: 'vertical-rl' }}>
+      Likelihood
+    </h5>
+  );
+};
+
+
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
   return (
@@ -278,9 +287,12 @@ const getGaussianPanel = (props) => {
                   allowDecimals={false}
                   dataKey="input"
                   type="number"
+                  label={<Label value="Mean" y={-10}/>}
                 // tick={CustomLabel}
                 />
-                <YAxis allowDecimals={true} />
+                <YAxis allowDecimals={true} 
+                label={<Label content={<LikelihoodLabel/>}/>}
+                />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                 {props.docTags}
                 {console.log("Getting plot styles from data:")}

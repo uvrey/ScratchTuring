@@ -163,6 +163,8 @@
     height: 18px;
     /* Adjust height as needed */
     cursor: pointer;
+    margin-right: 0.5em;
+
     /* Indicate interaction on hover */
 }
 
