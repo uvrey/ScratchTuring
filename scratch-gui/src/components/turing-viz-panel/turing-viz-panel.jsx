@@ -228,7 +228,7 @@ const CustomLabel = ({...props }) => {
     <g>
       <foreignObject x={props.viewBox.x} y={props.viewBox.y} width={(String(props.value).length*10 + 5)} height={20}>
         <div id = {props.id} 
-        style={{backgroundColor: props.fill, margin:"1px", color: "#ffffff",  display: "flex", flexWrap: "wrap", padding: "0.1em"}}>{props.value}
+        style={{backgroundColor: props.fill, margin:"1px", color: "#ffffff",  display: "flex", maxWidth: "2em", flexWrap: "wrap", padding: "0.1em"}}>{props.id == "prior_label" || props.id == "custom_label" ? (props.value) : (props.value.toFixed(2))}
         </div>
       </foreignObject>
     </g>
