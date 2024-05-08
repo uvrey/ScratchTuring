@@ -142,7 +142,7 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
       );
     } else {
       return (
-        <div className={styles.gaussianTooltip} style={{maxWidth: "3em"}}>
+        <div className={styles.gaussianTooltip} style={{ maxWidth: "3em" }}>
           {label.toFixed(2)}
         </div>
       )
@@ -165,8 +165,8 @@ const GaussianLegend = ({ payload, plot, props }) => (
     {console.log(props)} */}
     {props.data.samples.length > 0 ? (<b style={{ color: plot.styles["ps-options"].stroke, marginRight: "1.5em" }}>Updated Belief</b>) : (null)}
 
-    <div style={{marginTop: "0.5em"}}>
-    <label htmlFor="checkpoint-input-tooltip" className={styles.checkboxLabel}>
+    <div style={{ marginTop: "0.5em" }}>
+      <label htmlFor="checkpoint-input-tooltip" className={styles.checkboxLabel}>
         <input
           id="checkpoint-input"
           type="checkbox"
@@ -287,11 +287,11 @@ const getGaussianPanel = (props) => {
                   allowDecimals={false}
                   dataKey="input"
                   type="number"
-                  label={<Label value="Mean" y={-10}/>}
-                // tick={CustomLabel}
-                />
-                <YAxis allowDecimals={true} 
-                label={<Label content={<LikelihoodLabel/>}/>}
+                >
+                  <Label value="Mean" offset={0} position="insideBottom" />
+                </XAxis>
+                <YAxis allowDecimals={true}
+                  label={{ value: 'Likelihood', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
                 />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                 {props.docTags}
@@ -418,7 +418,7 @@ const getParameterLabels = (props) => {
   switch (props.data.distribution) {
     case 'gaussian':
       return (
-        <div className={styles.params} style={{marginBottom: "1em"}}>
+        <div className={styles.params} style={{ marginBottom: "1em" }}>
           <Box className={styles.paramBox}>
             <h4>Ground Truth 🚀</h4>
             <Box className={styles.sbuttonRow}>
