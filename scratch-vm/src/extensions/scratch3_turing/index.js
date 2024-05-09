@@ -1306,7 +1306,7 @@ class Scratch3Turing {
         var user_model = this.user_models[modelName]
 
         // clear samples from the list
-        user_model.samples = []
+        user_model.data = []
 
         // remove posterior curves
         user_model.models.ps.active = false
@@ -1314,6 +1314,9 @@ class Scratch3Turing {
 
         // update visualisation data
         this.updateVisualisationData(user_model)
+
+        this._runtime.emit('TURING_DATA', this.visualisationData)
+        this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
         this._runtime.emit('PROJECT_CHANGED')
     }
 

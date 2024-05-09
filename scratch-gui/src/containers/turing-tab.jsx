@@ -111,8 +111,6 @@ class TuringTab extends React.Component {
 
 
     handleActivateDashboard(key, index) {
-        console.log("(((((((((((((((((((((((");
-        console.log("activate the dashboard for " + key + " at " + index);
         this.setState({ activeModelIndex: index });
     }
 
@@ -121,6 +119,9 @@ class TuringTab extends React.Component {
     }
 
     getModelSamples(modelName) {
+        console.log("!!!!!!!GETTING MODEL SAMPLES! ")
+        console.log(this.props.data[modelName].samples)
+
         return (this.props.dataIsSet == {}) ? ([]) : ((this.props.dataIsSet[modelName] == undefined) ? ([]) : (this.props.data[modelName].samples));
     }
 
