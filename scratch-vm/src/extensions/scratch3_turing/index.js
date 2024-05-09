@@ -587,9 +587,11 @@ class Scratch3Turing {
         }
     }
 
-    async updatePosteriorCurves(user_model) {
+    async updatePosteriorCurves(user_model, afterPrior = false) {
         if (user_model.data.length > 0) {
-            this._runtime.emit('TURING_SHOW_LOAD')
+            if (!afterPrior) {
+                this._runtime.emit('TURING_SHOW_LOAD')
+            }
             user_model.fetching = true
             console.log("inside updatePosteriorCurves: We have captured data, and will now update our curves.")
 
@@ -894,7 +896,7 @@ class Scratch3Turing {
             if (changed) {
                 this.user_models[data.modelName].models[mode].mean = data.mean
                 this.user_models[data.modelName].models[mode].stdv = data.stdv
-                await this._updateTuringPrior(this.user_models[data.modelName]).then(this.updatePosteriorCurves(this.user_models[data.modelName]))
+                await this._updateTuringPrior(this.user_models[data.modelName]).then(this.updatePosteriorCurves(this.user_models[data.modelName], true))
 
             } else {
                 console.log("{Prior is unchanged}")

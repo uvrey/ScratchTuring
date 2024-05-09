@@ -74,7 +74,7 @@ const TuringSelector = props => {
             <ActionMenu
                 img={erasorIcon}
                 title={"Clear Samples"}
-                onClick={() => props.onClearSamples(props.vm, props.data.modelName)}
+                onClick={() => props.onClearSamples(props.data.modelName)}
             />
         </Box>
     );
