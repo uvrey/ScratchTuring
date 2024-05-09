@@ -902,7 +902,7 @@ const getKeyStats = (props) => {
       <div>
         <button
           className={styles.gaussianButton}
-          style={{ backgroundColor: "#aa4954" }} // Active button style
+          style={{ backgroundColor: "#ef4a5d" }} // Active button style
           onClick={() => props.deleteModel(props.activeModel)}
         >
           <h4>Delete</h4>

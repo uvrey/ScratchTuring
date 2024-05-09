@@ -234,15 +234,15 @@ class Scratch3Turing {
             name: 'Turing',
 
             blocks: [
-                {
-                    opcode: 'greet',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.greet',
-                        default: 'greet',
-                        description: 'turing.greet'
-                    })
-                },
+                // {
+                //     opcode: 'greet',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.greet',
+                //         default: 'greet',
+                //         description: 'turing.greet'
+                //     })
+                // },
                 {
                     opcode: 'viewModel',
                     blockType: BlockType.REPORTER,
@@ -278,6 +278,25 @@ class Scratch3Turing {
                     }
                 },
                 {
+                    opcode: 'takeSampleFromUser',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'turing.takeSampleFromUser',
+                        default: 'sample [OBSERVATION] for [MODEL]',
+                        description: 'turing.takeSampleFromUser'
+                    }),
+                    arguments: {
+                        OBSERVATION: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                        MODEL: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "height"
+                        }
+                    }
+                },
+                {
                     opcode: 'takeSampleFromSprite',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
@@ -295,25 +314,6 @@ class Scratch3Turing {
                             type: ArgumentType.STRING,
                             defaultValue: "height"
                         },
-                    }
-                },
-                {
-                    opcode: 'takeSampleFromUser',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'turing.takeSampleFromUser',
-                        default: 'sample [OBSERVATION] for [MODEL]',
-                        description: 'turing.takeSampleFromUser'
-                    }),
-                    arguments: {
-                        OBSERVATION: {
-                            type: ArgumentType.STRING,
-                            defaultValue: " ",
-                        },
-                        MODEL: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "height"
-                        }
                     }
                 },
                 {
