@@ -93,8 +93,8 @@ class Scratch3Turing {
         this._updateParams = this._updateParams.bind(this);
         this._runtime.on('UPDATE_POSTERIOR_N', data => this._updateParams(data, 'ps'));
 
-       this._runtime.on('UPDATE_TOOLTIP', data => this._updateParams(data, 'helpfulTooltip'));
-       this._runtime.on('UPDATE_MEAN_LINES', data => this._updateParams(data, 'meanLines'));
+        this._runtime.on('UPDATE_TOOLTIP', data => this._updateParams(data, 'helpfulTooltip'));
+        this._runtime.on('UPDATE_MEAN_LINES', data => this._updateParams(data, 'meanLines'));
 
         this._updateParams = this._updateParams.bind(this);
         this._runtime.on('UPDATE_PRIOR_PARAMS', data => this._updateParams(data, 'prior'));
@@ -462,6 +462,7 @@ class Scratch3Turing {
             },
             active: true,
             visible: true,
+            fetching: false,
             helpfulTooltip: false,
             meanLines: false,
             hasDistData: false,
@@ -516,8 +517,10 @@ class Scratch3Turing {
 
         if (distribution == "gaussian") {
             this._runtime.emit('TURING_SHOW_LOAD')
+            user_model.fetching = true
             var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", distribution, -1, [], {}).then(response =>
                 this.updateFromResponse(user_model, response, 'prior', true)); // unpacks the new data using the turing samples
+            user_model.fetching = false
             return message
         } else {
             this.user_models[modelName].timer.timeElapsed()
@@ -587,6 +590,7 @@ class Scratch3Turing {
     async updatePosteriorCurves(user_model) {
         if (user_model.data.length > 0) {
             this._runtime.emit('TURING_SHOW_LOAD')
+            user_model.fetching = true
             console.log("inside updatePosteriorCurves: We have captured data, and will now update our curves.")
 
             const n = user_model.models['ps'].n
@@ -607,6 +611,7 @@ class Scratch3Turing {
             user_model['hasDistData'] = true
         }
         this._runtime.emit('TURING_CLOSE_LOAD')
+        user_model.fetching = false
     }
 
     updatePosteriors(user_model, response) {
@@ -660,6 +665,7 @@ class Scratch3Turing {
         }
         user_model['hasDistData'] = true
         this._runtime.emit('TURING_CLOSE_LOAD')
+        user_model.fetching = false
         this.updateVisualisationData(user_model)
     }
 
@@ -914,6 +920,7 @@ class Scratch3Turing {
         this.updateVisualisationData(user_model)
 
         this._runtime.emit('TURING_SHOW_LOAD')
+        user_model.fetching = true
         var message = await this.buildQuery(user_model.modelName, "updateModelPrior", 'POST', 'prior', user_model.distribution, -1, [], params)
         return message
     }
@@ -960,360 +967,361 @@ class Scratch3Turing {
         return message
     }
 
-getActiveDistributions(models) {
-    var active = []
-    for (const model in models) {
-        if (models[model].active) {
-            if (model == "ps") {
-                for (var i = 0; i < models[model].n; i++) {
-                    active.push(model + "-" + i)
+    getActiveDistributions(models) {
+        var active = []
+        for (const model in models) {
+            if (models[model].active) {
+                if (model == "ps") {
+                    for (var i = 0; i < models[model].n; i++) {
+                        active.push(model + "-" + i)
+                    }
+                } else {
+                    active.push(model)
                 }
-            } else {
+            }
+        }
+        return active
+    }
+
+    getActiveModels() {
+        var active = []
+        for (const model of this.user_models) {
+            console.log("looking for active user models, got: " + model)
+            if (this.user_models[model].active) {
                 active.push(model)
             }
         }
+        return active
     }
-    return active
-}
 
-getActiveModels() {
-    var active = []
-    for (const model of this.user_models) {
-        console.log("looking for active user models, got: " + model)
-        if (this.user_models[model].active) {
-            active.push(model)
+    getDefinedDists(models) {
+        var defined = []
+        for (const model in models) {
+            if (models[model].defined) {
+                active.push(model)
+            }
         }
+        return defined
     }
-    return active
-}
 
-getDefinedDists(models) {
-    var defined = []
-    for (const model in models) {
-        if (models[model].defined) {
-            active.push(model)
-        }
-    }
-    return defined
-}
-
-getModelStatuses() {
-    var active = {}
-    for (const modelName in this.user_models) {
-        if (this.user_models[modelName].active) {
-            active[modelName] = true
-        } else {
-            active[modelName] = false
-        }
-    }
-    return active
-}
-
-_getSampleSpaceData(user_model) {
-    var observations = user_model.data
-    var data = []
-    for (var i = 0; i < observations.length; i++) {
-        var tmp = { x: i, y: observations[i], z: 0 }
-        data.push(tmp)
-    }
-    return data
-}
-
-_getHuePlotData(user_model) {
-    var data = []
-    for (var i = 0; i < user_model.hueData.hue.length; i++) {
-        data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this.hueToHex(i) })
-    }
-    return data
-}
-
-mapToPieChartData(user_model) {
-    // Define color ranges for each category
-    const colorRanges = {
-        'yellow': [45, 75],
-        "yellow-orange": [75, 90],
-        "yellow-green": [90, 120],
-        'green': [120, 180],
-        "blue-green": [180, 210],
-        'blue': [210, 270],
-        "blue-violet": [270, 300],
-        'violet': [300, 330],
-        "red-violet": [330, 345],
-        'red': [345, 15],
-        "red-orange": [15, 45],
-        'orange': [45, 75],
-    };
-
-    const fills = {
-        "yellow": "#fff200",
-        "yellow-orange": "#ffc400",
-        "yellow-green": "#b1ff00",
-        "green": "#00ff7a",
-        "blue-green": "#00ffeb",
-        "blue": "#0081ff",
-        "blue-violet": "#0007ff",
-        "violet": "#9000ff",
-        "red-violet": "#ff00f7",
-        "red": "#ff0007",
-        "red-orange": "#ff5000",
-        "orange": "#ff9400",
-    };
-
-    // Initialize pie chart data
-    const pieChartData = [];
-
-    // Loop through color ranges
-    for (const color of Object.keys(colorRanges)) {
-        const range = colorRanges[color];
-
-        // Calculate frequency for the range
-        const freq = user_model.hueData.hue.slice(range[0], range[1]).reduce((acc, curr) => acc + curr, 0);
-
-        // Add data to pie chart data list
-        pieChartData.push({ name: color, value: freq, fill: fills[color] });
-    }
-    return pieChartData;
-}
-
-hueToHex(hue) {
-    const hsv = { h: hue, s: 100, v: 100 }
-    return Color.rgbToHex(Color.hsvToRgb(hsv))
-}
-
-// mapToPieChartData(user_model) {
-//     // Initialize pie chart data
-//     const pieChartData = [];
-
-//     // Loop through color ranges
-//     console.log("HUES?? !!!!!!!!!!!!!!!!!")
-//     console.log(user_model.hueData.hue)
-
-//     for (var i; i < user_model.hueData.hue.length; i++) {
-//         var freq = user_model.hueData.hue[i]
-//         var color = this.hueToHex(i)
-//         pieChartData.push({ name: i, freq: freq, fill: color});
-//     }
-
-//     console.log("Format of PIE CHART DATA!!!")
-//     console.log(pieChartData)
-//     return pieChartData;
-// }
-
-_updateViewFactor(data) {
-    var user_model = this.user_models[data.modelName]
-    user_model.rhythmData.viewFactor = data.viewFactor < user_model.rhythmData.rhythms.length ? (data.viewFactor) : (user_model.rhythmData.rhythms.length - 1)
-    this.updateVisualisationData(user_model)
-}
-
-_getRhythmTimelineData(user_model) {
-    var data = []
-    var startIndex = user_model.rhythmData.viewFactor
-    for (var i = startIndex; i < user_model.rhythmData.rhythms.length; i++) {
-        data.push({ x: user_model.rhythmData.timeStamps[i], y: 1, z: 1, fill: user_model.rhythmData.fills[user_model.rhythmData.rhythms[i]], index: 1 }) // TODO get appropriate colour for the particular type of data
-    }
-    console.log("Prepared this rhythm timeline data to plot...")
-    console.log(data)
-    return data
-}
-
-_getRhythmProportionData(user_model) {
-    console.log("@@@@@@@@@@@ when getting rhythm props we have:")
-    console.log(user_model.rhythmData)
-
-    console.log("rhythm counts")
-    console.log(Object.keys(user_model.rhythmData.rhythmCounts))
-    var data = []
-    for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {
-        data.push({ name: rhythm, value: user_model.rhythmData.rhythmProportions[rhythm], fill: user_model.rhythmData.fills[rhythm] })
-    }
-    console.log("RHYTHM PIE DATA? ")
-    console.log(data)
-    return data
-}
-
-_getHueProportionData(user_model) {
-    var data = []
-    for (var i = 0; i < user_model.hueData.hue.length; i++) {
-        data.push({ hue: i, value: user_model.hueData.hueProportions[i] })
-    }
-    return data
-}
-
-_getVisibleModels (user_model) {
-    var visible = []
-    for (const model in user_model) {
-        if (models[model].visible) {
-            if (model == "ps") {
-                for (var i = 0; i < models[model].n; i++) {
-                    visible.push(model + "-" + i)
-                }
+    getModelStatuses() {
+        var active = {}
+        for (const modelName in this.user_models) {
+            if (this.user_models[modelName].active) {
+                active[modelName] = true
             } else {
-                visible.push(model)
+                active[modelName] = false
+            }
+        }
+        return active
+    }
+
+    _getSampleSpaceData(user_model) {
+        var observations = user_model.data
+        var data = []
+        for (var i = 0; i < observations.length; i++) {
+            var tmp = { x: i, y: observations[i], z: 0 }
+            data.push(tmp)
+        }
+        return data
+    }
+
+    _getHuePlotData(user_model) {
+        var data = []
+        for (var i = 0; i < user_model.hueData.hue.length; i++) {
+            data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this.hueToHex(i) })
+        }
+        return data
+    }
+
+    mapToPieChartData(user_model) {
+        // Define color ranges for each category
+        const colorRanges = {
+            'yellow': [45, 75],
+            "yellow-orange": [75, 90],
+            "yellow-green": [90, 120],
+            'green': [120, 180],
+            "blue-green": [180, 210],
+            'blue': [210, 270],
+            "blue-violet": [270, 300],
+            'violet': [300, 330],
+            "red-violet": [330, 345],
+            'red': [345, 15],
+            "red-orange": [15, 45],
+            'orange': [45, 75],
+        };
+
+        const fills = {
+            "yellow": "#fff200",
+            "yellow-orange": "#ffc400",
+            "yellow-green": "#b1ff00",
+            "green": "#00ff7a",
+            "blue-green": "#00ffeb",
+            "blue": "#0081ff",
+            "blue-violet": "#0007ff",
+            "violet": "#9000ff",
+            "red-violet": "#ff00f7",
+            "red": "#ff0007",
+            "red-orange": "#ff5000",
+            "orange": "#ff9400",
+        };
+
+        // Initialize pie chart data
+        const pieChartData = [];
+
+        // Loop through color ranges
+        for (const color of Object.keys(colorRanges)) {
+            const range = colorRanges[color];
+
+            // Calculate frequency for the range
+            const freq = user_model.hueData.hue.slice(range[0], range[1]).reduce((acc, curr) => acc + curr, 0);
+
+            // Add data to pie chart data list
+            pieChartData.push({ name: color, value: freq, fill: fills[color] });
+        }
+        return pieChartData;
+    }
+
+    hueToHex(hue) {
+        const hsv = { h: hue, s: 100, v: 100 }
+        return Color.rgbToHex(Color.hsvToRgb(hsv))
+    }
+
+    // mapToPieChartData(user_model) {
+    //     // Initialize pie chart data
+    //     const pieChartData = [];
+
+    //     // Loop through color ranges
+    //     console.log("HUES?? !!!!!!!!!!!!!!!!!")
+    //     console.log(user_model.hueData.hue)
+
+    //     for (var i; i < user_model.hueData.hue.length; i++) {
+    //         var freq = user_model.hueData.hue[i]
+    //         var color = this.hueToHex(i)
+    //         pieChartData.push({ name: i, freq: freq, fill: color});
+    //     }
+
+    //     console.log("Format of PIE CHART DATA!!!")
+    //     console.log(pieChartData)
+    //     return pieChartData;
+    // }
+
+    _updateViewFactor(data) {
+        var user_model = this.user_models[data.modelName]
+        user_model.rhythmData.viewFactor = data.viewFactor < user_model.rhythmData.rhythms.length ? (data.viewFactor) : (user_model.rhythmData.rhythms.length - 1)
+        this.updateVisualisationData(user_model)
+    }
+
+    _getRhythmTimelineData(user_model) {
+        var data = []
+        var startIndex = user_model.rhythmData.viewFactor
+        for (var i = startIndex; i < user_model.rhythmData.rhythms.length; i++) {
+            data.push({ x: user_model.rhythmData.timeStamps[i], y: 1, z: 1, fill: user_model.rhythmData.fills[user_model.rhythmData.rhythms[i]], index: 1 }) // TODO get appropriate colour for the particular type of data
+        }
+        console.log("Prepared this rhythm timeline data to plot...")
+        console.log(data)
+        return data
+    }
+
+    _getRhythmProportionData(user_model) {
+        console.log("@@@@@@@@@@@ when getting rhythm props we have:")
+        console.log(user_model.rhythmData)
+
+        console.log("rhythm counts")
+        console.log(Object.keys(user_model.rhythmData.rhythmCounts))
+        var data = []
+        for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {
+            data.push({ name: rhythm, value: user_model.rhythmData.rhythmProportions[rhythm], fill: user_model.rhythmData.fills[rhythm] })
+        }
+        console.log("RHYTHM PIE DATA? ")
+        console.log(data)
+        return data
+    }
+
+    _getHueProportionData(user_model) {
+        var data = []
+        for (var i = 0; i < user_model.hueData.hue.length; i++) {
+            data.push({ hue: i, value: user_model.hueData.hueProportions[i] })
+        }
+        return data
+    }
+
+    _getVisibleModels(user_model) {
+        var visible = []
+        for (const model in user_model) {
+            if (models[model].visible) {
+                if (model == "ps") {
+                    for (var i = 0; i < models[model].n; i++) {
+                        visible.push(model + "-" + i)
+                    }
+                } else {
+                    visible.push(model)
+                }
             }
         }
     }
-}
 
-getPlotDataFromDist(user_model) {
-    if (user_model.distribution == "gaussian") {
-        console.log(this._getDistLinesAndMeans(user_model))
-        var distAndMeans = this._getDistLinesAndMeans(user_model)
+    getPlotDataFromDist(user_model) {
+        if (user_model.distribution == "gaussian") {
+            console.log(this._getDistLinesAndMeans(user_model))
+            var distAndMeans = this._getDistLinesAndMeans(user_model)
 
-        return {
-            styles: {
-                'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "3px", chartName: "Original Belief"},
-                'posterior': { stroke: "#00B295", dots: false, strokeWidth: "2px", chartName: "Updated Belief", strokeDasharray: "5 5" },
-                'groundTruth': { stroke: "#45BDE5", dots: false, strokeWidth: "3px", chartName: "Ground Truth" },
-                'ps-options': { stroke: "#00B295", dots: false, strokeWidth: "1px", chartName: "", strokeDasharray: "5 5" },
-            },
-            helpfulTooltip: user_model.helpfulTooltip,
-            meanLines: user_model.meanLines,
-            visible: this._getVisibleModels(),
-            //    histogram: this._getBarChartData(user_model), // plots bar chart data
-            gaussian: Distributions.generateProbabilityData(distAndMeans.distLines),
-            means: distAndMeans.means,
-            sampleSpace: this._getSampleSpaceData(user_model),
-            distLines: user_model.distLines,
-            activeDistributions: this.getActiveDistributions(user_model.models),
-        }
-    } else if (user_model.distribution == "hue") {
-        return {
-            histogram: this._getHuePlotData(user_model),
-            pie: this.mapToPieChartData(user_model),
-            hues: user_model.hueData,
-        }
-    } else if (user_model.distribution == "rhythm") {
-        return {
-            timeline: this._getRhythmTimelineData(user_model),
-            pie: this._getRhythmProportionData(user_model),
-            rdata: user_model.rhythmData
+            return {
+                styles: {
+                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "3px", chartName: "Original Belief" },
+                    'posterior': { stroke: "#00B295", dots: false, strokeWidth: "2px", chartName: "Updated Belief", strokeDasharray: "5 5" },
+                    'groundTruth': { stroke: "#45BDE5", dots: false, strokeWidth: "3px", chartName: "Ground Truth" },
+                    'ps-options': { stroke: "#00B295", dots: false, strokeWidth: "1px", chartName: "", strokeDasharray: "5 5" },
+                },
+                fetching: user_model.fetching,
+                helpfulTooltip: user_model.helpfulTooltip,
+                meanLines: user_model.meanLines,
+                visible: this._getVisibleModels(),
+                //    histogram: this._getBarChartData(user_model), // plots bar chart data
+                gaussian: Distributions.generateProbabilityData(distAndMeans.distLines),
+                means: distAndMeans.means,
+                sampleSpace: this._getSampleSpaceData(user_model),
+                distLines: user_model.distLines,
+                activeDistributions: this.getActiveDistributions(user_model.models),
+            }
+        } else if (user_model.distribution == "hue") {
+            return {
+                histogram: this._getHuePlotData(user_model),
+                pie: this.mapToPieChartData(user_model),
+                hues: user_model.hueData,
+            }
+        } else if (user_model.distribution == "rhythm") {
+            return {
+                timeline: this._getRhythmTimelineData(user_model),
+                pie: this._getRhythmProportionData(user_model),
+                rdata: user_model.rhythmData
+            }
         }
     }
-}
 
     /* Prepare a JSON of relevant data */
 
     async buildQuery(modelName, url_path, method, modelType, distribution, n, data = [], params = {}) {
-    const url = this.api_host + "/api/turing/v1/" + url_path;
+        const url = this.api_host + "/api/turing/v1/" + url_path;
 
-    const dict = {
-        "username": this.username,
-        "target": modelName,
-        "model_type": modelType,
-        "distribution": distribution,
-        "n": n,
-        "data": data,
-        "model_params": params
+        const dict = {
+            "username": this.username,
+            "target": modelName,
+            "model_type": modelType,
+            "distribution": distribution,
+            "n": n,
+            "data": data,
+            "model_params": params
+        }
+        const payload = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };
+        const message = await this._sendRequesttoServer(url, payload);
+        return message;
     }
-    const payload = {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dict)
-    };
-    const message = await this._sendRequesttoServer(url, payload);
-    return message;
-}
 
     async greet() {
-    const url = this.api_host + "/api/turing/v1/greet";
-    const payload = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
+        const url = this.api_host + "/api/turing/v1/greet";
+        const payload = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
 
-    const message = await this._sendRequesttoServer(url, payload);
-    return message;
-}
+        const message = await this._sendRequesttoServer(url, payload);
+        return message;
+    }
 
     async turing_createUser() {
-    const url = this.api_host + "/api/turing/v1/createUser";
-    const dict = {
-        "username": this.username
+        const url = this.api_host + "/api/turing/v1/createUser";
+        const dict = {
+            "username": this.username
+        }
+        const payload = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };
+        const message = await this._sendRequesttoServer(url, payload);
+        return message;
     }
-    const payload = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dict)
-    };
-    const message = await this._sendRequesttoServer(url, payload);
-    return message;
-}
 
     async turing_deleteUser() {
-    const url = this.api_host + "/api/turing/v1/deleteUser";
-    const dict = {
-        "username": this.username
+        const url = this.api_host + "/api/turing/v1/deleteUser";
+        const dict = {
+            "username": this.username
+        }
+        const payload = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };
+        const message = await this._sendRequesttoServer(url, payload);
+        return message;
     }
-    const payload = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dict)
-    };
-    const message = await this._sendRequesttoServer(url, payload);
-    return message;
-}
 
-async turing_deleteModel(modelName) {
-    const url = this.api_host + "/api/turing/v1/deleteModel";
-    const dict = {
-        "username": this.username,
-        "target": modelName
+    async turing_deleteModel(modelName) {
+        const url = this.api_host + "/api/turing/v1/deleteModel";
+        const dict = {
+            "username": this.username,
+            "target": modelName
+        }
+        const payload = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        };
+        const message = await this._sendRequesttoServer(url, payload);
+        return message;
     }
-    const payload = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dict)
-    };
-    const message = await this._sendRequesttoServer(url, payload);
-    return message;
-}
 
-showRandomVariable() {
-    return RANDOM_VAR_NAMES[this.state.random_var]
-}
+    showRandomVariable() {
+        return RANDOM_VAR_NAMES[this.state.random_var]
+    }
 
-clearSamples(args, util) {
-    this._onClearSamples(model)
-    return "Samples cleared :)"
-}
+    clearSamples(args, util) {
+        this._onClearSamples(model)
+        return "Samples cleared :)"
+    }
 
-_onClearSamples (modelName) {
-    console.log("RECEIVED INSTRUCTION TO CLEAR SAMPLES!")
-    console.log(modelName)
+    _onClearSamples(modelName) {
+        console.log("RECEIVED INSTRUCTION TO CLEAR SAMPLES!")
+        console.log(modelName)
 
-    var user_model = this.user_models[modelName]
+        var user_model = this.user_models[modelName]
 
-    // clear samples from the list
-    user_model.samples = []
+        // clear samples from the list
+        user_model.samples = []
 
-    // remove posterior curves
-    user_model.models.ps.active = false
-    user_model.models.ps.curves = []
+        // remove posterior curves
+        user_model.models.ps.active = false
+        user_model.models.ps.curves = []
 
-    // update visualisation data
-    this.updateVisualisationData(user_model)
-    this._runtime.emit('PROJECT_CHANGED')
-}
+        // update visualisation data
+        this.updateVisualisationData(user_model)
+        this._runtime.emit('PROJECT_CHANGED')
+    }
 
-_onDeleteModel(modelName) {
-    // delete model from user_models dict
-    delete this.user_models[modelName]
+    _onDeleteModel(modelName) {
+        // delete model from user_models dict
+        delete this.user_models[modelName]
 
-    // tell turing about it
+        // tell turing about it
 
-    // update visualisation data
-    this._runtime.emit('PROJECT_CHANGED')
-}
+        // update visualisation data
+        this._runtime.emit('PROJECT_CHANGED')
+    }
     /**
      * Send a request to the Turing API of a particular type
      * @param {string} url - API destination
@@ -1321,68 +1329,68 @@ _onDeleteModel(modelName) {
      * @returns response code from the server
      */
     async _sendRequesttoServer(url, payload) {
-    try {
-        const response = await fetch(url, payload);
-        const copy = response.clone();
-        const text = await response.text();
-        if (text) {
-            return await this._fixJson(text); // Assuming _fixJson returns the fixed message
-        } else {
-            return await copy.json();
-        }
-    } catch (err) {
-        if (err instanceof SyntaxError) {
-            // Handle syntax errors
-            const data = await copy.json();
-            return this._fixJson(data);
-        } else {
-            throw err;
+        try {
+            const response = await fetch(url, payload);
+            const copy = response.clone();
+            const text = await response.text();
+            if (text) {
+                return await this._fixJson(text); // Assuming _fixJson returns the fixed message
+            } else {
+                return await copy.json();
+            }
+        } catch (err) {
+            if (err instanceof SyntaxError) {
+                // Handle syntax errors
+                const data = await copy.json();
+                return this._fixJson(data);
+            } else {
+                throw err;
+            }
         }
     }
-}
 
-_fixJson(text) {
-    return text
-}
-
-_onResetTimer() {
-    this.globalTimer.start()
-    this.globalTimer.timeElapsed()
-
-    for (const modelName in this.user_models) {
-        this.user_models[modelName].timer.start()
+    _fixJson(text) {
+        return text
     }
-}
 
-/* Helper Utilities */
-_getAffirmation() {
-    const randomWords = ["Epic! ^_^", "Okay!", "Done!", "Noted :))", "Excellent!", "Got it :)", "Awesome! :D", "Okey dokey!", "Splendid!", "Looks good!"];
-    const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
-    return randomWord; // Output a random word or phrase
-}
+    _onResetTimer() {
+        this.globalTimer.start()
+        this.globalTimer.timeElapsed()
 
-_getCaution() {
-    const cautionaryMessages = [
-        "Hmm... that doesn't look right!",
-        "Are you sure about that?",
-        "Something's fishy here...",
-        "Double check your input!",
-        "Something seems off...",
-        "Oops, that might be a mistake!",
-        "Hold on, that's not quite right...",
-        "Hmm... let's rethink this!",
-        "Check your inputs!",
-    ];
+        for (const modelName in this.user_models) {
+            this.user_models[modelName].timer.start()
+        }
+    }
 
-    // Get a random cautionary message from the array
-    const randomCautionaryMessage = cautionaryMessages[Math.floor(Math.random() * cautionaryMessages.length)];
-    return randomCautionaryMessage; // Output a random cautionary message
-}
+    /* Helper Utilities */
+    _getAffirmation() {
+        const randomWords = ["Epic! ^_^", "Okay!", "Done!", "Noted :))", "Excellent!", "Got it :)", "Awesome! :D", "Okey dokey!", "Splendid!", "Looks good!"];
+        const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
+        return randomWord; // Output a random word or phrase
+    }
 
-_generateRandomHexCode() {
-    const randomColor = Math.floor(Math.random() * 16777215);
-    const hexCode = randomColor.toString(16).padStart(6, '0');
-    return `#${hexCode}`;
-}
+    _getCaution() {
+        const cautionaryMessages = [
+            "Hmm... that doesn't look right!",
+            "Are you sure about that?",
+            "Something's fishy here...",
+            "Double check your input!",
+            "Something seems off...",
+            "Oops, that might be a mistake!",
+            "Hold on, that's not quite right...",
+            "Hmm... let's rethink this!",
+            "Check your inputs!",
+        ];
+
+        // Get a random cautionary message from the array
+        const randomCautionaryMessage = cautionaryMessages[Math.floor(Math.random() * cautionaryMessages.length)];
+        return randomCautionaryMessage; // Output a random cautionary message
+    }
+
+    _generateRandomHexCode() {
+        const randomColor = Math.floor(Math.random() * 16777215);
+        const hexCode = randomColor.toString(16).padStart(6, '0');
+        return `#${hexCode}`;
+    }
 }
 module.exports = Scratch3Turing;

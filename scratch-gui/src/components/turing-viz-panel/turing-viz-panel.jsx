@@ -379,7 +379,7 @@ const getPosteriorNs = (props) => {
           onChange={(event) => {
             const newValue = parseFloat(event.target.value);
             if (!isNaN(newValue) && newValue >= 0 && newValue <= 5) {
-              document.getElementById(formatId(active, "posteriorN")).value = Math.floor(newValue);
+              document.getElementById(formatId(active, "posteriorNValue")).value = Math.floor(newValue);
             }
           }}
         />
@@ -391,26 +391,39 @@ const getPosteriorNs = (props) => {
         {console.log(props.data.samples.length)}
 
         {props.data.samples.length > 0 ? (  // Only render active button if samples exist
-          <button
+          props.data.plot.fetching ?
+            (
+              <button  // Render inactive button (combined logic)
+                className={styles.gaussianButton}
+                style={{ backgroundColor: "#ccc", pointerEvents: "none" }} // Disabled button style
+                disabled
+              >
+                <h4>Update</h4>
+                {/* <img className={styles.buttonIconRight} /> */}
+              </button>
+            ) : ( // Conditionally render based on fetching state
+              <button
+                className={styles.gaussianButton}
+                style={{ backgroundColor: "#00B295" }} // Active button style
+                onClick={() => props.updateChart(active, 'ps')}
+              >
+                <h4>Update</h4>
+                {/* <img className={styles.buttonIconRight} /> */}
+              </button>
+            )
+        ) : (
+          <button  // Render inactive button (combined logic)
             className={styles.gaussianButton}
-            style={{ backgroundColor: "#00B295" }} // Active button style
-            onClick={() => props.updateChart(active, 'ps')}
-          >
-            <h4>Update</h4>
-            {/* <img className={styles.buttonIconRight} /> */}
-          </button>
-        ) : (  // Render inactive button without samples
-          <button
-            className={styles.gaussianButton}
-            style={{ backgroundColor: "#ccc", pointerEvents: "none" }} // Disabled button style (grayed out)
-            disabled // Explicitly disable the button
+            style={{ backgroundColor: "#ccc", pointerEvents: "none" }} // Disabled button style
+            disabled
           >
             <h4>Update</h4>
             {/* <img className={styles.buttonIconRight} /> */}
           </button>
         )}
+
       </Box>
-    </div>
+    </div >
   )
 }
 
@@ -458,17 +471,26 @@ const getParameterLabels = (props) => {
             </Box>
 
             <Box className={styles.gaussianButtonRow}>
-              <button
-                className={styles.gaussianButton}
-                style={{ backgroundColor: "#45BDE5" }}
-                onClick={() => props.updateChart(active, 'groundTruth')}
-              >
-                <h4>Update</h4>
-                <img
-                  className={styles.buttonIconRight}
-                // src={surpriseIcon}
-                />
-              </button>
+              {props.data.plot.fetching ? (
+                <button
+                  className={styles.gaussianButton}
+                  style={{ backgroundColor: "#ccc", pointerEvents: "none" }}
+                  disabled
+                >
+                  <h4>Update</h4>
+                </button>
+              ) : (
+                <button
+                  className={styles.gaussianButton}
+                  style={{ backgroundColor: "#45BDE5" }}
+                  onClick={() => props.updateChart(active, 'groundTruth')}
+                >
+                  <h4>Update</h4>
+                  <img
+                    className={styles.buttonIconRight}
+                  />
+                </button>
+              )}
             </Box>
           </Box>
 
@@ -509,26 +531,31 @@ const getParameterLabels = (props) => {
               />
             </Box>
             <Box className={styles.gaussianButtonRow}>
-              <button
-                className={styles.gaussianButton}
-                style={{ backgroundColor: "#FFAB1A" }}
-                onClick={() => props.updateChart(active, 'prior')}
-              >
-                <h4>Update</h4>
-                <img
-                  className={styles.buttonIconRight}
-                // src={compassIcon}
-                />
-              </button>
+              {props.data.plot.fetching ? (
+                <button
+                  className={styles.gaussianButton}
+                  style={{ backgroundColor: "#ccc", pointerEvents: "none" }}
+                  disabled
+                >
+                  <h4>Update</h4>
+                </button>
+              ) : (
+                <button
+                  className={styles.gaussianButton}
+                  style={{ backgroundColor: "#FFAB1A" }}
+                  onClick={() => props.updateChart(active, 'prior')}
+                >
+                  <h4>Update</h4>
+                  <img
+                    className={styles.buttonIconRight}
+                  />
+                </button>
+              )}
             </Box>
           </Box>
           {getPosteriorNs(props)}
         </div>
       ); // Use PascalCase for model names
-    // case 'color':
-    //   return (<div>Hue: <h1>λ</h1></div>)
-    // case 'rhythm':
-    //   return (<div>Rhythm: <h1>n</h1><h1>p</h1></div>)
     default:
       return (<h1>Unknown distribution</h1>);
   }
@@ -661,7 +688,7 @@ const getHuePanel = (props) => {
                 {/* </> */}
               </XAxis>
               <YAxis
-                label={{ value: 'Number of Observations', angle: -90, position: 'insideLeft', textAnchor: 'middle' }} 
+                label={{ value: 'Number of Observations', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
                 dots={false}
                 axisLine={{
                   stroke: "#ddd",
