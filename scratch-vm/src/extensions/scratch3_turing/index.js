@@ -1085,12 +1085,16 @@ class Scratch3Turing {
     }
 
     _getHexForActiveHue(user_model, activeHue) {
+        console.log("finding hex for active hue " + activeHue)
         const foundHue = user_model.hueData.activeHues.find(hueDict => hueDict.hue === activeHue);
+
+        // console.log("Our active hue list is: ")
+        // console.log(user_model.hueData.activeHues)
+
         if (foundHue) {
           return foundHue.hex;
         } else {
-          // Handle the case where the hue is not found (optional)
-          return null; // Or throw an error, provide a default value, etc.
+          return "#dddddd"; // Or throw an error, provide a default value, etc.
         }
       }
 

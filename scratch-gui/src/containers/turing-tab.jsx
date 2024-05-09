@@ -176,6 +176,7 @@ class TuringTab extends React.Component {
         }
 
         if (mode == "tooltip") {
+            console.log("--------> updating tooltip")
             var customData = { modelName: modelName }
             this.handleUpdateTooltip(customData)
             return

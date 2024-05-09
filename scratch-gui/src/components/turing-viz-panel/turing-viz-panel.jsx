@@ -19,6 +19,7 @@ import FontType from './font--value.svg'
 import Color, { rgbToDecimal } from './color.js'
 import arrowLeftIcon from './arrow-left.svg'
 import ZoomChart from './turing-viz-zoomChart.jsx'
+// import SZoomChart from './turing-viz-zoomChart copy.jsx'
 /** CREDIT THIS CODE **/
 import gsap from "gsap";
 import { style } from 'scratch-storage';
@@ -83,17 +84,6 @@ const formatId = (modelName, label) => {
   return modelName + "_" + label
 }
 
-const getMeansComponent = (plot) => {
-  { console.log("GETTTING MEAN COMPONENT...") }
-  { console.log(plot) }
-  return (
-    <div className={styles.dataRow}>
-      {Object.entries(plot.means).map(([key, index]) => (
-        <p style={{ color: "#d41444" }}>{key}: {index}</p>
-      ))}
-    </div>
-  )
-}
 
 const GaussianTooltip = ({ active, payload, label, plot }) => {
 
@@ -542,42 +532,6 @@ const getParameterLabels = (props) => {
   }
 };
 
-const colorRanges = {
-  'yellow': [45, 75],
-  "yellow-orange": [75, 90],
-  "yellow-green": [90, 120],
-  'green': [120, 180],
-  "blue-green": [180, 210],
-  'blue': [210, 270],
-  "blue-violet": [270, 300],
-  'violet': [300, 330],
-  "red-violet": [330, 345],
-  'red': [345, 15],
-  "red-orange": [15, 45],
-  'orange': [45, 75],
-};
-
-function getColorRange(hue) {
-  // Handle wrap around the color wheel
-  hue = (hue + 360) % 360;
-  for (const color in colorRanges) {
-    const range = colorRanges[color];
-    const lower = range[0];
-    const upper = range[1];
-    // Check if hue is within range, accounting for wrap around
-    if (lower <= upper) {
-      if (lower <= hue && hue <= upper) {
-        return color;
-      }
-    } else {
-      if (hue <= upper || lower <= hue) {
-        return color;
-      }
-    }
-  }
-  return null; // Use null instead of None in JavaScript
-}
-
 const HueTooltip = ({ active, payload, label, plot }) => {
   const index = Number(label)
 
@@ -686,25 +640,20 @@ const getHuePanel = (props) => {
       </Box>
       <Box className={styles.chartBox}>
         <Box className={styles.hueChartBox}>
-          {/* <ZoomChart data={plot.histogram}/> */}
+       
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            <BarChart
+            <ZoomChart data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke}/>
+            {/* <SZoomChart/> */}
+            {/* <BarChart
               width={900}
               height={400}
               data={plot.histogram}
               onClick={handleHueClick}
               style={{ marginTop: "1em" }}
-            // margin={{
-            //   top: 5,
-            //   right: 30,
-            //   left: 20,
-            //   bottom: 5,
-            // }}
             >
               <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} barSize={20} />
-              {/* <HueAxisLabel /> */}
               <XAxis
                 tickCount={360}
                 visibleTickCount={360} 
@@ -715,7 +664,7 @@ const getHuePanel = (props) => {
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 3,
-                  strokeLinecap: "round", // Set rounded line ends
+                  strokeLinecap: "round", 
                 }}
                 tickLine={false}
               >
@@ -733,7 +682,7 @@ const getHuePanel = (props) => {
               />
               <Legend content={<HueLegend plot={plot} props={props} />} />
               <Tooltip content={<HueTooltip plot={plot} />} />
-            </BarChart>
+            </BarChart> */}
           </ResponsiveContainer>
         </Box>
       </Box>
