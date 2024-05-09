@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Label, Bar, Brush, XAxis, YAxis, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -640,7 +640,7 @@ const getHuePanel = (props) => {
       </Box>
       <Box className={styles.chartBox}>
         <Box className={styles.hueChartBox}>
-       
+
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
@@ -653,10 +653,11 @@ const getHuePanel = (props) => {
               onClick={handleHueClick}
               style={{ marginTop: "1em" }}
             >
-              <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} barSize={20} />
+              <Brush dataKey="value" height={30} stroke="#8884d8" />
+              <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} fill={plot.histogram.stroke} dot={false} barSize={20} />
               <XAxis
                 tickCount={360}
-                visibleTickCount={360} 
+                visibleTickCount={360}
                 interval={0}
                 tick={<CustomHue />}
                 offset={0}
@@ -664,7 +665,7 @@ const getHuePanel = (props) => {
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 3,
-                  strokeLinecap: "round", 
+                  strokeLinecap: "round",
                 }}
                 tickLine={false}
               >
