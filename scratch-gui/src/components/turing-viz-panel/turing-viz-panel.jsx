@@ -663,13 +663,13 @@ const getHuePanel = (props) => {
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-6em" }}>
+              <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-5em" }}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
-                  <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em", stroke: "#ddd", strokeWidth: "2px" }}>
+                  <PieChart width={400} height={400} style={{ marginRight: "-4em", stroke: "#ddd", strokeWidth: "2px" }}>
                     <Pie
                       data={plot.pie}
                       dataKey={"value"}
-                      outerRadius={150}
+                      outerRadius={180}
                       fill={plot.pie.fill}
                       stroke={"#ggg"}
                       strokeWeight={"4px"}
