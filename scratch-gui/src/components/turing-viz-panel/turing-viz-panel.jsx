@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, PieChart, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -16,7 +16,7 @@ import FontDist from './font--normalDist.svg'
 import FontCurrentSample from './font--currentSample.svg'
 import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
-import Color from './color.js'
+import Color, { rgbToDecimal } from './color.js'
 import arrowLeftIcon from './arrow-left.svg'
 import ZoomChart from './turing-viz-zoomChart.jsx'
 /** CREDIT THIS CODE **/
@@ -41,21 +41,15 @@ export const randomRotate = selector => {
 
 const CustomHue = (props) => {
   var shiftFactor = 0
-
   const hue = (props.payload.value + shiftFactor) % 360;
-  // Calculate the corresponding color in hex format
   const color = hueToHex(hue);
-
-  console.log(props.payload)
-
-  // Use an SVG rect instead of foreignObject
   return (
     <rect
       className={styles.hueBox}
-      x={props.payload.tickCoord}
-      y={props.payload.offset}
-      width="1.2em"
-      height="1.2em"
+      x={props.x}
+      y={props.y}
+      width="5%"
+      height="2em"
       fill={color} // Set fill color to calculated hex
     />
   );
@@ -166,9 +160,9 @@ const GaussianLegend = ({ payload, plot, props }) => (
     {props.data.samples.length > 0 ? (<b style={{ color: plot.styles["ps-options"].stroke, marginRight: "1.5em" }}>Updated Belief</b>) : (null)}
 
     <div style={{ marginTop: "0.5em" }}>
-      <label htmlFor="checkpoint-input-tooltip" className={styles.checkboxLabel}>
+      <label htmlFor={formatId(props.activeModel, "helpfulTooltipGaussian")} className={styles.checkboxLabel}>
         <input
-          id="checkpoint-tooltip"
+          id={formatId(props.activeModel, "helpfulTooltipGaussian")}
           type="checkbox"
           className={styles.chartCheckbox}
           onChange={() => props.updateChart(props.activeModel, 'tooltip')}
@@ -176,18 +170,34 @@ const GaussianLegend = ({ payload, plot, props }) => (
         />
         Helpful tooltip
       </label>
-      <label htmlFor="checkpoint-input-means" className={styles.checkboxLabel}>
+      <label htmlFor={formatId(props.activeModel, "meanLines")} className={styles.checkboxLabel}>
         <input
-          id="checkpoint-meanLines"
+          id={formatId(props.activeModel, "meanLines")}
           className={styles.chartCheckbox}
           type="checkbox"
           onChange={() => props.updateChart(props.activeModel, 'meanLines')}
-        // Add a default checked state if needed (optional)
         />
         Mean Lines
       </label>
     </div>
 
+  </div>
+);
+
+const HueLegend = ({ payload, plot, props }) => (
+  <div style={{ justifyContent: "center" }}>
+    <div style={{ marginTop: "0.5em" }}>
+      <label htmlFor={formatId(props.activeModel, "helpfulTooltipHue")} className={styles.checkboxLabel}>
+        <input
+          id={formatId(props.activeModel, "helpfulTooltipHue")}
+          type="checkbox"
+          className={styles.chartCheckbox}
+          onChange={() => props.updateChart(props.activeModel, 'tooltip')}
+        // Add a default checked state if needed (optional)
+        />
+        Helpful tooltip
+      </label>
+    </div>
   </div>
 );
 
@@ -218,35 +228,6 @@ const TooltipReferenceLine = ({ x, children, ...otherProps }) => (
 
 const formatLabel = () => {
   console.log("WE ARE SUPPOSED TO FORMAT THIS LABEL?")
-}
-
-// const element = document.getElementById("prior_label");
-
-
-// element.addEventListener("click", () => {
-//   element.style.zIndex = 10; // Set a high z-index value to bring it to front
-// });
-const HueAxisLabel = ({ ...props }) => {
-  return (
-    <g>
-      <defs>
-        <linearGradient id="hueSpectrum" x1="0%" y1="0%" x2="100%" y2="0%">
-          {Array(361)
-            .fill(0)
-            .map((_, i) => (
-              <stop key={i} offset={`${i / 360}%`} stopColor={`hsl(${i}, 100%, 100%)`} />
-            ))}
-        </linearGradient>
-      </defs>
-      <rect
-        x={props.viewBox.x}
-        y={props.viewBox.y}
-        width={props.width || 100} // Set width or use provided props.width
-        height={props.height || 20} // Set height or use provided props.height
-        fill={`url(#hueSpectrum)`}
-      />
-    </g>
-  )
 }
 
 const MeanLabel = ({ ...props }) => {
@@ -597,25 +578,63 @@ function getColorRange(hue) {
   return null; // Use null instead of None in JavaScript
 }
 
-const HueTooltip = ({ active, payload, label, props }) => {
-  var shiftFactor = -70
+const HueTooltip = ({ active, payload, label, plot }) => {
   const index = Number(label)
 
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-    return (
-      <div>
-        {/* <p>{`${label}: ${payload[0].value}`}</p> */}
-        <div className={styles.hueBox}>
-          {props.data.plot.hues.hueFamilies[index].map((hex, index) => (
-            <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
-          ))}
+    console.log(payload[0])
+    const freq = payload[0].payload.value
+
+
+    if (plot.helpfulTooltip) {
+      return (
+        <div>
+          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+            {plot.hues.hueFamilies[index].map((hex, index) => (
+              <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, stroke: "#eee", strokeWeight: "3px", marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
+            ))}
+            <div className={styles.dataRow}>
+              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
+              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
+            </div>
+          </div>
         </div>
-        <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em" }} />
+      );
+    } else {
+      return (
+        <div>
+          {/* <p>{`${label}: ${payload[0].value}`}</p> */}
+          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+            <div className={styles.dataRow}>
+              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
+              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+  return null;
+};
+
+const HuePieTooltip = ({ active, payload, label, props }) => {
+  const index = Number(label)
+
+  if (active && payload && payload.length) { // Check if tooltip is active and has data
+    console.log("INSIDE PAYLOAD! of Hue pie tool tip :))")
+    console.log(payload)
+    console.log("hue to use>")
+    const hueToUse = payload[0].payload.h
+
+    return (
+      <div className={styles.dataRow} style={{ backgroundColor: `rgba(255,255,255,0.5)`, padding: "0.4em", borderRadius: "0.3em" }}>
+        <div className={styles.hueBox} style={{ backgroundColor: hueToHex(hueToUse), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: "3px" }} /><b>x {payload[0].value}</b>
       </div>
     );
   }
   return null;
 };
+
 
 const RhythmTooltip = ({ active, payload, label, ...props }) => {
   console.log("PROPS?")
@@ -646,14 +665,16 @@ const getHuePanel = (props) => {
             <Box className={styles.hueChartBox}>
               <ResponsiveContainer width={'99%'} aspect={1} styles={{ justifyContent: "center", marginBottom: "-6em" }}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
-                  <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em" }}>
+                  <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em", stroke: "#ddd", strokeWidth: "2px" }}>
                     <Pie
                       data={plot.pie}
                       dataKey={"value"}
                       outerRadius={150}
                       fill={plot.pie.fill}
+                      stroke={"#ggg"}
+                      strokeWeight={"4px"}
                     />
-                    <Tooltip />
+                    <Tooltip content={<HuePieTooltip props={props} />} />
                   </PieChart>
                   <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
                 </div>
@@ -669,15 +690,28 @@ const getHuePanel = (props) => {
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            <BarChart width={900} height={400} data={plot.histogram} onClick={handleHueClick} style={{ marginTop: "1em" }}>
-              <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} />
-              <HueAxisLabel />
+            <BarChart
+              width={900}
+              height={400}
+              data={plot.histogram}
+              onClick={handleHueClick}
+              style={{ marginTop: "1em" }}
+            // margin={{
+            //   top: 5,
+            //   right: 30,
+            //   left: 20,
+            //   bottom: 5,
+            // }}
+            >
+              <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} barSize={20} />
+              {/* <HueAxisLabel /> */}
               <XAxis
-                label={<Label content={<HueAxisLabel />} />}
+                tickCount={360}
+                visibleTickCount={360} 
+                interval={0}
                 tick={<CustomHue />}
                 offset={0}
-                // interval={0}
-                tickInterval={1}
+                minTickGap={0}
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 3,
@@ -685,10 +719,10 @@ const getHuePanel = (props) => {
                 }}
                 tickLine={false}
               >
-                {/* </> */}
               </XAxis>
               <YAxis
-                label={{ value: 'Number of Observations', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
+                label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
+                style={{ marginTop: '10px' }}
                 dots={false}
                 axisLine={{
                   stroke: "#ddd",
@@ -697,7 +731,8 @@ const getHuePanel = (props) => {
                 }}
                 tickLine={{ strokeWidth: 3 }}
               />
-              < Tooltip content={<HueTooltip props={props} />} />
+              <Legend content={<HueLegend plot={plot} props={props} />} />
+              <Tooltip content={<HueTooltip plot={plot} />} />
             </BarChart>
           </ResponsiveContainer>
         </Box>
@@ -726,7 +761,7 @@ const getRhythmPanel = (props) => {
                       outerRadius={150}
                       fill={plot.pie.fill}
                     />
-                    <Tooltip />
+                    <Tooltip content={<HuePieTooltip props={props} />} />
                   </PieChart>
                   <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
                 </div>
@@ -895,7 +930,7 @@ const getKeyStats = (props) => {
       {data.distribution === "gaussian" && samples.length > 0 ? (
         <div>
           <h4 style={{ color: "#00B295" }}>Mean of Observations</h4>
-          {console.log(samples)}
+          {/* {console.log(samples)} */}
           <p className={styles.stat}>{(samples.reduce((acc, v) => acc + v, 0) / samples.length).toFixed(2)}</p>
         </div>) : (null)}
 

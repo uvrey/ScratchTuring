@@ -480,6 +480,7 @@ class Scratch3Turing {
             },
             hueData: {
                 hue: Array(360).fill(0),
+                activeHues: [],
                 hueProportions: Array(360).fill(0),
                 hueCount: 0,
                 hueFamilies: Array(360).fill().map(() => [])
@@ -749,9 +750,49 @@ class Scratch3Turing {
         }
     }
 
+    hueToHex = (hue) => {
+        const hsv = { h: hue, s: 100, v: 100 }
+        return Color.rgbToHex(Color.hsvToRgb(hsv))
+      }
+      
+    hexToHue = (hex) => {
+        const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
+        return hueToHex(hsv.h)
+      }
+
+    updateActiveHues(hue, hex, user_model) {
+        // Convert hex to HSV (hue, saturation, value) for easier comparison
+        const hsv = Color.rgbToHsv(Color.hexToRgb(hex));
+
+        // Check if the hue already exists in activeHues
+        const existingHueIndex = user_model.hueData.activeHues.findIndex(
+          (activeHue) => activeHue.hue === hue
+        );
+      
+        if (existingHueIndex === -1) {
+          user_model.hueData.activeHues.push({
+            hue,
+            hex,
+            avg_s: hsv.s, // Initial saturation
+            avg_v: hsv.v, // Initial value
+          });
+        } else {
+          // Hue found, update average saturation and value
+          const existingHue = user_model.hueData.activeHues[existingHueIndex];
+          existingHue.avg_s = (existingHue.avg_s + hsv.s) / 2;
+          existingHue.avg_v = (existingHue.avg_v + hsv.v) / 2;
+          existingHue.hex = hex; // Update hex to the new value (optional)
+        }
+
+        user_model.hueData.activeHues.sort((hue1, hue2) => hue1.hue - hue2.hue); // sort the dictionaries in the list by their hue value
+      }
+
     updateHueData(user_model, hue, hex) {
         console.log("\n-------------------------------------------\n updating  hue")
         var hue = Math.floor(hue % 360)
+
+        this.updateActiveHues(hue, hex, user_model)
+
         user_model.hueData.hue[hue] = user_model.hueData.hue[hue] + 1
         user_model.hueData.hueCount += 1
         user_model.hueData.hueProportions[hue] = user_model.hueData.hue[hue] / user_model.hueData.hueCount // TODO might not be needed
@@ -1033,59 +1074,78 @@ class Scratch3Turing {
         return data
     }
 
+    _getColorRanges() {
+        var hues = {}
+        for (var i = 0; i < 360; i++) {
+            var hex = this.hueToHex(i)
+            var hue_key = String(i)
+            hues[hue_key] = hex
+        }
+        return hues
+    }
+
+    _getHexForActiveHue(user_model, activeHue) {
+        const foundHue = user_model.hueData.activeHues.find(hueDict => hueDict.hue === activeHue);
+        if (foundHue) {
+          return foundHue.hex;
+        } else {
+          // Handle the case where the hue is not found (optional)
+          return null; // Or throw an error, provide a default value, etc.
+        }
+      }
+
     _getHuePlotData(user_model) {
         var data = []
         for (var i = 0; i < user_model.hueData.hue.length; i++) {
-            data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this.hueToHex(i) })
+            data.push({ hue: i, value: user_model.hueData.hue[i], stroke: this._getHexForActiveHue(user_model, i) })
         }
         return data
     }
 
     mapToPieChartData(user_model) {
         // Define color ranges for each category
-        const colorRanges = {
-            'yellow': [45, 75],
-            "yellow-orange": [75, 90],
-            "yellow-green": [90, 120],
-            'green': [120, 180],
-            "blue-green": [180, 210],
-            'blue': [210, 270],
-            "blue-violet": [270, 300],
-            'violet': [300, 330],
-            "red-violet": [330, 345],
-            'red': [345, 15],
-            "red-orange": [15, 45],
-            'orange': [45, 75],
-        };
+        // const colorRanges = {
+        //     'yellow': [45, 75],
+        //     "yellow-orange": [75, 90],
+        //     "yellow-green": [90, 120],
+        //     'green': [120, 180],
+        //     "blue-green": [180, 210],
+        //     'blue': [210, 270],
+        //     "blue-violet": [270, 300],
+        //     'violet': [300, 330],
+        //     "red-violet": [330, 345],
+        //     'red': [345, 15],
+        //     "red-orange": [15, 45],
+        // };
 
-        const fills = {
-            "yellow": "#fff200",
-            "yellow-orange": "#ffc400",
-            "yellow-green": "#b1ff00",
-            "green": "#00ff7a",
-            "blue-green": "#00ffeb",
-            "blue": "#0081ff",
-            "blue-violet": "#0007ff",
-            "violet": "#9000ff",
-            "red-violet": "#ff00f7",
-            "red": "#ff0007",
-            "red-orange": "#ff5000",
-            "orange": "#ff9400",
-        };
+        // const fills = {
+        //     "yellow": "#fff200",
+        //     "yellow-orange": "#ffc400",
+        //     "yellow-green": "#b1ff00",
+        //     "green": "#00ff7a",
+        //     "blue-green": "#00ffeb",
+        //     "blue": "#0081ff",
+        //     "blue-violet": "#0007ff",
+        //     "violet": "#9000ff",
+        //     "red-violet": "#ff00f7",
+        //     "red": "#ff0007",
+        //     "red-orange": "#ff5000",
+        //     "orange": "#ff9400",
+        // };
 
         // Initialize pie chart data
         const pieChartData = [];
+        //  const colorRanges = this._getColorRanges();
+        console.log("WE want these samples...")
+        console.log(user_model.data)
 
         // Loop through color ranges
-        for (const color of Object.keys(colorRanges)) {
-            const range = colorRanges[color];
-
-            // Calculate frequency for the range
-            const freq = user_model.hueData.hue.slice(range[0], range[1]).reduce((acc, curr) => acc + curr, 0);
-
-            // Add data to pie chart data list
-            pieChartData.push({ name: color, value: freq, fill: fills[color] });
-        }
+        for (const item of user_model.hueData.activeHues) {
+            console.log("looping through active hues (in order hopefully!")
+            console.log(item.hue)
+            const freq = user_model.hueData.hue[item.hue];
+            pieChartData.push({ name: String(item.hue), value: freq, fill: item.hex, h: item.hue, avg_s: item.avg_s, avg_v: item.avg_v });
+          }
         return pieChartData;
     }
 
@@ -1195,6 +1255,7 @@ class Scratch3Turing {
             return {
                 histogram: this._getHuePlotData(user_model),
                 pie: this.mapToPieChartData(user_model),
+                helpfulTooltip: user_model.helpfulTooltip,
                 hues: user_model.hueData,
             }
         } else if (user_model.distribution == "rhythm") {
