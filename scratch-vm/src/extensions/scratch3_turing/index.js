@@ -961,7 +961,9 @@ class Scratch3Turing {
         console.log("conditionOnPrior")
         console.log("obtaining posterior... since there is data!")
         const newData = user_model.data
+        user_model.fetching = true
         message = this.buildQuery(user_model.modelName, "condition", 'POST', 'prior', user_model.distribution, 100, newData, {}) // logic to check number args
+        user_model.fetching = false
         console.log("Server responded:")
         console.log(message)
         return message
