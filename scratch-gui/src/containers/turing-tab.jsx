@@ -4,14 +4,10 @@ import bindAll from 'lodash.bindall';
 import { defineMessages, intlShape, injectIntl } from 'react-intl';
 import VM from 'scratch-vm';
 
-import TuringCarousel from './turing-carousel.jsx';
-import Box from '../components/box/box.jsx';
 import TuringAssetPanel from '../components/turing-asset-panel/turing-asset-panel.jsx';
 import TuringVizPanel from '../components/turing-viz-panel/turing-viz-panel.jsx';
 import soundIcon from '../components/asset-panel/icon--sound.svg';
 import soundIconRtl from '../components/asset-panel/icon--sound-rtl.svg';
-import addSampleFromLibraryIcon from '../components/asset-panel/icon--add-sound-lib.svg';
-import addSampleFromRecordingIcon from '../components/asset-panel/icon--add-sound-record.svg';
 import fileUploadIcon from '../components/action-menu/icon--file-upload.svg';
 import surpriseIcon from '../components/action-menu/icon--surprise.svg';
 import searchIcon from '../components/action-menu/icon--search.svg';
@@ -51,6 +47,26 @@ class TuringTab extends React.Component {
             'handleSelectSample',
             'handleDeleteSample',
             'handleNewSample',
+            'handleActivateDashboard',
+            'getModelDataState',
+            'getModelSamples',
+            'getModelData',
+            'getActiveModels',
+            'getActiveModelName',
+            'getActiveModelSamples',
+            'getActiveModelData',
+            'getActiveModelDataState',
+            'handleToggleVisibility',
+            'handleUpdateToChart',
+            //'handleUpdateCustom',
+            'handleUpdatePrior',
+            'handleUpdateViewFactor',
+            'handleUpdatePosteriorN',
+            'handleUpdateTooltip',
+            'handleUpdateGroundTruth',
+            'handleUpdateMeanLines',
+            'getStoredValue',
+            'handleClearSamples'
         ]);
         this.state = {
             selectedSampleIndex: 0,
@@ -140,39 +156,24 @@ class TuringTab extends React.Component {
         return this.getModelDataState(n)
     }
 
-    handleToggleVisibility(vm, data) {
+    handleToggleVisibility (data) {
         console.log("Toggle vis: Sending...")
         console.log(data)
-        vm.runtime.emit('TOGGLE_VISIBILITY', data)
+        this.props.vm.runtime.emit('TOGGLE_VISIBILITY', data)
     }
 
-    // buildDocTag(modelName, model, mode) {
-    //     return modelName + "_" + model + "_" + mode
-    // }
-
-    // getDocTags(modelName) {
-    //     return [
-    //         {
-    //             stdv: modelName + "_custom_stdv",
-    //             stdvValue: modelName +"customValue_stdv",
-    //             mean: modelName +"_custom_mu",
-    //             meanValue: modelName +"_customValue_mu"
-    //         },
-    //         {
-    //             stdv: modelName + "_prior_stdv",
-    //             stdvValue: modelName +"prioralue_stdv",
-    //             mean: modelName +"_prior_mu",
-    //             meanValue: modelName +"_priorValue_mu"
-    //         }
-    //     ]
-    // }
-
-    handleUpdateToChart(modelName, vm, updateFunction, mode) {
+    handleUpdateToChart(modelName, mode) {
         console.log("handling new values in the selection box")
 
-        if (mode == "meanLines" || mode == "tooltip") {
+        if (mode == "meanLines") {
             var customData = { modelName: modelName }
-            updateFunction(vm, customData)
+            this.handleUpdateMeanLines(customData)
+            return
+        }
+
+        if (mode == "tooltip") {
+            var customData = { modelName: modelName }
+            this.handleUpdateTooltip(customData)
             return
         }
 
@@ -181,38 +182,35 @@ class TuringTab extends React.Component {
             const values = {};
 
             for (const inputName of inputs) {
-
                 const input = document.getElementById(inputName);
-                values[inputName] = parseFloat(input.value);
-            }
-
-            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
-            console.log(values)
-            console.log("--------------")
-
-            // Update models on the backend with new information
+                const value = parseFloat(input.value);
+                if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
+                  this.props.onParamError()
+                  return;
+                }
+                values[inputName] = value;
+              }
+          
             var customData = { modelName: modelName, viewFactor: values[modelName + "_viewFactorValue"] }
-            updateFunction(vm, customData)
+            this.handleUpdateViewFactor(customData)
             return
         }
 
-        if (mode == 'custom') {
-            const inputs = [modelName + "_customParamsValue_mu", modelName + "_customParamsValue_stdv"]; // TODO check if I can use these labels for all models?
+        if (mode == 'groundTruth') {
+            const inputs = [modelName + "_groundTruthParamsValue_mu", modelName + "_groundTruthParamsValue_stdv"]; // TODO check if I can use these labels for all models?
             const values = {};
 
             for (const inputName of inputs) {
-
                 const input = document.getElementById(inputName);
-                values[inputName] = parseFloat(input.value);
-            }
-
-            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
-            console.log(values)
-            console.log("--------------")
-
-            // Update models on the backend with new information
-            var customData = { modelName: modelName, mean: values[modelName + "_customParamsValue_mu"], stdv: values[modelName + "_customParamsValue_stdv"] }
-            updateFunction(vm, customData)
+                const value = parseFloat(input.value);
+                if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
+                  this.props.onParamError()
+                  return;
+                }
+                values[inputName] = value;
+              }
+            var customData = { modelName: modelName, mean: values[modelName + "_groundTruthParamsValue_mu"], stdv: values[modelName + "_groundTruthParamsValue_stdv"] }
+            this.handleUpdateGroundTruth(customData)
             return
         }
 
@@ -221,74 +219,70 @@ class TuringTab extends React.Component {
             const values = {};
 
             for (const inputName of inputs) {
-
                 const input = document.getElementById(inputName);
-                values[inputName] = parseFloat(input.value);
-            }
-
-            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
-            console.log(values)
-            console.log("--------------")
-
-            // Update models on the backend with new information
+                const value = parseFloat(input.value);
+                if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
+                  this.props.onParamError()
+                  return;
+                }
+                values[inputName] = value;
+              }
             var priorData = { modelName: modelName, mean: values[modelName + "_priorParamsValue_mu"], stdv: values[modelName + "_priorParamsValue_stdv"] }
-            updateFunction(vm, priorData)
+            this.handleUpdatePrior(priorData)
             return
         }
 
         if (mode == 'ps') {
             const inputs = [modelName + "_posteriorNValue"]; // TODO check if I can use these labels for all models?
             const values = {};
-
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
+                const value = parseFloat(input.value);
+                if (value > 10 || value < 0 || value == NaN || value == undefined) { 
+                    this.props.onPosteriorError();
+                    return;
+                }
                 values[inputName] = parseFloat(input.value);
             }
-
-            console.log("WE CAPTURED THESE VALUES DURING THE UPDATE...")
-            console.log(values)
-            console.log("--------------")
-
-            // Update models on the backend with new information
-            var psData = { modelName: modelName, n: values[modelName + "_posteriorNValue"]}
-            updateFunction(vm, psData)
+            var psData = { modelName: modelName, n: values[modelName + "_posteriorNValue"] }
+            this.handleUpdatePosteriorN(psData)
             return
         }
     }
 
-    handleUpdateCustom(vm, data) {
+    handleUpdateGroundTruth(data) {
         console.log("Sending...")
         console.log(data)
-        vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
+        this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
-    handleUpdatePrior(vm, data) {
-        vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
+    handleUpdatePrior(data) {
+        this.props.vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
         //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
-    handleUpdateViewFactor(vm, data) {
-        vm.runtime.emit('UPDATE_VIEW_FACTOR', data)
+    handleUpdateViewFactor(data) {
+        this.props.vm.runtime.emit('UPDATE_VIEW_FACTOR', data)
         //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
 
-    handleUpdatePosteriorN(vm, data) {
-        vm.runtime.emit('UPDATE_POSTERIOR_N', data)
+    handleUpdatePosteriorN(data) {
+        this.props.vm.runtime.emit('UPDATE_POSTERIOR_N', data)
     }
 
-    handleUpdateTooltip(vm, data) {
+    handleUpdateTooltip(data) {
         console.log("UPDATING TOOLTIP!")
-        vm.runtime.emit('UPDATE_TOOLTIP', data)
+        this.props.vm.runtime.emit('UPDATE_TOOLTIP', data)
     }
 
-    handleUpdateGroundTruth(vm, data) {
-        vm.runtime.emit('UPDATE_GROUND_TRUTH_PARAMS', data)
+    handleUpdateGroundTruth(data) {
+        this.props.vm.runtime.emit('UPDATE_GROUND_TRUTH_PARAMS', data)
         //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
-    handleUpdateMeanLines(vm, data) {
-        vm.runtime.emit('UPDATE_MEAN_LINES', data)
+    handleUpdateMeanLines(data) {
+        this.props.vm.runtime.emit('UPDATE_MEAN_LINES', data)
     }
 
     getStoredValue(value, defaultValue) {
@@ -305,35 +299,8 @@ class TuringTab extends React.Component {
         return
     }
 
-    getTuringCheckbox(props) {
-        const [selectedKey, setSelectedKey] = useState(null); // Stores the selected key
-
-        const handleCheckboxChange = (event) => {
-            const newSelectedKey = event.target.value;
-            if (newSelectedKey !== selectedKey) { // Only update if different key is selected
-                setSelectedKey(newSelectedKey);
-            }
-        };
-
-        return (
-            <div>
-                {Object.keys(props.items).map((key) => (
-                    <label key={key}>
-                        <input
-                            type="checkbox"
-                            value={key}
-                            checked={selectedKey === key} // Set checked based on selectedKey
-                            onChange={handleCheckboxChange}
-                        />
-                        {key}
-                    </label>
-                ))}
-            </div>
-        );
-    }
-
-    handleClearSamples(vm, modelName) {
-        vm.runtime.emit('CLEAR_SAMPLES', {modelName: modelName})
+    handleClearSamples(modelName) {
+        this.props.vm.runtime.emit('CLEAR_SAMPLES', { modelName: modelName })
     }
 
     render() {
@@ -414,14 +381,6 @@ class TuringTab extends React.Component {
                         activateModelDashboard={this.handleActivateDashboard}
                         activeModelIndex={this.state.activeModelIndex}
                         activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
-                        updateCustom={this.handleUpdateCustom}
-                        updatePrior={this.handleUpdatePrior}
-                        updateGroundTruth={this.handleUpdateGroundTruth}
-                        updatePosteriorN={this.handleUpdatePosteriorN}
-                        updateMeanLines={this.handleUpdateMeanLines}
-                        updateTooltip={this.handleUpdateTooltip}
-                        toggleVisibility={this.handleToggleVisibility}
-                        updateViewFactor={this.handleUpdateViewFactor}
                         getValue={this.getStoredValue}
                         updateChart={this.handleUpdateToChart}
                     />) : (<h1>No models defined... yet!</h1>)}
@@ -442,7 +401,7 @@ const mapStateToProps = state => ({
     editingTarget: state.scratchGui.targets.editingTarget,
     isRtl: state.locales.isRtl,
     data: state.scratchGui.turingData.data,
-    dataIsSet: state.scratchGui.turingData.dataIsSet
+    dataIsSet: state.scratchGui.turingData.dataIsSet,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -450,9 +409,12 @@ const mapDispatchToProps = dispatch => ({
     dispatchUpdateRestore: restoreState => {
         dispatch(setRestore(restoreState));
     },
+    onPosteriorError: () => dispatch(showStandardAlert('posteriorError')),
+    onParamError: () => dispatch(showStandardAlert('paramError'))
+
 });
 
-export default errorBoundaryHOC('Sample Tab')(
+export default errorBoundaryHOC('Turing Tab')(
     injectIntl(connect(
         mapStateToProps,
         mapDispatchToProps

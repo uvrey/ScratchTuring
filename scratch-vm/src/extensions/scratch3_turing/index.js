@@ -85,7 +85,7 @@ class Scratch3Turing {
         this._runtime.on('PROJECT_START', this._onResetTimer);
 
         this._updateParams = this._updateParams.bind(this);
-        this._runtime.on('UPDATE_CUSTOM_PARAMS', data => this._updateParams(data, 'custom'));
+        this._runtime.on('UPDATE_CUSTOM_PARAMS', data => this._updateParams(data, 'groundTruth'));
 
         this._onClearSamples = this._onClearSamples.bind(this);
         this._runtime.on('CLEAR_SAMPLES', data => this._onClearSamples(data.modelName));
@@ -878,7 +878,7 @@ class Scratch3Turing {
             console.log("----------> toggling the tooltip of our data for " + data.modelName)
             this.user_models[data.modelName].helpfulTooltip = !this.user_models[data.modelName].helpfulTooltip
 
-        } else if (mode == 'custom') {
+        } else if (mode == 'groundTruth') {
             this._toggleVisibilityByState(data.modelName, mode, true)
             this.user_models[data.modelName].models[mode].mean = data.mean
             this.user_models[data.modelName].models[mode].stdv = data.stdv
@@ -1163,7 +1163,7 @@ getPlotDataFromDist(user_model) {
             styles: {
                 'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "3px", chartName: "Original Belief"},
                 'posterior': { stroke: "#00B295", dots: false, strokeWidth: "2px", chartName: "Updated Belief", strokeDasharray: "5 5" },
-                'custom': { stroke: "#45BDE5", dots: false, strokeWidth: "3px", chartName: "Ground Truth" },
+                'groundTruth': { stroke: "#45BDE5", dots: false, strokeWidth: "3px", chartName: "Ground Truth" },
                 'ps-options': { stroke: "#00B295", dots: false, strokeWidth: "1px", chartName: "", strokeDasharray: "5 5" },
             },
             helpfulTooltip: user_model.helpfulTooltip,

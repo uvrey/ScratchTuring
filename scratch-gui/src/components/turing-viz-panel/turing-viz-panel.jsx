@@ -158,7 +158,7 @@ const GaussianLegend = ({ payload, plot, props }) => (
     {console.log(payload)} */}
     {payload.map((item) => (
       item.dataKey.includes("ps") ? (null) : (
-        <b style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
+        <b key={item.dataKey} style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
     ))}
 
     {/* {console.log("Inside legend! ")}
@@ -168,20 +168,20 @@ const GaussianLegend = ({ payload, plot, props }) => (
     <div style={{ marginTop: "0.5em" }}>
       <label htmlFor="checkpoint-input-tooltip" className={styles.checkboxLabel}>
         <input
-          id="checkpoint-input"
+          id="checkpoint-tooltip"
           type="checkbox"
           className={styles.chartCheckbox}
-          onChange={() => props.updateChart(props.activeModel, props.vm, props.updateTooltip, 'tooltip')}
+          onChange={() => props.updateChart(props.activeModel, 'tooltip')}
         // Add a default checked state if needed (optional)
         />
         Helpful tooltip
       </label>
       <label htmlFor="checkpoint-input-means" className={styles.checkboxLabel}>
         <input
-          id="checkpoint-input"
+          id="checkpoint-meanLines"
           className={styles.chartCheckbox}
           type="checkbox"
-          onChange={() => props.updateChart(props.activeModel, props.vm, props.updateMeanLines, 'meanLines')}
+          onChange={() => props.updateChart(props.activeModel, 'meanLines')}
         // Add a default checked state if needed (optional)
         />
         Mean Lines
@@ -315,6 +315,7 @@ const getGaussianPanel = (props) => {
                   plot.activeDistributions.map((key) => (
                     <ReferenceLine
                       x={plot.means[key]}
+                      key={plot.means[key]}
                       label={<Label
                         id={key + "_label"}
                         value={plot.means[key]}
@@ -393,7 +394,7 @@ const getPosteriorNs = (props) => {
           <button
             className={styles.gaussianButton}
             style={{ backgroundColor: "#00B295" }} // Active button style
-            onClick={() => props.updateChart(active, props.vm, props.updatePosteriorN, 'ps')}
+            onClick={() => props.updateChart(active, 'ps')}
           >
             <h4>Update</h4>
             {/* <img className={styles.buttonIconRight} /> */}
@@ -425,7 +426,7 @@ const getParameterLabels = (props) => {
               mean
               <input
                 type="text"
-                id={formatId(active, "customParamsValue_mu")}
+                id={formatId(active, "groundTruthParamsValue_mu")}
                 maxLength="4" // Restrict to 8 characters
                 defaultValue={0} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
@@ -433,7 +434,7 @@ const getParameterLabels = (props) => {
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById(formatId(active, "customParams_mu")).value = newValue;
+                    document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value = newValue;
                   }
                 }}
               />
@@ -442,7 +443,7 @@ const getParameterLabels = (props) => {
               stdv
               <input
                 type="text"
-                id={formatId(active, "customParamsValue_stdv")}
+                id={formatId(active, "groundTruthParamsValue_stdv")}
                 style={{ color: "#45BDE5" }}
                 maxLength="4" // Restrict to 8 characters
                 defaultValue={1} // Set initial value
@@ -450,7 +451,7 @@ const getParameterLabels = (props) => {
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                    document.getElementById(formatId(active, "customParams_stdv")).value = newValue;
+                    document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value = newValue;
                   }
                 }}
               />
@@ -460,7 +461,7 @@ const getParameterLabels = (props) => {
               <button
                 className={styles.gaussianButton}
                 style={{ backgroundColor: "#45BDE5" }}
-                onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
+                onClick={() => props.updateChart(active, 'groundTruth')}
               >
                 <h4>Update</h4>
                 <img
@@ -468,17 +469,6 @@ const getParameterLabels = (props) => {
                 // src={surpriseIcon}
                 />
               </button>
-              {/* <button
-                className={styles.gaussianButton}
-                style={{ backgroundColor: "#ccc" }}
-                onClick={() => props.updateChart(active, props.vm, props.updateCustom, 'custom')}
-              >
-                <h4>X</h4>
-                <img
-                  className={styles.buttonIconRight}
-                // src={surpriseIcon}
-                />
-              </button> */}
             </Box>
           </Box>
 
@@ -495,8 +485,8 @@ const getParameterLabels = (props) => {
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue)) {
-                    document.getElementById(formatId(active, "priorParams_mu")).value = newValue;
+                  if (!isNaN(newValue) && newValue != "undefined") {
+                    document.getElementById(formatId(active, "priorParamsValue_mu")).value = newValue;
                   }
                 }}
               />
@@ -513,7 +503,7 @@ const getParameterLabels = (props) => {
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
                   if (!isNaN(newValue) && newValue >= 0) {
-                    document.getElementById(formatId(active, "priorParams_stdv")).value = newValue;
+                    document.getElementById(formatId(active, "priorParamsValue_stdv")).value = newValue;
                   }
                 }}
               />
@@ -522,7 +512,7 @@ const getParameterLabels = (props) => {
               <button
                 className={styles.gaussianButton}
                 style={{ backgroundColor: "#FFAB1A" }}
-                onClick={() => props.updateChart(active, props.vm, props.updatePrior, 'prior')}
+                onClick={() => props.updateChart(active, 'prior')}
               >
                 <h4>Update</h4>
                 <img
@@ -667,11 +657,12 @@ const getHuePanel = (props) => {
                   strokeLinecap: "round", // Set rounded line ends
                 }}
                 tickLine={false}
-              />
+              >
+                {/* </> */}
+              </XAxis>
               <YAxis
-                label="Freq"
+                label={{ value: 'Number of Observations', angle: -90, position: 'insideLeft', textAnchor: 'middle' }} 
                 dots={false}
-                yAxis={-5}
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 1,
@@ -759,7 +750,7 @@ const getRhythmPanel = (props) => {
               onChange={(event) => {
                 const newValue = parseFloat(event.target.value);
                 document.getElementById(formatId(active, "viewFactorValue")).value = newValue;
-                props.updateChart(active, props.vm, props.updateViewFactor, 'viewFactor')
+                props.updateChart(active, 'viewFactor')
               }}
             />
             <input
@@ -773,7 +764,7 @@ const getRhythmPanel = (props) => {
                 const newValue = parseFloat(event.target.value);
                 if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
                   document.getElementById(formatId(active, "viewFactor")).value = newValue;
-                  props.updateChart(active, props.vm, props.updateViewFactor, 'viewFactor')
+                  props.updateChart(active, 'viewFactor')
                 }
               }}
             />
