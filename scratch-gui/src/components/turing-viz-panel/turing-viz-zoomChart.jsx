@@ -11,6 +11,7 @@ import {
     ReferenceArea,
     BarChart,
     Bar,
+    Cell,
     ResponsiveContainer,
     Legend
 } from 'recharts';
@@ -238,16 +239,13 @@ export default class ZoomChart extends PureComponent {
                             type="monotone"
                             data={data} // Pass the entire data list
                             dataKey="value"
-                            fill={(dataItem) => dataItem.stroke} // Use a function to access stroke from each item
                             animationDuration={300}
                             style={{ strokeWidth: "2px" }}
-                            // activeBar={({ active, payload }) => (
-                            //     <Rectangle
-                            //         fill={active ? hexToHue(payload.stroke) : payload.stroke} // Use payload.stroke for active state
-                            //         stroke={payload.stroke}
-                            //     />
-                            // )}
-                        />
+                        >
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={data[index].stroke} />
+                            ))}
+                        </Bar>
 
                         {/* <Bar yAxisId="1" type="monotone" dataKey="value" fill={data.stroke} animationDuration={300} style={{strokeWeight: "2px"}} activeBar={<Rectangle fill={hexToHue(data.stroke)} stroke={hexToHue(data.stroke)} />} /> */}
                         {refAreaLeft && refAreaRight ? (

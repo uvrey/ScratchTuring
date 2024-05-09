@@ -1194,6 +1194,17 @@ class Scratch3Turing {
         return data
     }
 
+    
+    _getRhythmBars(user_model) {
+        var data = []
+        for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {
+            data.push({ name: rhythm, value: user_model.rhythmData.rhythms[rhythm], fill: user_model.rhythmData.fills[rhythm] })
+        }
+        console.log("Prepared this rhythm timeline data to plot...")
+        console.log(data)
+        return data
+    }
+
     _getRhythmProportionData(user_model) {
         console.log("@@@@@@@@@@@ when getting rhythm props we have:")
         console.log(user_model.rhythmData)
@@ -1266,7 +1277,8 @@ class Scratch3Turing {
             return {
                 timeline: this._getRhythmTimelineData(user_model),
                 pie: this._getRhythmProportionData(user_model),
-                rdata: user_model.rhythmData
+                rdata: user_model.rhythmData,
+                histogram: this._getRhythmBars(user_model),
             }
         }
     }
