@@ -90,6 +90,9 @@ class Scratch3Turing {
         this._onClearSamples = this._onClearSamples.bind(this);
         this._runtime.on('CLEAR_SAMPLES', data => this._onClearSamples(data.modelName));
 
+        this._onDeleteModel = this._onDeleteModel.bind(this);
+        this._runtime.on('DELETE_MODEL', data => this._onDeleteModel(data));
+
         this._updateParams = this._updateParams.bind(this);
         this._runtime.on('UPDATE_POSTERIOR_N', data => this._updateParams(data, 'ps'));
 
@@ -1318,7 +1321,6 @@ class Scratch3Turing {
 
     deleteModel(args, util) {
         const model = args.MODEL
-
         if (this.user_models.hasOwnProperty(model)) {
             this._onDeleteModel(model);
             return "Success!"
@@ -1328,6 +1330,7 @@ class Scratch3Turing {
     }
 
     _onDeleteModel(modelName) {
+        console.log("GOT DELETE SIGNAL!")
         console.log("deleting model " + modelName)
         // delete model from user_models dict
         this.user_models[modelName].active = false // remove from view

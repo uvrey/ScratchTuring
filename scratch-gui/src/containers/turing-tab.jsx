@@ -66,7 +66,8 @@ class TuringTab extends React.Component {
             'handleUpdateGroundTruth',
             'handleUpdateMeanLines',
             'getStoredValue',
-            'handleClearSamples'
+            'handleClearSamples',
+            'handleDeleteModel'
         ]);
         this.state = {
             selectedSampleIndex: 0,
@@ -118,10 +119,12 @@ class TuringTab extends React.Component {
         return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[modelName] == undefined) ? (false) : (this.props.dataIsSet[modelName]));
     }
 
-    getModelSamples(modelName) {
-        console.log("!!!!!!!GETTING MODEL SAMPLES! ")
-        console.log(this.props.data[modelName].samples)
+    handleDeleteModel (modelName) {
+        console.log("RECEIVED SIGNAL TO DELETE MODEL: " + modelName)
+        this.props.vm.emit('DELETE_MODEL', {modelName: modelName})
+    }
 
+    getModelSamples(modelName) {
         return (this.props.dataIsSet == {}) ? ([]) : ((this.props.dataIsSet[modelName] == undefined) ? ([]) : (this.props.data[modelName].samples));
     }
 
@@ -383,6 +386,7 @@ class TuringTab extends React.Component {
                         activeModelIndex={this.state.activeModelIndex}
                         activeModel={this.getActiveModels(this.props.dataIsSet)[this.state.activeModelIndex]}
                         getValue={this.getStoredValue}
+                        deleteModel={this.handleDeleteModel}
                         updateChart={this.handleUpdateToChart}
                     />) : (<h1>No models defined... yet!</h1>)}
             </TuringAssetPanel>

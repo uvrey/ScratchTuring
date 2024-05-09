@@ -509,6 +509,10 @@ class Runtime extends EventEmitter {
         return 'UPDATE_CUSTOM_PARAMS';
     }
 
+    static get DELETE_MODEL () {
+        return 'DELETE_MODEL';
+    }
+
     static get CLEAR_SAMPLES () {
         return 'CLEAR_SAMPLES';
     }

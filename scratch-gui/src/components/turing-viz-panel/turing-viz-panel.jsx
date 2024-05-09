@@ -898,6 +898,17 @@ const getKeyStats = (props) => {
           {console.log(samples)}
           <p className={styles.stat}>{(samples.reduce((acc, v) => acc + v, 0) / samples.length).toFixed(2)}</p>
         </div>) : (null)}
+
+      <div>
+        <button
+          className={styles.gaussianButton}
+          style={{ backgroundColor: "#aa4954" }} // Active button style
+          onClick={() => props.deleteModel(props.activeModel)}
+        >
+          <h4>Delete</h4>
+          {/* <img className={styles.buttonIconRight} /> */}
+        </button>
+      </div>
     </Box>
     // </Box>
   );
