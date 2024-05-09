@@ -314,12 +314,12 @@ class Scratch3Turing {
                     }
                 },
                 {
-                    opcode: 'removeModel',
+                    opcode: 'deleteModel',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: 'turing.removeModel',
+                        id: 'turing.deleteModel',
                         default: 'delete model [MODEL]',
-                        description: 'turing.removeModel'
+                        description: 'turing.deleteModel'
                     }),
                     arguments: {
                         MODEL: {
@@ -1314,20 +1314,28 @@ class Scratch3Turing {
 
         // update visualisation data
         this.updateVisualisationData(user_model)
+    }
 
-        this._runtime.emit('TURING_DATA', this.visualisationData)
-        this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
-        this._runtime.emit('PROJECT_CHANGED')
+    deleteModel(args, util) {
+        const model = args.MODEL
+
+        if (this.user_models.hasOwnProperty(model)) {
+            this._onDeleteModel(model);
+            return "Success!"
+        } else {
+            return "No model called " + model
+        }
     }
 
     _onDeleteModel(modelName) {
+        console.log("deleting model " + modelName)
         // delete model from user_models dict
-        delete this.user_models[modelName]
-
-        // tell turing about it
-
-        // update visualisation data
+        this.user_models[modelName].active = false // remove from view
+        this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
         this._runtime.emit('PROJECT_CHANGED')
+
+        delete this.user_models[modelName] // delete model
+        this.turing_deleteModel(modelName)
     }
     /**
      * Send a request to the Turing API of a particular type
