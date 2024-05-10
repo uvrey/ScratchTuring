@@ -436,7 +436,7 @@ class TuringTab extends React.Component {
                         updateRefRight={this.handleRefUpdateRight}
                         zoom={this.handleZoom}
                         zoomOut={this.handleZoomOut}
-                    />) : (<h1>No models defined... yet!</h1>)}
+                    />) : (<h1 style={{marginLeft: "4em", marginTop: "4em"}}>No models defined... yet!</h1>)}
             </TuringAssetPanel>
         );
     }

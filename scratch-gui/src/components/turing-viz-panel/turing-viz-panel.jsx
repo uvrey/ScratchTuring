@@ -1,29 +1,14 @@
 import PropTypes from 'prop-types';
-import React, { PureComponent } from 'react';
+import React from 'react';
 import Box from '../box/box.jsx';
 import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
-import { FormattedMessage } from 'react-intl';
 import { LineChart, BarChart, Cell, Line, Label, Brush, Bar, XAxis, YAxis, PieChart, Sector, ReferenceArea, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
-import Gaussian from '../gaussian/gaussian.jsx'
-import FontCST from './font--cst.svg'
-import arrowIcon from './arrow.svg'
-import FontDashboard from './font--dashboard.svg'
-import FontScratchTuring from './font--scratchturing.svg'
-import FontBarChart from './font--barChart.svg'
-import FontDist from './font--normalDist.svg'
-import FontCurrentSample from './font--currentSample.svg'
-import FontNumSamples from './font--samples.svg'
-import FontType from './font--value.svg'
-import Color, { rgbToDecimal } from './color.js'
+import Color from './color.js'
 import arrowLeftIcon from './arrow-left.svg'
 import ZoomChart from './turing-viz-zoomChart.jsx'
-// import SZoomChart from './turing-viz-zoomChart copy.jsx'
-/** CREDIT THIS CODE **/
 import gsap from "gsap";
-import { style } from 'scratch-storage';
-
 
 const randomNumber = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
@@ -40,36 +25,6 @@ export const randomRotate = selector => {
   });
 };
 
-const CustomHue = (props) => {
-  var shiftFactor = 0
-  const hue = (props.payload.value + shiftFactor) % 360;
-  const color = hueToHex(hue);
-  return (
-    <rect
-      className={styles.hueBox}
-      x={props.x}
-      y={props.y}
-      width="5%"
-      height="2em"
-      fill={color} // Set fill color to calculated hex
-    />
-  );
-};
-
-const CustomizedLabel = (label) => {
-  return (
-    <div className={styles.meanLabel}>{label}</div>
-  );
-}
-
-
-/**
- * Convert a hex color (e.g., F00, #03F, #0033FF) to an RGB color object.
- * CC-BY-SA Tim Down:
- * https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
- * @param {!string} hex Hex representation of the color.
- * @return {RGBObject} null on failure, or rgb: {r: red [0,255], g: green [0,255], b: blue [0,255]}.
- */
 const hueToHex = (hue) => {
   const hsv = { h: hue, s: 80, v: 80 }
   return Color.rgbToHex(Color.hsvToRgb(hsv))
@@ -84,19 +39,8 @@ const formatId = (modelName, label) => {
   return modelName + "_" + label
 }
 
-
 const GaussianTooltip = ({ active, payload, label, props, plot }) => {
-
-  // console.log("plot?")
-  // console.log(plot)
-
-  // console.log("helpful tooltip should show??")
-  // console.log(plot.helpfulTooltip)
-
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-    // console.log("tooltip payload?")
-    // console.log(payload)
-
     if (plot.helpfulTooltip) {
       return (
         <div className={styles.gaussianTooltip}>
@@ -111,10 +55,6 @@ const GaussianTooltip = ({ active, payload, label, props, plot }) => {
                 }}
                 className={styles.odds}
               >
-                {/* {payload[index].dataKey.includes("ps")
-                  ? `Updated Belief (${index + 1})`  // Use index + 1 for human-readable numbering
-                  : plot.styles[payload[index].dataKey].chartName
-                }  */}
                 ➡️ {
                   `${(100 * payload[index].value).toFixed(3)}%` +
                   (plot.meanLines ? ` (Mean = ${plot.means[payload[index].dataKey]})` : '')
@@ -138,17 +78,11 @@ const GaussianTooltip = ({ active, payload, label, props, plot }) => {
 const GaussianLegend = ({ payload, plot, props }) => (
   <div style={{ justifyContent: "center" }}>
     <h4 style={{ marginBottom: "1em", fontSize: "0.8rem" }}>KEY 🗝️</h4>
-    {/* {console.log("GAUSSIAN LEGEND PAYLOAD?")}
-    {console.log(payload)} */}
     {payload.map((item) => (
       item.dataKey.includes("ps") ? (null) : (
         <b key={item.dataKey} style={{ color: plot.styles[item.dataKey].stroke, marginRight: "1.5em" }}>{plot.styles[item.dataKey].chartName}</b>)
     ))}
-
-    {/* {console.log("Inside legend! ")}
-    {console.log(props)} */}
     {props.data.samples.length > 0 ? (<b style={{ color: plot.styles["ps-options"].stroke, marginRight: "1.5em" }}>Updated Belief</b>) : (null)}
-
     <div style={{ marginTop: "0.5em" }}>
       <label htmlFor={formatId(props.activeModel, "helpfulTooltipGaussian")} className={styles.checkboxLabel}>
         <input
@@ -156,7 +90,6 @@ const GaussianLegend = ({ payload, plot, props }) => (
           type="checkbox"
           className={styles.chartCheckbox}
           onChange={() => props.updateChart(props.activeModel, 'tooltip')}
-        // Add a default checked state if needed (optional)
         />
         Helpful tooltip
       </label>
@@ -174,47 +107,6 @@ const GaussianLegend = ({ payload, plot, props }) => (
   </div>
 );
 
-const HueLegend = ({ payload, plot, props }) => (
-  <div style={{ justifyContent: "center" }}>
-    <div style={{ marginTop: "0.5em" }}>
-      <label htmlFor={formatId(props.activeModel, "helpfulTooltipHue")} className={styles.checkboxLabel}>
-        <input
-          id={formatId(props.activeModel, "helpfulTooltipHue")}
-          type="checkbox"
-          className={styles.chartCheckbox}
-          onChange={() => props.updateChart(props.activeModel, 'tooltip')}
-        // Add a default checked state if needed (optional)
-        />
-        Helpful tooltip
-      </label>
-    </div>
-  </div>
-);
-
-const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
-  <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>{`value: ${payload.value}`}</text>;
-};
-
-// const MeanLabel = ({ x, y, mean}) => {
-//   return (
-//     // <div>
-//     <foreignObject className={styles.labelWrapper} x={mean} y="0">
-//       <svg width={"3em"} height={"1em"}>
-//         <rect x={0} y={0} width={"3em"} height={"1em"} fill={"#fff"} /> {/* Colored rectangle */}
-//         <text x={"3em" / 2} y={"1em" / 2} dominantBaseline="middle" textAnchor="middle">
-//           {mean} {/* Text on top of the rectangle */}
-//         </text>
-//       </svg>
-//     </foreignObject>
-//   )
-// }
-
-const TooltipReferenceLine = ({ x, children, ...otherProps }) => (
-  <Tooltip content={children} trigger="none"> {/* Disable default trigger */}
-    <ReferenceLine x={x} {...otherProps} />
-  </Tooltip>
-);
-
 const MeanLabel = ({ ...props }) => {
   return (
     <g>
@@ -227,22 +119,12 @@ const MeanLabel = ({ ...props }) => {
   )
 }
 
-const LikelihoodLabel = ({ ...props }) => {
-  return (
-    <h5 style={{ transform: 'rotate(-90deg)', writingMode: 'vertical-rl' }}>
-      Likelihood
-    </h5>
-  );
-};
-
-
 const getGaussianPanel = (props) => {
   const plot = props.data.plot
   return (
     <Box className={styles.dataRow} style={{ marginTop: "-1.5em" }}>
       {getParameterLabels(props)}
       <Box className={styles.dataCol}>
-        {/* <img src={FontDist} className={styles.visHeading} /> */}
         <Box className={styles.chartBox}>
           <Box className={styles.dataCol}>
             <h3 style={{ marginTop: "-0.2em" }}>Distributions</h3>
@@ -260,9 +142,6 @@ const getGaussianPanel = (props) => {
                   label={{ value: 'Likelihood', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
                 />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                {props.docTags}
-                {/* {console.log("Getting plot styles from data:")}
-                {console.log(plot.activeDistributions)} */}
                 {plot.activeDistributions.map((key) => (
                   <Line
                     key={key.includes("ps") ? plot.styles['ps-options'].chartName : plot.styles[key].chartName}
@@ -272,7 +151,6 @@ const getGaussianPanel = (props) => {
                     dot={key.includes("ps") ? plot.styles['ps-options'].dots : plot.styles[key].dots}
                     isAnimationActive={true}
                     strokeWidth={key.includes("ps") ? plot.styles['ps-options'].strokeWidth : plot.styles[key].strokeWidth}
-                    // Apply strokeDasharray conditionally based on the key
                     strokeDasharray={key.includes("ps") ? plot.styles['ps-options'].strokeDasharray : null}
                   />
                 ))}
@@ -292,13 +170,11 @@ const getGaussianPanel = (props) => {
                         content={<MeanLabel />} />
                       }
                       strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
-                      // label={plot.means[key]}
                       stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
                       strokeWidth={key.includes("ps") ? plot.styles["ps-options"].strokeWidth : plot.styles[key].strokeWidth}
                     />
                   ))
                 ) : null}
-                {/* <ReferenceLine x={} /> */}
                 <Legend content={<GaussianLegend plot={plot} props={props} />} />
                 <Tooltip content={<GaussianTooltip props={props} plot={plot} />} />
               </LineChart>
@@ -306,22 +182,6 @@ const getGaussianPanel = (props) => {
           </Box>
         </Box>
       </Box>
-      {/* <ScatterChart
-        width={400}
-        height={300}
-        margin={{
-          top: 20,
-          right: 20,
-          bottom: 20,
-          left: 20,
-        }}
-      >
-        <CartesianGrid />
-        <XAxis type="number" dataKey="x" name="sample" unit="" />
-        <YAxis type="number" dataKey="y" name="value" unit="" />
-        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
-      </ScatterChart> */}
       <Box>
       </Box>
     </Box>
@@ -351,11 +211,6 @@ const getPosteriorNs = (props) => {
         />
       </Box>
       <Box className={styles.gaussianButtonRow}>
-        {/* {console.log("deciding whether to grey the button out or not. Samples / length = ")}
-        {console.log(props.data)}
-        {console.log(props.data.samples)}
-        {console.log(props.data.samples.length)} */}
-
         {props.data.samples.length > 0 ? (  // Only render active button if samples exist
           props.data.plot.fetching ?
             (
@@ -365,26 +220,23 @@ const getPosteriorNs = (props) => {
                 disabled
               >
                 <h4>Update</h4>
-                {/* <img className={styles.buttonIconRight} /> */}
               </button>
             ) : ( // Conditionally render based on fetching state
               <button
                 className={styles.gaussianButton}
-                style={{ backgroundColor: "#00B295" }} // Active button style
+                style={{ backgroundColor: "#00B295" }}
                 onClick={() => props.updateChart(active, 'ps')}
               >
                 <h4>Update</h4>
-                {/* <img className={styles.buttonIconRight} /> */}
               </button>
             )
         ) : (
-          <button  // Render inactive button (combined logic)
+          <button
             className={styles.gaussianButton}
-            style={{ backgroundColor: "#ccc", pointerEvents: "none" }} // Disabled button style
+            style={{ backgroundColor: "#ccc", pointerEvents: "none" }}
             disabled
           >
             <h4>Update</h4>
-            {/* <img className={styles.buttonIconRight} /> */}
           </button>
         )}
 
@@ -517,52 +369,9 @@ const getParameterLabels = (props) => {
   }
 };
 
-const HueTooltip = ({ active, payload, label, plot }) => {
-  const index = Number(label)
-
-  if (active && payload && payload.length) { // Check if tooltip is active and has data
-
-    const freq = payload[0].payload.value
-    if (plot.helpfulTooltip) {
-      return (
-        <div>
-          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
-            {plot.hues.hueFamilies[index].map((hex, index) => (
-              <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, stroke: "#eee", strokeWeight: "3px", marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
-            ))}
-            <div className={styles.dataRow}>
-              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
-              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          {/* <p>{`${label}: ${payload[0].value}`}</p> */}
-          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
-            <div className={styles.dataRow}>
-              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
-              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-  }
-  return null;
-};
-
 const HuePieTooltip = ({ active, payload, label, props }) => {
-  const index = Number(label)
-
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-    console.log("INSIDE PAYLOAD! of Hue pie tool tip :))")
-    console.log(payload)
-    console.log("hue to use>")
     const hueToUse = payload[0].payload.h
-
     return (
       <div className={styles.dataRow} style={{ backgroundColor: `rgba(255,255,255,0.5)`, padding: "0.4em", borderRadius: "0.3em" }}>
         <div className={styles.hueBox} style={{ backgroundColor: hueToHex(hueToUse), borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: "3px" }} /><b>x {payload[0].value}</b>
@@ -623,71 +432,10 @@ const getHuePanel = (props) => {
       </Box>
       <Box className={styles.chartBox}>
         <Box className={styles.hueChartBox}>
-
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
             <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
-
-            {/* <BarChart
-              width={900}
-              height={400}
-              data={plot.histogram}
-              style={{ marginTop: "1em" }}
-              onMouseDown={(e) => props.updateRefLeft(props.activeModel, e.activeLabel)}
-              onMouseMove={(e) => props.updateRefRight(props.activeModel, e.activeLabel)}
-              onMouseUp={() => props.zoom(props.activeModel)} // binding this?
-            >
-              <Bar type="monotone" dataKey="value" dot={false} barSize={20}>
-                {plot.histogram.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={plot.histogram[index].stroke} />
-                ))}
-              </Bar>
-
-              {console.log("DOMAIN SHOULD BE: ")}
-              {console.log(plot.view.left + ", " + plot.view.right)}
-              <XAxis
-                allowDataOverflow
-                dataKey="hue"
-                domain={[plot.view.left, plot.view.right]}
-                tickCount={360}
-                visibleTickCount={360}
-                interval={0}
-                tick={<CustomHue />}
-                offset={0}
-                minTickGap={0}
-                axisLine={{
-                  stroke: "#ddd",
-                  strokeWidth: 3,
-                  strokeLinecap: "round",
-                }}
-                tickLine={false}
-              >
-              </XAxis>
-              <Brush dataKey="value" height={30} stroke="#8884d8" />
-              <YAxis allowDataOverflow
-                domain={['dataMin', 'dataMax + 1']}
-                label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
-                style={{ marginTop: '10px' }}
-                dots={false}
-                axisLine={{
-                  stroke: "#ddd",
-                  strokeWidth: 1,
-                  strokeLinecap: "round", // Set rounded line ends
-                }}
-                tickLine={{ strokeWidth: 3 }}
-              />
-              <Legend content={<HueLegend plot={plot} props={props} />} />
-              <Tooltip content={<HueTooltip plot={plot} />} />
-
-              {console.log("INSIDE PANEL, THE PLOT VIEW IS:")}
-              {console.log(plot.view)}
-              {console.log("DRAWINGREF AREA?")}
-              <ReferenceArea yAxisId="1" x1={0} x2={101} strokeOpacity={0.5} />
-              {plot.view.refAreaLeft != "" && plot.view.refAreaRight != "" ? (
-                <ReferenceArea yAxisId="1" x1={plot.view.refAreaLeft} x2={plot.view.refAreaRight} strokeOpacity={1} />
-              ) : (null)}
-            </BarChart> */}
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -717,7 +465,6 @@ const getRhythmPanel = (props) => {
                       stroke={"#ggg"}
                       strokeWeight={"4px"}
                     />
-                    {/* <Tooltip content={<RhythmPieTooltip props={props} />} /> */}
                     <Tooltip />
                   </PieChart>
                   <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
@@ -745,11 +492,10 @@ const getRhythmPanel = (props) => {
               <Tooltip />
             </BarChart> */}
 
-            {/* <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
+            <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
               <Scatter type="monotone" dataKey="x" stroke={plot.timeline.stroke} dot={false} />
               <XAxis
                 label="Rhythm"
-                // tick={<CustomHue />}
                 tickInterval={5}
                 axisLine={{
                   stroke: "#ddd",
@@ -788,8 +534,8 @@ const getRhythmPanel = (props) => {
               type="text"
               style={{ display: 'none' }}
               id={formatId(active, "viewFactorValue")}
-              maxLength="200" // Restrict to 8 characters
-              defaultValue={0} // Set initial value
+              maxLength="200"
+              defaultValue={0}
               className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
               onChange={(event) => {
                 const newValue = parseFloat(event.target.value);
@@ -798,7 +544,7 @@ const getRhythmPanel = (props) => {
                   props.updateChart(active, 'viewFactor')
                 }
               }}
-            /> */}
+            />
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -810,9 +556,6 @@ const getRhythmPanel = (props) => {
 
 
 const getPanel = (props) => {
-  // { console.log("Deciding which panel to choose:") }
-  // { console.log(props.data) }
-  // { console.log(props.data.distribution) }
   switch (props.data.distribution) {
     case 'gaussian':
       return getGaussianPanel(props)
@@ -849,15 +592,12 @@ const getKeyStats = (props) => {
   const data = props.data
   const samples = props.data.samples
   return (
-    // <Box className={styles.dataRow}>
     <Box className={styles.keyStats}>
       <div>
         <h4>Model</h4>
-        {/* <img src={FontType} className={styles.statsHeading} /> */}
         <div><p className={styles.stat}>{data.modelName}</p></div>
       </div>
       <div>
-        {/* <img src={FontCurrentSample} className={styles.statsHeading} /> */}
         {samples.length === 0 ? (
           <>
             <h4>Current Observation</h4>
@@ -899,7 +639,6 @@ const getKeyStats = (props) => {
       {data.distribution === "gaussian" && samples.length > 0 ? (
         <div>
           <h4 style={{ color: "#00B295" }}>Mean of Observations</h4>
-          {/* {console.log(samples)} */}
           <p className={styles.stat}>{(samples.reduce((acc, v) => acc + v, 0) / samples.length).toFixed(2)}</p>
         </div>) : (null)}
 
@@ -910,11 +649,9 @@ const getKeyStats = (props) => {
           onClick={() => props.deleteModel(props.activeModel)}
         >
           <h4>Delete</h4>
-          {/* <img className={styles.buttonIconRight} /> */}
         </button>
       </div>
     </Box>
-    // </Box>
   );
 }
 
