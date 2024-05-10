@@ -115,6 +115,14 @@ class TuringTab extends React.Component {
         this.setState({ activeModelIndex: index });
     }
 
+    handleGetStoredValue(value, defaultValue) {
+        try {
+            return localStorage.getItem(value);
+        }  catch (error) {
+            return defaultValue; 
+        }
+    }
+
     getModelDataState(modelName) {
         return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[modelName] == undefined) ? (false) : (this.props.dataIsSet[modelName]));
     }
@@ -136,9 +144,6 @@ class TuringTab extends React.Component {
     getActiveModels(models) {
         var list = []
         for (const m in models) {
-            console.log("active models are? " )
-            console.log(models)
-            console.log("active? " + m + ": " + models[m].active)
             list.push(m)
         }
         return list
@@ -295,13 +300,20 @@ class TuringTab extends React.Component {
         this.props.vm.runtime.emit('UPDATE_MEAN_LINES', data)
     }
 
-    getStoredValue(value, defaultValue) {
-        console.log("@@trying to get the stored value for " + value)
-        try {
-            console.log("found the value as " + value)
-            return localStorage.getItem(value);
-        } catch (error) {
-            return defaultValue;
+    getStoredValue(props, mode, dist) {
+        console.log("@@trying to get the stored value for " + dist + ", " + mode)
+        console.log(props)
+        
+        if (mode == 'n' && props != undefined) {
+            return props.data.plot.nPosteriors
+        }
+
+        if (mode == 'mean' && props != undefined) {
+            return props.data.plot.means[dist]
+        }
+
+        if (mode == 'stdv' && props != undefined) {
+            return props.data.plot.stdvs[dist]
         }
     }
 

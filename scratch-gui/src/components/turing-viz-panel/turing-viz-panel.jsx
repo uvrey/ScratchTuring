@@ -345,7 +345,7 @@ const getPosteriorNs = (props) => {
           id={formatId(active, "posteriorNValue")}
           style={{ color: "#00B295", marginLeft: "7.5em" }}
           maxLength="4" // Restrict to 8 characters
-          defaultValue={2} // Set initial value
+          defaultValue={props.getValue(props, 'n', '')} // Set initial value
           className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
           onChange={(event) => {
             const newValue = parseFloat(event.target.value);
@@ -412,12 +412,12 @@ const getParameterLabels = (props) => {
                 type="text"
                 id={formatId(active, "groundTruthParamsValue_mu")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={0} // Set initial value
+                defaultValue={props.getValue(props, 'mean', 'groundTruth')}  // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 style={{ color: "#45BDE5" }}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                  if (!isNaN(newValue)) {
                     document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value = newValue;
                   }
                 }}
@@ -430,11 +430,11 @@ const getParameterLabels = (props) => {
                 id={formatId(active, "groundTruthParamsValue_stdv")}
                 style={{ color: "#45BDE5" }}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={1} // Set initial value
+                defaultValue={props.getValue(props, 'stdv', 'groundTruth')}   // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
+                  if (!isNaN(newValue) && newValue >= 0) {
                     document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value = newValue;
                   }
                 }}
@@ -462,7 +462,7 @@ const getParameterLabels = (props) => {
               <input
                 type="text"
                 id={formatId(active, "priorParamsValue_mu")}
-                defaultValue={0}
+                defaultValue={props.getValue(props, 'mean', 'prior')}
                 style={{ color: "#FFAB1A" }}
                 maxLength="4" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
@@ -480,7 +480,7 @@ const getParameterLabels = (props) => {
                 type="text"
                 id={formatId(active, "priorParamsValue_stdv")}
                 style={{ color: "#FFAB1A" }}
-                defaultValue={1}
+                defaultValue={props.getValue(props, 'stdv', 'prior')}
                 maxLength="4" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {

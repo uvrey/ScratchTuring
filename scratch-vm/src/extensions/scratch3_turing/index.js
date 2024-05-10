@@ -868,9 +868,10 @@ class Scratch3Turing {
         return rhythm + ": " + timeStamp
     }
 
-    _getDistLinesAndMeans(user_model) {
+    _getDistLinesAndParams(user_model) {
         var distLines = []
         var means = {}
+        var stdvs = {}
 
         for (const model in user_model.models) {
             if (user_model.models[model].active) {
@@ -888,6 +889,7 @@ class Scratch3Turing {
                         dss.mean = data.mean
                         dss.stdv = data.stdv
                         means[dss.id] = data.mean
+                        stdvs[dss.id] = data.stdv
                         distLines.push(dss)
                         i = i + 1
                     }
@@ -896,6 +898,7 @@ class Scratch3Turing {
                     dss.id = model
                     dss.mean = user_model.models[model].mean
                     dss.stdv = user_model.models[model].stdv
+                    stdvs[model] = user_model.models[model].stdv
                     means[model] = user_model.models[model].mean
                     distLines.push(dss)
                 }
@@ -903,7 +906,7 @@ class Scratch3Turing {
         }
         console.log(distLines)
         console.log("DIST LINES ABOVE: ^^^^")
-        return { distLines: distLines, means: means }
+        return { distLines: distLines, means: means, stdvs: stdvs }
     }
 
     toggleVisibility(data) {
@@ -1252,8 +1255,8 @@ class Scratch3Turing {
 
     getPlotDataFromDist(user_model) {
         if (user_model.distribution == "gaussian") {
-            console.log(this._getDistLinesAndMeans(user_model))
-            var distAndMeans = this._getDistLinesAndMeans(user_model)
+            console.log(this._getDistLinesAndParams(user_model))
+            var distAndParams = this._getDistLinesAndParams(user_model)
 
             return {
                 styles: {
@@ -1265,10 +1268,11 @@ class Scratch3Turing {
                 fetching: user_model.fetching,
                 helpfulTooltip: user_model.helpfulTooltip,
                 meanLines: user_model.meanLines,
+                nPosteriors: user_model.models.ps.n,
                 visible: this._getVisibleModels(),
-                //    histogram: this._getBarChartData(user_model), // plots bar chart data
-                gaussian: Distributions.generateProbabilityData(distAndMeans.distLines),
-                means: distAndMeans.means,
+                gaussian: Distributions.generateProbabilityData(distAndParams.distLines),
+                means: distAndParams.means,
+                stdvs: distAndParams.stdvs,
                 sampleSpace: this._getSampleSpaceData(user_model),
                 distLines: user_model.distLines,
                 activeDistributions: this.getActiveDistributions(user_model.models),
