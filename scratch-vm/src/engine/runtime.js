@@ -516,6 +516,18 @@ class Runtime extends EventEmitter {
     static get REMOVE_MODEL () {
         return 'REMOVE_MODEL';
     }
+    static get UPDATE_VIEW_REF_LEFT () {
+        return 'UPDATE_VIEW_REF_LEFT';
+    }
+    static get UPDATE_VIEW_REF_RIGHT () {
+        return 'UPDATE_VIEW_REF_RIGHT';
+    }
+    static get UPDATE_VIEW_ZOOM () {
+        return 'UPDATE_VIEW_ZOOM';
+    }
+    static get UPDATE_VIEW_ZOOM_OUT () {
+        return 'UPDATE_VIEW_ZOOM_OUT';
+    }
 
     static get CLEAR_SAMPLES () {
         return 'CLEAR_SAMPLES';

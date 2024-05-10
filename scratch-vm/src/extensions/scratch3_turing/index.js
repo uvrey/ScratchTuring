@@ -110,6 +110,45 @@ class Scratch3Turing {
 
         this.toggleVisibility = this.toggleVisibility.bind(this);
         this._runtime.on('TOGGLE_VISIBILITY', data => this.toggleVisibility(data));
+
+        /* Updating views */
+        this.updateRefLeft = this.updateRefLeft.bind(this);
+        this._runtime.on('UPDATE_VIEW_REF_LEFT', data => this.updateRefLeft(data));
+
+        this.updateRefRight = this.updateRefRight.bind(this);
+        this._runtime.on('UPDATE_VIEW_REF_RIGHT', data => this.updateRefRight(data));
+
+        this.hueZoom = this.hueZoom.bind(this);
+        this._runtime.on('UPDATE_VIEW_ZOOM', data => this.hueZoom(data.modelName));
+
+        this.hueZoomOut = this.hueZoomOut.bind(this);
+        this._runtime.on('UPDATE_VIEW_ZOOM_OUT', data => this.hueZoomOut(data.modelName));
+
+    }
+
+    updateRefLeft(data) {
+        var user_model = this.user_models[data.modelName]
+        console.log("@!! Updating ref left")
+
+        var view = user_model.hueData.view
+        user_model.hueData.view.refAreaLeft = data.refAreaLeft
+        this.updateVisualisationData(user_model)
+    }
+
+    updateRefRight(data) {
+        var user_model = this.user_models[data.modelName]
+        console.log("@!! Updating ref right for " + data.modelName)
+
+        console.log(user_model.hueData.view)
+        var view = user_model.hueData.view
+
+        console.log("updating the view with new data?")
+        console.log("new ref area RIGHT ->? " + data.refAreaRight)
+
+        if (view.refAreaLeft != "") {
+            user_model.hueData.view.refAreaRight = data.refAreaRight
+            this.updateVisualisationData(user_model)
+        }
     }
 
     _getColorFromPalette() {
@@ -483,7 +522,8 @@ class Scratch3Turing {
                 activeHues: [],
                 hueProportions: Array(360).fill(0),
                 hueCount: 0,
-                hueFamilies: Array(360).fill().map(() => [])
+                hueFamilies: Array(360).fill().map(() => []),
+                view: this.getInitialState()
             },
             rhythmData: {
                 viewFactor: 0,
@@ -1107,7 +1147,7 @@ class Scratch3Turing {
     }
 
     _getHexForActiveHue(user_model, activeHue) {
-        console.log("finding hex for active hue " + activeHue)
+       // console.log("finding hex for active hue " + activeHue)
         const foundHue = user_model.hueData.activeHues.find(hueDict => hueDict.hue === activeHue);
 
         // console.log("Our active hue list is: ")
@@ -1265,6 +1305,91 @@ class Scratch3Turing {
         }
     }
 
+
+    getView(user_model, data) {
+        var view = user_model.hueData.view
+        console.log("BEFORE SENDING, OUR VIEW IS:")
+        console.log(view)
+
+        toReturn = {
+            ...view,
+            data,
+        };
+
+        user_model.hueData.view = toReturn
+        return toReturn
+    }
+
+    getInitialState() {
+        return {
+            data: {},
+            left: 'dataMin',
+            right: 'dataMax',
+            refAreaLeft: '',
+            refAreaRight: '',
+            top: 'dataMax+1',
+            bottom: 'dataMin',
+            animation: true,
+        };
+    }
+
+    updateHueState = (user_model, state) => {
+        user_model.hueData.view = state
+    }
+
+    getAxisYDomain = (data, from, to, ref, offset) => {
+        console.log("getting y axis domain..." + from + ", " + to)
+        const refData = data.slice(from - 1, to);
+        let [bottom, top] = [refData[0][ref], refData[0][ref]];
+        refData.forEach((d) => {
+            if (d[ref] > top) top = d[ref];
+            if (d[ref] < bottom) bottom = d[ref];
+        });
+
+        return [(bottom | 0), (top | 0) + offset];
+    };
+
+    hueZoom(modelName) {
+        var user_model = this.user_models[modelName]
+
+        let { refAreaLeft, refAreaRight } = user_model.hueData.view;
+        const { data } = user_model.hueData.view;
+
+        console.log('Zooming')
+
+        if (refAreaLeft === refAreaRight || refAreaRight === '') {
+            user_model.hueData.view.refAreaLeft = '';
+            user_model.hueData.view.refAreaRight = '';
+            this.updateVisualisationData(user_model)
+            return;
+        }
+
+        // // xAxis domain
+        if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
+
+        // // yAxis domain
+        const [bottom, top] = this.getAxisYDomain(data, refAreaLeft, refAreaRight, 'value', 1);
+        user_model.hueData.view.data = data.slice(); // Create a copy of data
+        user_model.hueData.view.left = refAreaLeft;
+        user_model.hueData.view.right = refAreaRight;
+        this.updateVisualisationData(user_model)
+    }
+
+    hueZoomOut(modelName) {
+        var user_model = this.user_models[modelName]
+        console.log('Zooming Out')
+        const { data } = user_model.hueData.view;
+
+        user_model.hueData.view.data = data.slice()
+        user_model.hueData.view.data.refAreaLeft = ''
+        user_model.hueData.view.data.refAreaRight = ''
+        user_model.hueData.view.data.left = 'dataMin'
+        user_model.hueData.view.data.right = 'dataMax'
+        user_model.hueData.view.data.top = 'dataMax+1'
+        user_model.hueData.view.data.bottom = 'dataMin'
+        this.updateVisualisationData(user_model)
+    }
+
     getPlotDataFromDist(user_model) {
         if (user_model.distribution == "gaussian") {
             console.log(this._getDistLinesAndParams(user_model))
@@ -1295,6 +1420,7 @@ class Scratch3Turing {
                 pie: this.mapToPieChartData(user_model),
                 helpfulTooltip: user_model.helpfulTooltip,
                 hues: user_model.hueData,
+                view: this.getView(user_model, this._getHuePlotData(user_model))
             }
         } else if (user_model.distribution == "rhythm") {
             return {
@@ -1431,7 +1557,7 @@ class Scratch3Turing {
 
     _onDeleteModel(modelName) {
         // delete model from user_models dict
-        this.user_models[modelName].visible = false 
+        this.user_models[modelName].visible = false
         this.user_models[modelName].active = false // remove from view
 
         // this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())

@@ -67,7 +67,11 @@ class TuringTab extends React.Component {
             'handleUpdateMeanLines',
             'getStoredValue',
             'handleClearSamples',
-            'handleDeleteModel'
+            'handleDeleteModel',
+            'handleRefUpdateLeft',
+            'handleRefUpdateRight',
+            'handleZoom',
+            'handleZoomOut'
         ]);
         this.state = {
             selectedSampleIndex: 0,
@@ -174,6 +178,26 @@ class TuringTab extends React.Component {
         console.log("Toggle vis: Sending...")
         console.log(data)
         this.props.vm.runtime.emit('TOGGLE_VISIBILITY', data)
+    }
+
+    handleRefUpdateLeft (modelName, newLeft) {
+        const send = {modelName: modelName, refAreaLeft: newLeft}
+        this.props.vm.runtime.emit('UPDATE_VIEW_REF_LEFT', send)
+    }
+
+    handleRefUpdateRight (modelName, newRight) {
+        const send = {modelName: modelName, refAreaRight: newRight}
+        this.props.vm.runtime.emit('UPDATE_VIEW_REF_RIGHT', send)
+    }
+
+    handleZoom (modelName) {
+        const send = {modelName: modelName}
+        this.props.vm.runtime.emit('UPDATE_VIEW_ZOOM', send)
+    }
+
+    handleZoomOut (modelName) {
+        const send = {modelName: modelName}
+        this.props.vm.runtime.emit('UPDATE_VIEW_ZOOM_OUT', send)
     }
 
     handleUpdateToChart(modelName, mode) {
@@ -408,6 +432,10 @@ class TuringTab extends React.Component {
                         getValue={this.getStoredValue}
                         deleteModel={this.handleDeleteModel}
                         updateChart={this.handleUpdateToChart}
+                        updateRefLeft={this.handleRefUpdateLeft}
+                        updateRefRight={this.handleRefUpdateRight}
+                        zoom={this.handleZoom}
+                        zoomOut={this.handleZoomOut}
                     />) : (<h1>No models defined... yet!</h1>)}
             </TuringAssetPanel>
         );

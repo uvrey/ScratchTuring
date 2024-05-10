@@ -143,9 +143,9 @@ export default class ZoomChart extends PureComponent {
         this.stroke = stroke
     }
 
-    zoom() {
-        let { refAreaLeft, refAreaRight } = this.state;
-        const { data } = this.state;
+    zoom(state) {
+        let { refAreaLeft, refAreaRight } = state;
+        const { data } = state;
 
         if (refAreaLeft === refAreaRight || refAreaRight === '') {
             this.setState(() => ({
@@ -202,6 +202,8 @@ export default class ZoomChart extends PureComponent {
                         onMouseMove={(e) => this.state.refAreaLeft && this.setState({ refAreaRight: e.activeLabel })}
                         onMouseUp={this.zoom.bind(this)}
                     >
+                        {console.log("OUR DOMAIN IS... ")}
+                        {console.log(left + ", " + right)}
                         <XAxis allowDataOverflow
                             dataKey="hue"
                             domain={[left, right]}
@@ -218,6 +220,9 @@ export default class ZoomChart extends PureComponent {
                             }}
                             tickLine={false}
                             type="number" />
+                                 {console.log("OUR RANGE IS... ")}
+                        {console.log(bottom + ", " + top)}
+
                         <YAxis allowDataOverflow
                             domain={[bottom, top]}
                             style={{ marginTop: '10px' }}

@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Label, Brush, Bar, XAxis, YAxis, PieChart, Sector, ReferenceArea, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -215,11 +215,6 @@ const TooltipReferenceLine = ({ x, children, ...otherProps }) => (
   </Tooltip>
 );
 
-
-const formatLabel = () => {
-  console.log("WE ARE SUPPOSED TO FORMAT THIS LABEL?")
-}
-
 const MeanLabel = ({ ...props }) => {
   return (
     <g>
@@ -266,8 +261,8 @@ const getGaussianPanel = (props) => {
                 />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                 {props.docTags}
-                {console.log("Getting plot styles from data:")}
-                {console.log(plot.activeDistributions)}
+                {/* {console.log("Getting plot styles from data:")}
+                {console.log(plot.activeDistributions)} */}
                 {plot.activeDistributions.map((key) => (
                   <Line
                     key={key.includes("ps") ? plot.styles['ps-options'].chartName : plot.styles[key].chartName}
@@ -305,7 +300,7 @@ const getGaussianPanel = (props) => {
                 ) : null}
                 {/* <ReferenceLine x={} /> */}
                 <Legend content={<GaussianLegend plot={plot} props={props} />} />
-                <Tooltip content={<GaussianTooltip props = {props} plot={plot} />} />
+                <Tooltip content={<GaussianTooltip props={props} plot={plot} />} />
               </LineChart>
             </ResponsiveContainer>
           </Box>
@@ -356,10 +351,10 @@ const getPosteriorNs = (props) => {
         />
       </Box>
       <Box className={styles.gaussianButtonRow}>
-        {console.log("deciding whether to grey the button out or not. Samples / length = ")}
+        {/* {console.log("deciding whether to grey the button out or not. Samples / length = ")}
         {console.log(props.data)}
         {console.log(props.data.samples)}
-        {console.log(props.data.samples.length)}
+        {console.log(props.data.samples.length)} */}
 
         {props.data.samples.length > 0 ? (  // Only render active button if samples exist
           props.data.plot.fetching ?
@@ -526,10 +521,8 @@ const HueTooltip = ({ active, payload, label, plot }) => {
   const index = Number(label)
 
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-    console.log(payload[0])
+
     const freq = payload[0].payload.value
-
-
     if (plot.helpfulTooltip) {
       return (
         <div>
@@ -634,32 +627,45 @@ const getHuePanel = (props) => {
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
-            {/* <SZoomChart/> */}
-            {/* <BarChart
+            {/* <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} /> */}
+            <BarChart
               width={900}
               height={400}
               data={plot.histogram}
-              onClick={handleHueClick}
               style={{ marginTop: "1em" }}
+            // onMouseDown={(e) => props.updateRefLeft(props.activeModel, e.activeLabel)}
+            // onMouseMove={(e) => props.updateRefRight(props.activeModel, e.activeLabel)}
+            // onMouseUp={() => props.zoom(props.activeModel)} // binding this?
             >
-              <Bar type="monotone" dataKey="value" stroke={plot.histogram.stroke} dot={false} barSize={20} />
+              <Bar type="monotone" dataKey="value" dot={false} barSize={20}>
+                {plot.histogram.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={plot.histogram[index].stroke} />
+                ))}
+              </Bar>
+
+              {console.log("DOMAIN SHOULD BE: ")}
+              {console.log(plot.view.left + ", " + plot.view.right)}
               <XAxis
+                allowDataOverflow
+                dataKey="hue"
+                // domain={['dataMin', 'dataMax + 1']}
                 tickCount={360}
-                visibleTickCount={360} 
+                visibleTickCount={360}
                 interval={0}
                 tick={<CustomHue />}
-                offset={0}
-                minTickGap={0}
+                // offset={0}
+                // minTickGap={0}
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 3,
-                  strokeLinecap: "round", 
+                  strokeLinecap: "round",
                 }}
                 tickLine={false}
               >
               </XAxis>
-              <YAxis
+              <Brush dataKey="value" height={30} stroke="#8884d8" />
+              <YAxis allowDataOverflow
+                // domain={['dataMin', 'dataMax + 1']}
                 label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
                 style={{ marginTop: '10px' }}
                 dots={false}
@@ -672,7 +678,14 @@ const getHuePanel = (props) => {
               />
               <Legend content={<HueLegend plot={plot} props={props} />} />
               <Tooltip content={<HueTooltip plot={plot} />} />
-            </BarChart> */}
+
+              {console.log("INSIDE PANEL, THE PLOT VIEW IS:")}
+              {console.log(plot.view)}
+              {console.log("DRAWINGREF AREA?")}
+              {plot.view.refAreaLeft != "" && plot.view.refAreaRight != "" ? (
+                <ReferenceArea yAxisId="1" x1={plot.view.refAreaLeft} x2={plot.view.refAreaRight} strokeOpacity={1} />
+              ) : ("nothjing here")}
+            </BarChart>
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -795,9 +808,9 @@ const getRhythmPanel = (props) => {
 
 
 const getPanel = (props) => {
-  { console.log("Deciding which panel to choose:") }
-  { console.log(props.data) }
-  { console.log(props.data.distribution) }
+  // { console.log("Deciding which panel to choose:") }
+  // { console.log(props.data) }
+  // { console.log(props.data.distribution) }
   switch (props.data.distribution) {
     case 'gaussian':
       return getGaussianPanel(props)
