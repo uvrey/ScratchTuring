@@ -501,7 +501,7 @@ class Scratch3Turing {
         };
     }
 
-    async defineModel(args, util) {
+    defineModel(args, util) {
         var modelName = args.MODEL
         var distribution = DISTRIBUTIONS[args.DISTRIBUTION - 1]
 
@@ -531,6 +531,7 @@ class Scratch3Turing {
             this.user_models[modelName].timer.timeElapsed()
             this.updateVisualisationData(user_model)
         }
+        return "Success!"
     }
 
     parseResponse(response) {
@@ -544,16 +545,17 @@ class Scratch3Turing {
         return { 'data': data, 'chain': chain, 'summary': summary }
     }
 
-    async takeSampleFromSprite(args, util) {
+    takeSampleFromSprite(args, util) {
         var modelName = args.MODEL
         var random_var_idx = args.RANDOM_VAR - 1
         var user_model = this.user_models[modelName]
 
-        console.log("Taking sample from a sprite behaviour: " + this.user_models[modelName].distribution)
-
-        if (user_model == undefined) {
+        if (user_model == undefined || user_model == null) {
             return "No model called " + modelName
         }
+
+        console.log("Taking sample from a sprite behaviour: " + this.user_models[modelName].distribution)
+
 
         if (user_model.distribution == "rhythm") {
             return "Use the other block to sample rhythm"
