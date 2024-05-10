@@ -578,6 +578,10 @@ class Scratch3Turing {
             this.updatePosteriorCurves(user_model, false)
 
         } else {
+            if (random_var_idx != COLOR) {
+                return modelName + " is a HUE model, so you can only sample COLOR"
+            }
+
             sample = this._getThenSendSample(util, user_model, random_var_idx)
         }
 
@@ -594,7 +598,7 @@ class Scratch3Turing {
             return `${observation} ${lastUnit}`
 
         } else {
-            if (random_var_idx == TIME) {
+            if (random_var_idx == TIME || random_var_idx == RHYTHM) {
                 return "You haven't used this block in a project, so it has started a stopwatch until clicked again..."
             }
         }
