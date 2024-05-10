@@ -119,9 +119,9 @@ class TuringTab extends React.Component {
         return (this.props.dataIsSet == {}) ? (false) : ((this.props.dataIsSet[modelName] == undefined) ? (false) : (this.props.dataIsSet[modelName]));
     }
 
-    handleDeleteModel (modelName) {
+    handleDeleteModel(modelName) {
         console.log("RECEIVED SIGNAL TO DELETE MODEL: " + modelName)
-        this.props.vm.emit('DELETE_MODEL', {modelName: modelName})
+        this.props.vm.emit('DELETE_MODEL', { modelName: modelName })
     }
 
     getModelSamples(modelName) {
@@ -136,6 +136,9 @@ class TuringTab extends React.Component {
     getActiveModels(models) {
         var list = []
         for (const m in models) {
+            console.log("active models are? " )
+            console.log(models)
+            console.log("active? " + m + ": " + models[m].active)
             list.push(m)
         }
         return list
@@ -156,11 +159,13 @@ class TuringTab extends React.Component {
     }
 
     getActiveModelDataState() {
+        console.log("trying to get the active model state, we got: ")
         var n = this.getActiveModelName()
+        console.log(n)
         return this.getModelDataState(n)
     }
 
-    handleToggleVisibility (data) {
+    handleToggleVisibility(data) {
         console.log("Toggle vis: Sending...")
         console.log(data)
         this.props.vm.runtime.emit('TOGGLE_VISIBILITY', data)
@@ -190,12 +195,12 @@ class TuringTab extends React.Component {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
                 if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
-                  this.props.onParamError()
-                  return;
+                    this.props.onParamError()
+                    return;
                 }
                 values[inputName] = value;
-              }
-          
+            }
+
             var customData = { modelName: modelName, viewFactor: values[modelName + "_viewFactorValue"] }
             this.handleUpdateViewFactor(customData)
             return
@@ -209,11 +214,11 @@ class TuringTab extends React.Component {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
                 if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
-                  this.props.onParamError()
-                  return;
+                    this.props.onParamError()
+                    return;
                 }
                 values[inputName] = value;
-              }
+            }
             var customData = { modelName: modelName, mean: values[modelName + "_groundTruthParamsValue_mu"], stdv: values[modelName + "_groundTruthParamsValue_stdv"] }
             this.handleUpdateGroundTruth(customData)
             return
@@ -227,11 +232,11 @@ class TuringTab extends React.Component {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
                 if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
-                  this.props.onParamError()
-                  return;
+                    this.props.onParamError()
+                    return;
                 }
                 values[inputName] = value;
-              }
+            }
             var priorData = { modelName: modelName, mean: values[modelName + "_priorParamsValue_mu"], stdv: values[modelName + "_priorParamsValue_stdv"] }
             this.handleUpdatePrior(priorData)
             return
@@ -243,7 +248,7 @@ class TuringTab extends React.Component {
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
-                if (value > 10 || value < 0 || value == NaN || value == undefined) { 
+                if (value > 10 || value < 0 || value == NaN || value == undefined) {
                     this.props.onPosteriorError();
                     return;
                 }

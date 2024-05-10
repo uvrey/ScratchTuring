@@ -509,8 +509,8 @@ class Scratch3Turing {
         this.defineTargetModel(util, modelName)
         this._runtime.emit('PROJECT_CHANGED')
 
-        if (this.user_models[modelName] == null) {
-            return "No model found."
+        if (this.user_models[modelName] == null || this.user_models[modelName] == undefined) {
+            return "No model called " + modelName
         }
 
         var user_model = this.user_models[modelName]
@@ -1416,12 +1416,26 @@ class Scratch3Turing {
     _onDeleteModel(modelName) {
         console.log("GOT DELETE SIGNAL!")
         console.log("deleting model " + modelName)
+
         // delete model from user_models dict
+        this.user_models[modelName].visible = false 
         this.user_models[modelName].active = false // remove from view
-        this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
+
+        // this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
         this._runtime.emit('PROJECT_CHANGED')
 
         delete this.user_models[modelName] // delete model
+
+        console.log("after the deletion, user models is: ")
+        console.log(this.user_models)
+
+        if (this.user_models.length > 0) {
+            const [firstModelName, firstModel] = Object.entries(this.user_models)[0];
+            this.updateVisualisationData(firstModel)
+        }
+
+        this._runtime.emit('TURING_DATA', this.visualisationData)
+        this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
         this.turing_deleteModel(modelName)
     }
     /**
