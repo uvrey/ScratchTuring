@@ -955,7 +955,8 @@ class Scratch3Turing {
             }
         } else if (mode == 'ps') {
             console.log("Updating posterior Ns?")
-
+            this._runtime.emit('TURING_SHOW_LOAD')
+            this.user_models[data.modelName].fetching = true
             this._updatePosteriorNs(data.modelName, data.n)
 
         } else {

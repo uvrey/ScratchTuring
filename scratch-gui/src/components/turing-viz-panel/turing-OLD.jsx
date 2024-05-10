@@ -117,7 +117,7 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
                 }  */}
                 ➡️ {
                   `${(100 * payload[index].value).toFixed(3)}%` +
-                  (plot.meanLines ? ` (Mean = ${plot.means[payload[index].dataKey]})` : '')
+                  (plot.meanLines ? ` (Mean = ${(plot.means[payload[index].dataKey]).toFixed(3)})` : '')
                 }
               </b>
             </p>
