@@ -442,26 +442,18 @@ const getParameterLabels = (props) => {
             </Box>
 
             <Box className={styles.gaussianButtonRow}>
-              {props.data.plot.fetching ? (
-                <button
-                  className={styles.gaussianButton}
-                  style={{ backgroundColor: "#ccc", pointerEvents: "none" }}
-                  disabled
-                >
-                  <h4>Update</h4>
-                </button>
-              ) : (
-                <button
-                  className={styles.gaussianButton}
-                  style={{ backgroundColor: "#45BDE5" }}
-                  onClick={() => props.updateChart(active, 'groundTruth')}
-                >
-                  <h4>Update</h4>
-                  <img
-                    className={styles.buttonIconRight}
-                  />
-                </button>
-              )}
+
+              <button
+                className={styles.gaussianButton}
+                style={{ backgroundColor: "#45BDE5" }}
+                onClick={() => props.updateChart(active, 'groundTruth')}
+              >
+                <h4>Update</h4>
+                <img
+                  className={styles.buttonIconRight}
+                />
+              </button>
+
             </Box>
           </Box>
 

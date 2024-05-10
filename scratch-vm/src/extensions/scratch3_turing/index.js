@@ -522,6 +522,7 @@ class Scratch3Turing {
         if (distribution == "gaussian") {
             this._runtime.emit('TURING_SHOW_LOAD')
             user_model.fetching = true
+            this.updateVisualisationData(user_model)
             var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", distribution, -1, [], {}).then(response =>
                 this.updateFromResponse(user_model, response, 'prior', true)); // unpacks the new data using the turing samples
             user_model.fetching = false
@@ -572,7 +573,7 @@ class Scratch3Turing {
             }
 
             message = this._getThenSendSample(util, user_model, random_var_idx)
-            this.updatePosteriorCurves(user_model)
+            this.updatePosteriorCurves(user_model, false)
 
         } else {
             sample = this._getThenSendSample(util, user_model, random_var_idx)
@@ -594,9 +595,11 @@ class Scratch3Turing {
     async updatePosteriorCurves(user_model, afterPrior = false) {
         if (user_model.data.length > 0) {
             if (!afterPrior) {
+                console.log("--------> NOT AFTER PRIOR")
                 this._runtime.emit('TURING_SHOW_LOAD')
             }
             user_model.fetching = true
+            this.updateVisualisationData(user_model)
             console.log("inside updatePosteriorCurves: We have captured data, and will now update our curves.")
 
             const n = user_model.models['ps'].n
@@ -963,10 +966,9 @@ class Scratch3Turing {
         console.log("trying to update this model..")
         console.log(user_model)
 
-        this.updateVisualisationData(user_model)
-
         this._runtime.emit('TURING_SHOW_LOAD')
         user_model.fetching = true
+        this.updateVisualisationData(user_model)
         var message = await this.buildQuery(user_model.modelName, "updateModelPrior", 'POST', 'prior', user_model.distribution, -1, [], params)
         return message
     }
@@ -986,10 +988,8 @@ class Scratch3Turing {
     }
 
     _updatePosteriorNs(modelName, n) {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        console.log("INSIDE _updatePosteriorNs: we were asked to change " + modelName + "'s N value " + n)
         this.user_models[modelName].models.ps.n = n
-        this.updatePosteriorCurves(this.user_models[modelName])
+        this.updatePosteriorCurves(this.user_models[modelName], false)
     }
 
     _getSampleSpace(user_model) {
