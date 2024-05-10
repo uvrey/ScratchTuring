@@ -594,12 +594,11 @@ class Scratch3Turing {
 
     async updatePosteriorCurves(user_model, afterPrior = false) {
         if (user_model.data.length > 0) {
+
             if (!afterPrior) {
-                console.log("--------> NOT AFTER PRIOR")
                 this._runtime.emit('TURING_SHOW_LOAD')
             }
-            user_model.fetching = true
-            this.updateVisualisationData(user_model)
+
             console.log("inside updatePosteriorCurves: We have captured data, and will now update our curves.")
 
             const n = user_model.models['ps'].n
@@ -616,11 +615,8 @@ class Scratch3Turing {
                 .then(response => this.updateFromResponse(user_model, response, 'posterior'))
 
             this.updateVisualisationData(user_model)
-
             user_model['hasDistData'] = true
         }
-        this._runtime.emit('TURING_CLOSE_LOAD')
-        user_model.fetching = false
     }
 
     updatePosteriors(user_model, response) {
@@ -756,12 +752,12 @@ class Scratch3Turing {
     hueToHex = (hue) => {
         const hsv = { h: hue, s: 100, v: 100 }
         return Color.rgbToHex(Color.hsvToRgb(hsv))
-      }
-      
+    }
+
     hexToHue = (hex) => {
         const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
         return hueToHex(hsv.h)
-      }
+    }
 
     updateActiveHues(hue, hex, user_model) {
         // Convert hex to HSV (hue, saturation, value) for easier comparison
@@ -769,26 +765,26 @@ class Scratch3Turing {
 
         // Check if the hue already exists in activeHues
         const existingHueIndex = user_model.hueData.activeHues.findIndex(
-          (activeHue) => activeHue.hue === hue
+            (activeHue) => activeHue.hue === hue
         );
-      
+
         if (existingHueIndex === -1) {
-          user_model.hueData.activeHues.push({
-            hue,
-            hex,
-            avg_s: hsv.s, // Initial saturation
-            avg_v: hsv.v, // Initial value
-          });
+            user_model.hueData.activeHues.push({
+                hue,
+                hex,
+                avg_s: hsv.s, // Initial saturation
+                avg_v: hsv.v, // Initial value
+            });
         } else {
-          // Hue found, update average saturation and value
-          const existingHue = user_model.hueData.activeHues[existingHueIndex];
-          existingHue.avg_s = (existingHue.avg_s + hsv.s) / 2;
-          existingHue.avg_v = (existingHue.avg_v + hsv.v) / 2;
-          existingHue.hex = hex; // Update hex to the new value (optional)
+            // Hue found, update average saturation and value
+            const existingHue = user_model.hueData.activeHues[existingHueIndex];
+            existingHue.avg_s = (existingHue.avg_s + hsv.s) / 2;
+            existingHue.avg_v = (existingHue.avg_v + hsv.v) / 2;
+            existingHue.hex = hex; // Update hex to the new value (optional)
         }
 
         user_model.hueData.activeHues.sort((hue1, hue2) => hue1.hue - hue2.hue); // sort the dictionaries in the list by their hue value
-      }
+    }
 
     updateHueData(user_model, hue, hex) {
         console.log("\n-------------------------------------------\n updating  hue")
@@ -912,7 +908,6 @@ class Scratch3Turing {
 
     toggleVisibility(data) {
         console.log(this.user_models[data.modelName].models)
-
         if (this.user_models[data.modelName].models[data.mode] != undefined) {
             this.user_models[data.modelName].models[data.mode].active = !this.user_models[data.modelName].models[data.mode].active
         }
@@ -934,9 +929,16 @@ class Scratch3Turing {
             this.user_models[data.modelName].helpfulTooltip = !this.user_models[data.modelName].helpfulTooltip
 
         } else if (mode == 'groundTruth') {
-            this._toggleVisibilityByState(data.modelName, mode, true)
-            this.user_models[data.modelName].models[mode].mean = data.mean
-            this.user_models[data.modelName].models[mode].stdv = data.stdv
+            if (data.stdv == 0) {
+                this._toggleVisibilityByState(data.modelName, mode, false)
+                this.user_models[data.modelName].models[mode].active = false
+            } else {
+                this.user_models[data.modelName].models[mode].active = true
+                this._toggleVisibilityByState(data.modelName, mode, true)
+                this.user_models[data.modelName].models[mode].mean = data.mean
+                this.user_models[data.modelName].models[mode].stdv = data.stdv
+            }
+
 
         } else if (mode == 'prior') {
             var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) || (this.user_models[data.modelName].models[mode].stdv != data.stdv)
@@ -949,11 +951,15 @@ class Scratch3Turing {
                 console.log("{Prior is unchanged}")
             }
         } else if (mode == 'ps') {
+            console.log("Updating posterior Ns?")
+
             this._updatePosteriorNs(data.modelName, data.n)
 
         } else {
             console.log("unknown mode " + mode)
         }
+        this.user_models[data.modelName].fetching = false
+        this._runtime.emit('TURING_CLOSE_LOAD')
         this.updateVisualisationData(this.user_models[data.modelName])
     }
 
@@ -989,6 +995,7 @@ class Scratch3Turing {
 
     _updatePosteriorNs(modelName, n) {
         this.user_models[modelName].models.ps.n = n
+        this.user_models[modelName].fetching = true
         this.updatePosteriorCurves(this.user_models[modelName], false)
     }
 
@@ -1092,11 +1099,11 @@ class Scratch3Turing {
         // console.log(user_model.hueData.activeHues)
 
         if (foundHue) {
-          return foundHue.hex;
+            return foundHue.hex;
         } else {
-          return "#dddddd"; // Or throw an error, provide a default value, etc.
+            return "#dddddd"; // Or throw an error, provide a default value, etc.
         }
-      }
+    }
 
     _getHuePlotData(user_model) {
         var data = []
@@ -1149,7 +1156,7 @@ class Scratch3Turing {
             console.log(item.hue)
             const freq = user_model.hueData.hue[item.hue];
             pieChartData.push({ name: String(item.hue), value: freq, fill: item.hex, h: item.hue, avg_s: item.avg_s, avg_v: item.avg_v });
-          }
+        }
         return pieChartData;
     }
 
@@ -1194,7 +1201,7 @@ class Scratch3Turing {
         return data
     }
 
-    
+
     _getRhythmBars(user_model) {
         var data = []
         for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {

@@ -442,7 +442,6 @@ const getParameterLabels = (props) => {
             </Box>
 
             <Box className={styles.gaussianButtonRow}>
-
               <button
                 className={styles.gaussianButton}
                 style={{ backgroundColor: "#45BDE5" }}
@@ -453,7 +452,6 @@ const getParameterLabels = (props) => {
                   className={styles.buttonIconRight}
                 />
               </button>
-
             </Box>
           </Box>
 
