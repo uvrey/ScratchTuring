@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Label, Bar, XAxis, YAxis, ReferenceArea, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -18,7 +18,7 @@ import FontNumSamples from './font--samples.svg'
 import FontType from './font--value.svg'
 import Color, { rgbToDecimal } from './color.js'
 import arrowLeftIcon from './arrow-left.svg'
-import ZoomChart from './turing-viz-zoomChart.jsx'
+// import ZoomChart from './turing-viz-zoomChart.jsx'
 // import SZoomChart from './turing-viz-zoomChart copy.jsx'
 /** CREDIT THIS CODE **/
 import gsap from "gsap";
@@ -174,22 +174,22 @@ const GaussianLegend = ({ payload, plot, props }) => (
   </div>
 );
 
-const HueLegend = ({ payload, plot, props }) => (
-  <div style={{ justifyContent: "center" }}>
-    <div style={{ marginTop: "0.5em" }}>
-      <label htmlFor={formatId(props.activeModel, "helpfulTooltipHue")} className={styles.checkboxLabel}>
-        <input
-          id={formatId(props.activeModel, "helpfulTooltipHue")}
-          type="checkbox"
-          className={styles.chartCheckbox}
-          onChange={() => props.updateChart(props.activeModel, 'tooltip')}
-        // Add a default checked state if needed (optional)
-        />
-        Helpful tooltip
-      </label>
-    </div>
-  </div>
-);
+// const HueLegend = ({ payload, plot, props }) => (
+//   <div style={{ justifyContent: "center" }}>
+//     <div style={{ marginTop: "0.5em" }}>
+//       <label htmlFor={formatId(props.activeModel, "helpfulTooltipHue")} className={styles.checkboxLabel}>
+//         <input
+//           id={formatId(props.activeModel, "helpfulTooltipHue")}
+//           type="checkbox"
+//           className={styles.chartCheckbox}
+//           onChange={() => props.updateChart(props.activeModel, 'tooltip')}
+//         // Add a default checked state if needed (optional)
+//         />
+//         Helpful tooltip
+//       </label>
+//     </div>
+//   </div>
+// );
 
 const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
   <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>{`value: ${payload.value}`}</text>;
@@ -241,7 +241,7 @@ const LikelihoodLabel = ({ ...props }) => {
 };
 
 
-const getGaussianPanel = (props) => {
+const GaussianPanel = ({ props }) => {
   const plot = props.data.plot
   return (
     <Box className={styles.dataRow} style={{ marginTop: "-1.5em" }}>
@@ -305,28 +305,12 @@ const getGaussianPanel = (props) => {
                 ) : null}
                 {/* <ReferenceLine x={} /> */}
                 <Legend content={<GaussianLegend plot={plot} props={props} />} />
-                <Tooltip content={<GaussianTooltip props = {props} plot={plot} />} />
+                <Tooltip content={<GaussianTooltip props={props} plot={plot} />} />
               </LineChart>
             </ResponsiveContainer>
           </Box>
         </Box>
       </Box>
-      {/* <ScatterChart
-        width={400}
-        height={300}
-        margin={{
-          top: 20,
-          right: 20,
-          bottom: 20,
-          left: 20,
-        }}
-      >
-        <CartesianGrid />
-        <XAxis type="number" dataKey="x" name="sample" unit="" />
-        <YAxis type="number" dataKey="y" name="value" unit="" />
-        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
-      </ScatterChart> */}
       <Box>
       </Box>
     </Box>
@@ -522,44 +506,44 @@ const getParameterLabels = (props) => {
   }
 };
 
-const HueTooltip = ({ active, payload, label, plot }) => {
-  const index = Number(label)
+// const HueTooltip = ({ active, payload, label, plot }) => {
+//   const index = Number(label)
 
-  if (active && payload && payload.length) { // Check if tooltip is active and has data
-    console.log(payload[0])
-    const freq = payload[0].payload.value
+//   if (active && payload && payload.length) { // Check if tooltip is active and has data
+//     console.log(payload[0])
+//     const freq = payload[0].payload.value
 
 
-    if (plot.helpfulTooltip) {
-      return (
-        <div>
-          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
-            {plot.hues.hueFamilies[index].map((hex, index) => (
-              <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, stroke: "#eee", strokeWeight: "3px", marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
-            ))}
-            <div className={styles.dataRow}>
-              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
-              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          {/* <p>{`${label}: ${payload[0].value}`}</p> */}
-          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
-            <div className={styles.dataRow}>
-              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
-              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-  }
-  return null;
-};
+//     if (plot.helpfulTooltip) {
+//       return (
+//         <div>
+//           <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+//             {plot.hues.hueFamilies[index].map((hex, index) => (
+//               <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, stroke: "#eee", strokeWeight: "3px", marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
+//             ))}
+//             <div className={styles.dataRow}>
+//               <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
+//               {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
+//             </div>
+//           </div>
+//         </div>
+//       );
+//     } else {
+//       return (
+//         <div>
+//           {/* <p>{`${label}: ${payload[0].value}`}</p> */}
+//           <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+//             <div className={styles.dataRow}>
+//               <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
+//               {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
+//             </div>
+//           </div>
+//         </div>
+//       );
+//     }
+//   }
+//   return null;
+// };
 
 const HuePieTooltip = ({ active, payload, label, props }) => {
   const index = Number(label)
@@ -593,14 +577,25 @@ const RhythmTooltip = ({ active, payload, label, ...props }) => {
   return null;
 };
 
-const handleHueClick = (data, index) => {
-  { console.log("WECLICKED THE CHART!!!") }
-  { console.log(data) }
-  { console.log(index) }
-};
-
-const getHuePanel = (props) => {
+const HuePanel = ({ props, zoomOut, state, setRefAreaLeft, setRefAreaRight, zoom, bindZoom, bindZoomOut }) => {
   const plot = props.data.plot
+
+  console.log("HUE PANEL PROPS! DO WE GET NEW THINGS?")
+  console.log(props)
+
+
+  const { data, left, right, refAreaLeft, refAreaRight, top, bottom } = state;
+
+  const handleMouseDown = (e) => {
+    setRefAreaLeft(e.activeLabel); // Update state using context
+  };
+
+  const handleMouseMove = (e) => {
+    if (refAreaLeft) { // Check for existence
+      setRefAreaRight(e.activeLabel); // Update state using context
+    }
+  };
+
   return (
     <Box className={styles.dataRow} style={{ marginLeft: "-1em" }} >
       <Box className={styles.chartBox}>
@@ -634,7 +629,77 @@ const getHuePanel = (props) => {
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
+
+            <div className="highlight-bar-charts" style={{ userSelect: 'none', width: '100%' }}>
+              <button type="button" className="btn update" onClick={() => bindZoomOut()}>
+                Zoom Out
+              </button>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart
+                  width={800}
+                  height={400}
+                  style={{ marginTop: "1em" }}
+                  data={data}
+                  onMouseDown={(e) => handleMouseDown(e.activeLabel)}
+                  onMouseMove={(e) => state.refAreaLeft && handleMouseMove(e.activeLabel)}
+                  onMouseUp={() => zoom()}
+                >
+                  <XAxis allowDataOverflow
+                    dataKey="hue"
+                    domain={[left, right]}
+                    tick={<CustomHue />}
+                    tickCount={360}
+                    visibleTickCount={360}
+                    interval={0}
+                    offset={0}
+                    minTickGap={0}
+                    axisLine={{
+                      stroke: "#ddd",
+                      strokeWidth: 3,
+                      strokeLinecap: "round",
+                    }}
+                    tickLine={false}
+                    type="number" />
+                  <YAxis allowDataOverflow
+                    domain={[bottom, top]}
+                    style={{ marginTop: '10px' }}
+                    axisLine={{
+                      stroke: "#ddd",
+                      strokeWidth: 1,
+                      strokeLinecap: "round", // Set rounded line ends
+                    }}
+                    tickLine={{ strokeWidth: 3 }}
+                    label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
+                    type="number"
+                    yAxisId="1" />
+                  <Tooltip content={<HueTooltip plot={props.data.plot} />} />
+                  <Legend content={<HueLegend vizProps={props} />} />
+                  {console.log("Our data is: ")}
+                  {console.log(data)}
+                  <Bar
+                    yAxisId="1"
+                    type="monotone"
+                    data={data} // Pass the entire data list
+                    dataKey="value"
+                    animationDuration={300}
+                    style={{ strokeWidth: "2px" }}
+                  >
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={data[index].stroke} />
+                    ))}
+                  </Bar>
+
+                  {/* <Bar yAxisId="1" type="monotone" dataKey="value" fill={data.stroke} animationDuration={300} style={{strokeWeight: "2px"}} activeBar={<Rectangle fill={hexToHue(data.stroke)} stroke={hexToHue(data.stroke)} />} /> */}
+                  {refAreaLeft && refAreaRight ? (
+                    <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
+                  ) : null}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+
+
+            {/* <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} /> */}
             {/* <SZoomChart/> */}
             {/* <BarChart
               width={900}
@@ -682,9 +747,10 @@ const getHuePanel = (props) => {
   );
 };
 
-const getRhythmPanel = (props) => {
+const RhythmPanel = ({ props }) => {
   const plot = props.data.plot
   const active = props.activeModel
+
   return (
     <Box className={styles.dataRow} >
       <Box className={styles.chartBox}>
@@ -794,17 +860,31 @@ const getRhythmPanel = (props) => {
 };
 
 
-const getPanel = (props) => {
+const Panel = ({ ...props }) => {
   { console.log("Deciding which panel to choose:") }
-  { console.log(props.data) }
-  { console.log(props.data.distribution) }
-  switch (props.data.distribution) {
+  {
+    console.log("ALL PROPS!?")
+  }
+  { console.log(props) }
+  { console.log(props.props.data) }
+  { console.log(props.props.data.distribution) }
+
+  switch (props.props.data.distribution) {
     case 'gaussian':
-      return getGaussianPanel(props)
+      return <GaussianPanel props={props.props} />
     case 'hue':
-      return getHuePanel(props)
+      return <HuePanel
+                props={props.props}
+                zoomOut={props.zoomOut}
+                state={props.state}
+                setRefAreaLeft={props.setRefAreaLeft}
+                setRefAreaRight={props.setRefAreaRight}
+                zoom={props.zoom}
+                bindZoom={props.bindZoom}
+                bindZoomOut={props.bindZoomOut} // props, zoomOut, state, setRefAreaLeft, setRefAreaRight, zoom, bindZoom, bindZoomOut
+            />
     case 'rhythm':
-      return getRhythmPanel(props)
+      return <RhythmPanel props={props.props} />
   }
 }
 
@@ -830,7 +910,7 @@ const hueSwatchStyle = (samples) => {
 };
 
 
-const getKeyStats = (props) => {
+const KeyStats = ({ props }) => {
   const data = props.data
   const samples = props.data.samples
   return (
@@ -904,26 +984,143 @@ const getKeyStats = (props) => {
 }
 
 
-const TuringVizPanel = props => (
-  <Box className={styles.body}>
-    <Box className={styles.buttonRow}>
-      {props.activeModels.map((modelName, index) => (
-        <button
-          key={modelName}
-          className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
-          onClick={() => props.activateModelDashboard(modelName, index)}>
-          <h4>{modelName}</h4>
-        </button>
-      ))}
-    </Box>
-    <Box className={styles.vizPanel}>
-      <Box className={styles.dataCol}>
-        {getPanel(props)}
-        {getKeyStats(props)}
+class TuringVizPanel extends React.Component {
+  constructor(props) {
+    super(props);
+
+    // Set up this initial state for the hue data plots
+    if (props.data.distribution == "hue") {
+      this.state = initialState(props.data.plot.histogram);
+    } else {
+      this.state = {}
+    }
+
+    this.zoom = this.zoom.bind(this);
+    this.zoomOut = this.zoomOut.bind(this);
+  }
+
+  bindZoomToContext = () => {
+    this.zoom = this.zoom.bind(this);
+  }
+
+  bindZoomOutToContext = () => {
+    this.zoomOut = this.zoomOut.bind(this);
+  }
+
+  handleAreaLeftChange = (newAreaLeft) => {
+    this.setState(() => ({
+      refAreaLeft: newAreaLeft,
+    }));
+    return
+  };
+
+  handleAreaRightChange = (newAreaRight) => {
+    this.setState(() => ({
+      refAreaRight: newAreaRight,
+    }));
+    return
+  };
+
+
+  zoom() {
+    let { refAreaLeft, refAreaRight } = this.state;
+    const { data } = this.state;
+
+    if (refAreaLeft === refAreaRight || refAreaRight === '') {
+      this.setState(() => ({
+        refAreaLeft: '',
+        refAreaRight: '',
+      }));
+      return;
+    }
+
+    // xAxis domain
+    if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
+
+    // yAxis domain
+    const [bottom, top] = getAxisYDomain(this.data, refAreaLeft, refAreaRight, 'value', 1);
+
+    this.setState(() => ({
+      refAreaLeft: '',
+      refAreaRight: '',
+      data: data.slice(),
+      left: refAreaLeft,
+      right: refAreaRight,
+      bottom,
+      top,
+    }));
+  }
+
+  zoomOut() {
+    const { data } = this.state;
+    this.setState(() => ({
+      data: data.slice(),
+      refAreaLeft: '',
+      refAreaRight: '',
+      left: 'dataMin',
+      right: 'dataMax',
+      top: 'dataMax+1',
+      bottom: 'dataMin',
+    }));
+  }
+
+  render() {
+    const { activeModels, activateModelDashboard } = this.props;
+
+    return (
+      <Box className={styles.body}>
+        <Box className={styles.buttonRow}>
+          {activeModels.map((modelName, index) => (
+            <button
+              key={modelName}
+              className={modelName === activeModels[0] ? styles.activeButton : styles.panelButton}
+              onClick={() => activateModelDashboard(modelName, index)}
+            >
+              <h4>{modelName}</h4>
+            </button>
+          ))}
+        </Box>
+        <Box className={styles.vizPanel}>
+          <Box className={styles.dataCol}>
+            < Panel
+              props={this.props}
+              zoomOut={this.zoomOut}
+              zoom={this.zoom}
+              state={this.state}
+              setRefAreaLeft={this.handleAreaLeftChange}
+              setRefAreaRight={this.handleAreaRightChange}
+              bindZoom={this.bindZoomToContext}
+              bindZoomOut={this.bindZoomOutToContext}
+            />
+            < KeyStats props={this.props} />
+          </Box>
+        </Box>
       </Box>
-    </Box>
-  </Box>
-);
+    );
+  }
+}
+
+
+// const TuringVizPanel = props => (
+//   <Box className={styles.body}>
+//     <Box className={styles.buttonRow}>
+//       {props.activeModels.map((modelName, index) => (
+//         <button
+//           key={modelName}
+//           className={modelName === props.activeModel ? styles.activeButton : styles.panelButton}
+//           onClick={() => props.activateModelDashboard(modelName, index)}>
+//           <h4>{modelName}</h4>
+//         </button>
+//       ))}
+//     </Box>
+//     <Box className={styles.vizPanel}>
+//       <Box className={styles.dataCol}>
+//         {getPanel(props)}
+//         {getKeyStats(props)}
+//       </Box>
+//     </Box>
+//   </Box>
+// );
 
 TuringVizPanel.propTypes = {
   data: PropTypes.object,
@@ -938,3 +1135,216 @@ TuringVizPanel.defaultProps = {
 export {
   TuringVizPanel as default,
 };
+
+const getAxisYDomain = (data, from, to, ref, offset) => {
+  console.log("getting y axis domain..." + from + ", " + to)
+  const refData = data.slice(from - 1, to);
+  let [bottom, top] = [refData[0][ref], refData[0][ref]];
+  refData.forEach((d) => {
+    if (d[ref] > top) top = d[ref];
+    if (d[ref] < bottom) bottom = d[ref];
+  });
+
+  return [(bottom | 0), (top | 0) + offset];
+};
+
+const initialState = (data) => {
+  return {
+    data: data,
+    left: 'dataMin',
+    right: 'dataMax',
+    refAreaLeft: '',
+    refAreaRight: '',
+    top: 'dataMax+1',
+    bottom: 'dataMin',
+    animation: true,
+  };
+}
+
+/** EXPERIMENT WITH ZOOM CHART **/
+
+// class ZoomChart extends PureComponent {
+
+//   constructor({ props, data, plot, vizProps, stroke }) {
+//     super(props);
+//     this.state = initialState(data);
+//     this.data = data
+//     this.plot = plot
+//     this.vizProps = vizProps
+//     this.stroke = stroke
+//   }
+
+// zoom() {
+//   let { refAreaLeft, refAreaRight } = this.state;
+//   const { data } = this.state;
+
+//   if (refAreaLeft === refAreaRight || refAreaRight === '') {
+//     this.setState(() => ({
+//       refAreaLeft: '',
+//       refAreaRight: '',
+//     }));
+//     return;
+//   }
+
+//   // xAxis domain
+//   if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
+
+//   // yAxis domain
+//   const [bottom, top] = getAxisYDomain(this.data, refAreaLeft, refAreaRight, 'value', 1);
+
+//   this.setState(() => ({
+//     refAreaLeft: '',
+//     refAreaRight: '',
+//     data: data.slice(),
+//     left: refAreaLeft,
+//     right: refAreaRight,
+//     bottom,
+//     top,
+//   }));
+// }
+
+// zoomOut() {
+//   const { data } = this.state;
+//   this.setState(() => ({
+//     data: data.slice(),
+//     refAreaLeft: '',
+//     refAreaRight: '',
+//     left: 'dataMin',
+//     right: 'dataMax',
+//     top: 'dataMax+1',
+//     bottom: 'dataMin',
+//   }));
+// }
+
+//   render() {
+//     const { data, barIndex, left, right, refAreaLeft, refAreaRight, top, bottom } = this.state;
+//     return (
+//       <div className="highlight-bar-charts" style={{ userSelect: 'none', width: '100%' }}>
+//         <button type="button" className="btn update" onClick={this.zoomOut.bind(this)}>
+//           Zoom Out
+//         </button>
+//         <ResponsiveContainer width="100%" height={400}>
+//           <BarChart
+//             width={800}
+//             height={400}
+//             style={{ marginTop: "1em" }}
+//             data={data}
+//             onMouseDown={(e) => this.setState({ refAreaLeft: e.activeLabel })}
+//             onMouseMove={(e) => this.state.refAreaLeft && this.setState({ refAreaRight: e.activeLabel })}
+//             onMouseUp={this.zoom.bind(this)}
+//           >
+//             <XAxis allowDataOverflow
+//               dataKey="hue"
+//               domain={[left, right]}
+//               tick={<CustomHue />}
+//               tickCount={360}
+//               visibleTickCount={360}
+//               interval={0}
+//               offset={0}
+//               minTickGap={0}
+//               axisLine={{
+//                 stroke: "#ddd",
+//                 strokeWidth: 3,
+//                 strokeLinecap: "round",
+//               }}
+//               tickLine={false}
+//               type="number" />
+//             <YAxis allowDataOverflow
+//               domain={[bottom, top]}
+//               style={{ marginTop: '10px' }}
+//               axisLine={{
+//                 stroke: "#ddd",
+//                 strokeWidth: 1,
+//                 strokeLinecap: "round", // Set rounded line ends
+//               }}
+//               tickLine={{ strokeWidth: 3 }}
+//               label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
+//               type="number"
+//               yAxisId="1" />
+//             <Tooltip content={<HueTooltip plot={this.plot} />} />
+//             <Legend content={<HueLegend vizProps={this.vizProps} />} />
+//             {console.log("Our data is: ")}
+//             {console.log(data)}
+//             <Bar
+//               yAxisId="1"
+//               type="monotone"
+//               data={data} // Pass the entire data list
+//               dataKey="value"
+//               animationDuration={300}
+//               style={{ strokeWidth: "2px" }}
+//             >
+//               {data.map((entry, index) => (
+//                 <Cell key={`cell-${index}`} fill={data[index].stroke} />
+//               ))}
+//             </Bar>
+
+//             {/* <Bar yAxisId="1" type="monotone" dataKey="value" fill={data.stroke} animationDuration={300} style={{strokeWeight: "2px"}} activeBar={<Rectangle fill={hexToHue(data.stroke)} stroke={hexToHue(data.stroke)} />} /> */}
+//             {refAreaLeft && refAreaRight ? (
+//               <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
+//             ) : null}
+//           </BarChart>
+//         </ResponsiveContainer>
+//       </div>
+//     );
+//   }
+// }
+
+
+const HueLegend = ({ vizProps }) => (
+  <div style={{ justifyContent: "center" }}>
+    <div style={{ marginTop: "0.5em" }}>
+      <label htmlFor={formatId(vizProps.activeModel, "helpfulTooltipHue")} className={styles.checkboxLabel}>
+        <input
+          id={formatId(vizProps.activeModel, "helpfulTooltipHue")}
+          type="checkbox"
+          className={styles.chartCheckbox}
+          onChange={() => vizProps.updateChart(vizProps.activeModel, 'tooltip')}
+        />
+        Helpful tooltip
+      </label>
+    </div>
+  </div>
+);
+
+const HueTooltip = ({ active, payload, label, plot }) => {
+  const index = Number(label)
+
+  if (active && payload && payload.length) { // Check if tooltip is active and has data
+    const freq = payload[0].payload.value
+
+    // console.log("INSIDE HUETOOLTIP CHART-> HELPFUL TOOLTIP?")
+    // console.log(plot)
+    // console.log(plot.helpfulTooltip) // This is using the initial state and won't change for some reason?
+
+    if (plot.helpfulTooltip) {
+      return (
+        <div>
+          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+            {plot.hues.hueFamilies[index].map((hex, index) => (
+              <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, stroke: "#eee", strokeWeight: "3px", marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
+            ))}
+            <div className={styles.dataRow}>
+              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
+              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          {/* <p>{`${label}: ${payload[0].value}`}</p> */}
+          <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+            <div className={styles.dataRow}>
+              <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
+              {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+  return null;
+};
+
+
