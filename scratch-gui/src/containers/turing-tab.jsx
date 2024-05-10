@@ -177,7 +177,9 @@ class TuringTab extends React.Component {
     }
 
     handleUpdateToChart(modelName, mode) {
-        console.log("handling new values in the selection box")
+        // Close any error messages if they are still open
+        this.props.closePosteriorError();
+        this.props.closeParamError();
 
         if (mode == "meanLines") {
             var customData = { modelName: modelName }
@@ -253,7 +255,7 @@ class TuringTab extends React.Component {
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
-                if (value > 10 || value < 0 || value == NaN || value == undefined) {
+                if (value >= 11 || value < 0 || value == NaN || value == undefined) {
                     this.props.onPosteriorError();
                     return;
                 }
@@ -303,7 +305,7 @@ class TuringTab extends React.Component {
     getStoredValue(props, mode, dist) {
         console.log("@@trying to get the stored value for " + dist + ", " + mode)
         console.log(props)
-        
+
         if (mode == 'n' && props != undefined) {
             return props.data.plot.nPosteriors
         }
@@ -433,8 +435,9 @@ const mapDispatchToProps = dispatch => ({
         dispatch(setRestore(restoreState));
     },
     onPosteriorError: () => dispatch(showStandardAlert('posteriorError')),
-    onParamError: () => dispatch(showStandardAlert('paramError'))
-
+    onParamError: () => dispatch(showStandardAlert('paramError')),
+    closePosteriorError: () => dispatch(closeAlertWithId('posteriorError')),
+    closeParamError: () => dispatch(closeAlertWithId('paramError')),
 });
 
 export default errorBoundaryHOC('Turing Tab')(
