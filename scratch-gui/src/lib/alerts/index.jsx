@@ -241,6 +241,32 @@ const alerts = [
         level: AlertLevels.WARN
     },
     {
+        alertId: 'posteriorError',
+        clearList: [],
+        closeButton: true,
+        content: (
+            <FormattedMessage
+                defaultMessage="We can only show up to 10 possible beliefs."
+                description="Message indicating that posterior value is not good & could not be loaded"
+                id="gui.alerts.posteriorError"
+            />
+        ),
+        level: AlertLevels.WARN
+    },
+    {
+        alertId: 'paramError',
+        clearList: [],
+        closeButton: true,
+        content: (
+            <FormattedMessage
+                defaultMessage="Oops... Those values don't look right."
+                description="Message indicating that posterior value is not good & could not be loaded"
+                id="gui.alerts.paramError"
+            />
+        ),
+        level: AlertLevels.WARN
+    },
+    {
         alertId: 'fetchingFromTuring',
         alertType: AlertTypes.STANDARD,
         clearList: [],

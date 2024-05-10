@@ -113,9 +113,12 @@ class MapModal extends React.Component {
 
     getStoredValue(value, defaultValue) {
         try {
+            if (localStorage.getItem(value) == null) {
+                return defaultValue
+            }
             return localStorage.getItem(value);
-        }  catch (error) {
-            return defaultValue; 
+        } catch (error) {
+            return defaultValue;
         }
     }
 

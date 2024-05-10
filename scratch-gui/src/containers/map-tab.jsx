@@ -331,7 +331,7 @@ const mapDispatchToProps = dispatch => ({
     onShowImporting: () => dispatch(showStandardAlert('importingAsset'))
 });
 
-export default errorBoundaryHOC('Sound Tab')(
+export default errorBoundaryHOC('Map Tab')(
     injectIntl(connect(
         mapStateToProps,
         mapDispatchToProps

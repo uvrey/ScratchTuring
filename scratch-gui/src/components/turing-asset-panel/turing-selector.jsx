@@ -58,10 +58,7 @@ const TuringSelector = props => {
     const isRelevantDrag = draggingType === dragType;
     let newButtonSection = null;
 
-    function onClearSamples(targetName) {
-        props.vm.runtime.emit('CLEAR_SAMPLES', targetName)
-    }
-
+  
     function getKey(sample) {
         if (SAMPLE_COUNTS[sample] == undefined) {
             SAMPLE_COUNTS[sample] = 0
@@ -77,7 +74,7 @@ const TuringSelector = props => {
             <ActionMenu
                 img={erasorIcon}
                 title={"Clear Samples"}
-                onClick={() => onClearSamples(props.vm.editingTarget.getName())}
+                onClick={() => props.onClearSamples(props.data.modelName)}
             />
         </Box>
     );
@@ -141,6 +138,7 @@ TuringSelector.propTypes = {
     onExportClick: PropTypes.func,
     onItemClick: PropTypes.func.isRequired,
     onRemoveSortable: PropTypes.func,
+    onClearSamples: PropTypes.func,
     ordering: PropTypes.arrayOf(PropTypes.number),
     selectedItemIndex: PropTypes.number,
     items: PropTypes.array,

@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import VM from 'scratch-vm';
 import styles from './turing-viz-panel.css';
 import { FormattedMessage } from 'react-intl';
-import { LineChart, BarChart, Cell, Line, Label, Brush, Bar, XAxis, YAxis, PieChart, Sector, ReferenceArea, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, Cell, Line, Label, Bar, Brush, XAxis, YAxis, PieChart, Sector, Pie, CartesianGrid, ReferenceLine, ReferenceDot, ComposedChart, Tooltip, ZAxis, ScatterChart, Scatter, Legend, ResponsiveContainer } from 'recharts';
 import Gaussian from '../gaussian/gaussian.jsx'
 import FontCST from './font--cst.svg'
 import arrowIcon from './arrow.svg'
@@ -85,7 +85,7 @@ const formatId = (modelName, label) => {
 }
 
 
-const GaussianTooltip = ({ active, payload, label, props, plot }) => {
+const GaussianTooltip = ({ active, payload, label, plot }) => {
 
   // console.log("plot?")
   // console.log(plot)
@@ -102,7 +102,7 @@ const GaussianTooltip = ({ active, payload, label, props, plot }) => {
         <div className={styles.gaussianTooltip}>
           🎲 Likelihood of <b>{label.toFixed(2)}</b> 🎲
           {payload.map((key, index) => (
-            <p key={formatId(props.activeModel, payload[index])}> {/* Add unique key for each item */}
+            <p key={payload[index]}> {/* Add unique key for each item */}
               <b
                 style={{
                   color: payload[index].dataKey.includes("ps")
@@ -117,7 +117,7 @@ const GaussianTooltip = ({ active, payload, label, props, plot }) => {
                 }  */}
                 ➡️ {
                   `${(100 * payload[index].value).toFixed(3)}%` +
-                  (plot.meanLines ? ` (Mean = ${plot.means[payload[index].dataKey]})` : '')
+                  (plot.meanLines ? ` (Mean = ${(plot.means[payload[index].dataKey]).toFixed(3)})` : '')
                 }
               </b>
             </p>
@@ -191,30 +191,6 @@ const HueLegend = ({ payload, plot, props }) => (
   </div>
 );
 
-const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
-  <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>{`value: ${payload.value}`}</text>;
-};
-
-// const MeanLabel = ({ x, y, mean}) => {
-//   return (
-//     // <div>
-//     <foreignObject className={styles.labelWrapper} x={mean} y="0">
-//       <svg width={"3em"} height={"1em"}>
-//         <rect x={0} y={0} width={"3em"} height={"1em"} fill={"#fff"} /> {/* Colored rectangle */}
-//         <text x={"3em" / 2} y={"1em" / 2} dominantBaseline="middle" textAnchor="middle">
-//           {mean} {/* Text on top of the rectangle */}
-//         </text>
-//       </svg>
-//     </foreignObject>
-//   )
-// }
-
-const TooltipReferenceLine = ({ x, children, ...otherProps }) => (
-  <Tooltip content={children} trigger="none"> {/* Disable default trigger */}
-    <ReferenceLine x={x} {...otherProps} />
-  </Tooltip>
-);
-
 const MeanLabel = ({ ...props }) => {
   return (
     <g>
@@ -226,14 +202,6 @@ const MeanLabel = ({ ...props }) => {
     </g>
   )
 }
-
-const LikelihoodLabel = ({ ...props }) => {
-  return (
-    <h5 style={{ transform: 'rotate(-90deg)', writingMode: 'vertical-rl' }}>
-      Likelihood
-    </h5>
-  );
-};
 
 
 const getGaussianPanel = (props) => {
@@ -261,8 +229,8 @@ const getGaussianPanel = (props) => {
                 />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                 {props.docTags}
-                {/* {console.log("Getting plot styles from data:")}
-                {console.log(plot.activeDistributions)} */}
+                {console.log("Getting plot styles from data:")}
+                {console.log(plot.activeDistributions)}
                 {plot.activeDistributions.map((key) => (
                   <Line
                     key={key.includes("ps") ? plot.styles['ps-options'].chartName : plot.styles[key].chartName}
@@ -300,28 +268,12 @@ const getGaussianPanel = (props) => {
                 ) : null}
                 {/* <ReferenceLine x={} /> */}
                 <Legend content={<GaussianLegend plot={plot} props={props} />} />
-                <Tooltip content={<GaussianTooltip props={props} plot={plot} />} />
+                <Tooltip content={<GaussianTooltip plot={plot} />} />
               </LineChart>
             </ResponsiveContainer>
           </Box>
         </Box>
       </Box>
-      {/* <ScatterChart
-        width={400}
-        height={300}
-        margin={{
-          top: 20,
-          right: 20,
-          bottom: 20,
-          left: 20,
-        }}
-      >
-        <CartesianGrid />
-        <XAxis type="number" dataKey="x" name="sample" unit="" />
-        <YAxis type="number" dataKey="y" name="value" unit="" />
-        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-        <Scatter name="Sample Space" data={plot.sampleSpace} fill="#FF5959" />
-      </ScatterChart> */}
       <Box>
       </Box>
     </Box>
@@ -340,7 +292,7 @@ const getPosteriorNs = (props) => {
           id={formatId(active, "posteriorNValue")}
           style={{ color: "#00B295", marginLeft: "7.5em" }}
           maxLength="4" // Restrict to 8 characters
-          defaultValue={props.getValue(props, 'n', '')} // Set initial value
+          defaultValue={2} // Set initial value
           className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
           onChange={(event) => {
             const newValue = parseFloat(event.target.value);
@@ -351,10 +303,10 @@ const getPosteriorNs = (props) => {
         />
       </Box>
       <Box className={styles.gaussianButtonRow}>
-        {/* {console.log("deciding whether to grey the button out or not. Samples / length = ")}
+        {console.log("deciding whether to grey the button out or not. Samples / length = ")}
         {console.log(props.data)}
         {console.log(props.data.samples)}
-        {console.log(props.data.samples.length)} */}
+        {console.log(props.data.samples.length)}
 
         {props.data.samples.length > 0 ? (  // Only render active button if samples exist
           props.data.plot.fetching ?
@@ -407,12 +359,12 @@ const getParameterLabels = (props) => {
                 type="text"
                 id={formatId(active, "groundTruthParamsValue_mu")}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(props, 'mean', 'groundTruth')}  // Set initial value
+                defaultValue={0} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 style={{ color: "#45BDE5" }}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue)) {
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
                     document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value = newValue;
                   }
                 }}
@@ -425,11 +377,11 @@ const getParameterLabels = (props) => {
                 id={formatId(active, "groundTruthParamsValue_stdv")}
                 style={{ color: "#45BDE5" }}
                 maxLength="4" // Restrict to 8 characters
-                defaultValue={props.getValue(props, 'stdv', 'groundTruth')}   // Set initial value
+                defaultValue={1} // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0) {
+                  if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
                     document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value = newValue;
                   }
                 }}
@@ -437,16 +389,26 @@ const getParameterLabels = (props) => {
             </Box>
 
             <Box className={styles.gaussianButtonRow}>
-              <button
-                className={styles.gaussianButton}
-                style={{ backgroundColor: "#45BDE5" }}
-                onClick={() => props.updateChart(active, 'groundTruth')}
-              >
-                <h4>Update</h4>
-                <img
-                  className={styles.buttonIconRight}
-                />
-              </button>
+              {props.data.plot.fetching ? (
+                <button
+                  className={styles.gaussianButton}
+                  style={{ backgroundColor: "#ccc", pointerEvents: "none" }}
+                  disabled
+                >
+                  <h4>Update</h4>
+                </button>
+              ) : (
+                <button
+                  className={styles.gaussianButton}
+                  style={{ backgroundColor: "#45BDE5" }}
+                  onClick={() => props.updateChart(active, 'groundTruth')}
+                >
+                  <h4>Update</h4>
+                  <img
+                    className={styles.buttonIconRight}
+                  />
+                </button>
+              )}
             </Box>
           </Box>
 
@@ -457,7 +419,7 @@ const getParameterLabels = (props) => {
               <input
                 type="text"
                 id={formatId(active, "priorParamsValue_mu")}
-                defaultValue={props.getValue(props, 'mean', 'prior')}
+                defaultValue={0}
                 style={{ color: "#FFAB1A" }}
                 maxLength="4" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
@@ -475,7 +437,7 @@ const getParameterLabels = (props) => {
                 type="text"
                 id={formatId(active, "priorParamsValue_stdv")}
                 style={{ color: "#FFAB1A" }}
-                defaultValue={props.getValue(props, 'stdv', 'prior')}
+                defaultValue={1}
                 maxLength="4" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
@@ -521,8 +483,10 @@ const HueTooltip = ({ active, payload, label, plot }) => {
   const index = Number(label)
 
   if (active && payload && payload.length) { // Check if tooltip is active and has data
-
+    console.log(payload[0])
     const freq = payload[0].payload.value
+
+
     if (plot.helpfulTooltip) {
       return (
         <div>
@@ -587,13 +551,27 @@ const RhythmTooltip = ({ active, payload, label, ...props }) => {
 };
 
 const handleHueClick = (data, index) => {
-  { console.log("WECLICKED THE CHART!!!") }
-  { console.log(data) }
-  { console.log(index) }
+  //  { console.log("WECLICKED THE CHART!!!") }
+  //  { console.log(data) }
+  //  { console.log(index) }
+};
+
+
+const getAxisYDomain = (data, from, to, ref, offset) => {
+  const refData = data.slice(from - 1, to);
+  let [bottom, top] = [refData[0][ref], refData[0][ref]];
+  refData.forEach((d) => {
+    if (d[ref] > top) top = d[ref];
+    if (d[ref] < bottom) bottom = d[ref];
+  });
+
+  return [(bottom | 0), (top | 0) + offset];
 };
 
 const getHuePanel = (props) => {
   const plot = props.data.plot
+  // const { data, barIndex, left, right, refAreaLeft, refAreaRight, top, bottom } = plot.state;
+
   return (
     <Box className={styles.dataRow} style={{ marginLeft: "-1em" }} >
       <Box className={styles.chartBox}>
@@ -627,67 +605,12 @@ const getHuePanel = (props) => {
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
+            {console.log("refreshing zoom chart")}
+            {/* <ZoomChart key={Math.random()} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} /> */}
+            {/* <button type="button" className="btn update" onClick={this.zoomOut.bind(this)}>
+              Zoom Out
+            </button> */}
 
-            {/* <BarChart
-              width={900}
-              height={400}
-              data={plot.histogram}
-              style={{ marginTop: "1em" }}
-              onMouseDown={(e) => props.updateRefLeft(props.activeModel, e.activeLabel)}
-              onMouseMove={(e) => props.updateRefRight(props.activeModel, e.activeLabel)}
-              onMouseUp={() => props.zoom(props.activeModel)} // binding this?
-            >
-              <Bar type="monotone" dataKey="value" dot={false} barSize={20}>
-                {plot.histogram.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={plot.histogram[index].stroke} />
-                ))}
-              </Bar>
-
-              {console.log("DOMAIN SHOULD BE: ")}
-              {console.log(plot.view.left + ", " + plot.view.right)}
-              <XAxis
-                allowDataOverflow
-                dataKey="hue"
-                domain={[plot.view.left, plot.view.right]}
-                tickCount={360}
-                visibleTickCount={360}
-                interval={0}
-                tick={<CustomHue />}
-                offset={0}
-                minTickGap={0}
-                axisLine={{
-                  stroke: "#ddd",
-                  strokeWidth: 3,
-                  strokeLinecap: "round",
-                }}
-                tickLine={false}
-              >
-              </XAxis>
-              <Brush dataKey="value" height={30} stroke="#8884d8" />
-              <YAxis allowDataOverflow
-                domain={['dataMin', 'dataMax + 1']}
-                label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
-                style={{ marginTop: '10px' }}
-                dots={false}
-                axisLine={{
-                  stroke: "#ddd",
-                  strokeWidth: 1,
-                  strokeLinecap: "round", // Set rounded line ends
-                }}
-                tickLine={{ strokeWidth: 3 }}
-              />
-              <Legend content={<HueLegend plot={plot} props={props} />} />
-              <Tooltip content={<HueTooltip plot={plot} />} />
-
-              {console.log("INSIDE PANEL, THE PLOT VIEW IS:")}
-              {console.log(plot.view)}
-              {console.log("DRAWINGREF AREA?")}
-              <ReferenceArea yAxisId="1" x1={0} x2={101} strokeOpacity={0.5} />
-              {plot.view.refAreaLeft != "" && plot.view.refAreaRight != "" ? (
-                <ReferenceArea yAxisId="1" x1={plot.view.refAreaLeft} x2={plot.view.refAreaRight} strokeOpacity={1} />
-              ) : (null)}
-            </BarChart> */}
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -708,17 +631,14 @@ const getRhythmPanel = (props) => {
             <Box className={styles.hueChartBox}>
               <ResponsiveContainer width={'99%'} aspect={1.1} style={{ justifyContent: "center" }}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
-                  <PieChart width={400} height={400} style={{ marginRight: "-4em", stroke: "#ddd", strokeWidth: "2px" }}>
+                  <PieChart width={600} height={600} style={{ marginRight: "-4em", marginTop: "-3em" }}>
                     <Pie
                       data={plot.pie}
                       dataKey={"value"}
-                      outerRadius={180}
+                      outerRadius={150}
                       fill={plot.pie.fill}
-                      stroke={"#ggg"}
-                      strokeWeight={"4px"}
                     />
-                    {/* <Tooltip content={<RhythmPieTooltip props={props} />} /> */}
-                    <Tooltip />
+                    <Tooltip content={<HuePieTooltip props={props} />} />
                   </PieChart>
                   <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
                 </div>
@@ -733,19 +653,7 @@ const getRhythmPanel = (props) => {
           <ResponsiveContainer width={'99%'} aspect={1.3}>
             <h4>Rhythm Timeline</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of rhythms are there and when are they played?</p>
-            {/* <BarChart width={400} height={400} style={{ marginRight: "-4em", stroke: "#ddd", strokeWidth: "2px" }}>
-              <Bar
-                data={plot.histogram}
-                dataKey={"value"}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={plot.pie[index].fill} />
-                ))}
-              </Bar>
-              <Tooltip />
-            </BarChart> */}
-
-            {/* <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
+            <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
               <Scatter type="monotone" dataKey="x" stroke={plot.timeline.stroke} dot={false} />
               <XAxis
                 label="Rhythm"
@@ -798,7 +706,7 @@ const getRhythmPanel = (props) => {
                   props.updateChart(active, 'viewFactor')
                 }
               }}
-            /> */}
+            />
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -810,9 +718,9 @@ const getRhythmPanel = (props) => {
 
 
 const getPanel = (props) => {
-  // { console.log("Deciding which panel to choose:") }
-  // { console.log(props.data) }
-  // { console.log(props.data.distribution) }
+  //  { console.log("Deciding which panel to choose:") }
+  // //  { console.log(props.data) }
+  // //  { console.log(props.data.distribution) }
   switch (props.data.distribution) {
     case 'gaussian':
       return getGaussianPanel(props)
@@ -899,7 +807,7 @@ const getKeyStats = (props) => {
       {data.distribution === "gaussian" && samples.length > 0 ? (
         <div>
           <h4 style={{ color: "#00B295" }}>Mean of Observations</h4>
-          {/* {console.log(samples)} */}
+          {/*//  { console.log(samples)} */}
           <p className={styles.stat}>{(samples.reduce((acc, v) => acc + v, 0) / samples.length).toFixed(2)}</p>
         </div>) : (null)}
 
