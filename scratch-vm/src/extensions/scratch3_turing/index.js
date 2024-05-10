@@ -581,10 +581,16 @@ class Scratch3Turing {
             sample = this._getThenSendSample(util, user_model, random_var_idx)
         }
 
+        console.log('rvs:')
         if (user_model.data.length > 0) {
             const observation = user_model.data[user_model.data.length - 1] // gets most recent sample
             const units = user_model.dataSpecs.units; // gets units for samples
             const lastUnit = units[units.length - 1]// gets the last unit    
+
+            if (random_var_idx == TIME && lastUnit != 's') {
+                return "You haven't used this block in a project, so it has started a stopwatch until clicked again..."
+            }
+
             return `${observation} ${lastUnit}`
 
         } else {
@@ -823,8 +829,7 @@ class Scratch3Turing {
     extractSample = (util, user_model, rv, groundTruth) => {
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
-        if ((rv == TIME || rv == RHYTHM) && sample > 1000000 && user_model.data.length < 1) {
-            console.log("RETURNING THIS!!")
+        if ((rv == TIME || rv == RHYTHM) && (sample > 1000000)) {
             this.globalTimer.start()
             user_model.timer.start();
             console.log(sample)
