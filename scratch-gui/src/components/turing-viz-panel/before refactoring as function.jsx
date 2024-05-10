@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, Cell, ReferenceArea, ResponsiveContainer } from 'recharts';
+import React, { Component } from 'react';
+import {
+    Label,
+    LineChart,
+    Line,
+    CartesianGrid,
+    XAxis,
+    YAxis,
+    Tooltip,
+    Rectangle,
+    ReferenceArea,
+    BarChart,
+    Bar,
+    Cell,
+    ResponsiveContainer,
+    Legend
+} from 'recharts';
 import styles from './turing-viz-panel.css';
 import Color from './color.js'
-
 
 const hueToHex = (hue) => {
     const hsv = { h: hue, s: 80, v: 80 }
@@ -118,27 +132,37 @@ const HueTooltip = ({ active, payload, label, plot }) => {
     return null;
 };
 
-const ZoomChart = ({ data, plot, vizProps, stroke }) => {
-    const [state, setState] = useState(initialState(data));
+export default class ZoomChart extends Component {
 
-    const zoom = () => {
-        let { refAreaLeft, refAreaRight } = state;
+    constructor({ props, count, data, plot, vizProps, stroke }) {
+        super(props);
+        this.state = initialState(data);
+        this.data = data
+        this.plot = plot
+        this.vizProps = vizProps
+        this.stroke = stroke
+        this.count = count
+    }
+
+    zoom() {
+        let { refAreaLeft, refAreaRight } = this.state;
+        const { data } = this.state;
 
         if (refAreaLeft === refAreaRight || refAreaRight === '') {
-            setState({
-                ...state,
+            this.setState(() => ({
                 refAreaLeft: '',
                 refAreaRight: '',
-            });
+            }));
             return;
         }
 
+        // xAxis domain
         if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
 
-        const [bottom, top] = getAxisYDomain(data, refAreaLeft, refAreaRight, 'value', 1);
+        // yAxis domain
+        const [bottom, top] = getAxisYDomain(this.data, refAreaLeft, refAreaRight, 'value', 1);
 
-        setState({
-            ...state,
+        this.setState(() => ({
             refAreaLeft: '',
             refAreaRight: '',
             data: data.slice(),
@@ -146,12 +170,12 @@ const ZoomChart = ({ data, plot, vizProps, stroke }) => {
             right: refAreaRight,
             bottom,
             top,
-        });
-    };
+        }));
+    }
 
-    const zoomOut = () => {
-        setState({
-            ...state,
+    zoomOut() {
+        const { data } = this.state;
+        this.setState(() => ({
             data: data.slice(),
             refAreaLeft: '',
             refAreaRight: '',
@@ -159,74 +183,85 @@ const ZoomChart = ({ data, plot, vizProps, stroke }) => {
             right: 'dataMax',
             top: 'dataMax+1',
             bottom: 'dataMin',
-        });
-    };
+        }));
+    }
 
-    const { left, right, refAreaLeft, refAreaRight, top, bottom } = state;
+    update() {
+        this.count = this.count + 1
+    }
 
-    return (
-        <div className="highlight-bar-charts" style={{ userSelect: 'none', width: '100%' }}>
-            <button type="button" className="btn update" onClick={zoomOut}>
-                Zoom Out
-            </button>
-            <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                    width={800}
-                    height={400}
-                    style={{ marginTop: "1em" }}
-                    data={data}
-                    onMouseDown={(e) => setState({ ...state, refAreaLeft: e.activeLabel })}
-                    onMouseMove={(e) => state.refAreaLeft && setState({ ...state, refAreaRight: e.activeLabel })}
-                    onMouseUp={zoom}
-                >
-                    <XAxis allowDataOverflow
-                        dataKey="hue"
-                        domain={[left, right]}
-                        tick={<CustomHue />}
-                        tickCount={360}
-                        visibleTickCount={360}
-                        interval={0}
-                        offset={0}
-                        minTickGap={0}
-                        axisLine={{
-                            stroke: "#ddd",
-                            strokeWidth: 3,
-                            strokeLinecap: "round",
-                        }}
-                        tickLine={false}
-                        type="number" />
-                    <YAxis allowDataOverflow
-                        domain={[bottom, top]}
-                        style={{ marginTop: '10px' }}
-                        axisLine={{
-                            stroke: "#ddd",
-                            strokeWidth: 1,
-                            strokeLinecap: "round",
-                        }}
-                        tickLine={{ strokeWidth: 3 }}
-                        label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
-                        type="number"
-                        yAxisId="1" />
-                    <Tooltip content={<HueTooltip plot={plot} />} />
-                    <Legend content={<HueLegend vizProps={vizProps} />} />
-                    <Bar
-                        yAxisId="1"
-                        type="monotone"
-                        dataKey="value"
-                        animationDuration={300}
-                        style={{ strokeWidth: "2px" }}
+    render() {
+        this.update() // hacku solution to cause a rerender?
+
+        const { data, barIndex, left, right, refAreaLeft, refAreaRight, top, bottom } = this.state; // PROBLEM, it uses a FIXED STATE HERE! so we need to somehow update the data from the render function...
+        return (
+            <div className="highlight-bar-charts" style={{ userSelect: 'none', width: '100%' }}>
+                <h2>{this.count}</h2>
+                <button type="button" className="btn update" onClick={this.zoomOut.bind(this)}>
+                    Zoom Out
+                </button>
+                <ResponsiveContainer width="100%" height={400}>
+                    <BarChart
+                        width={800}
+                        height={400}
+                        style={{ marginTop: "1em" }}
+                        data={data}
+                        onMouseDown={(e) => this.setState({ refAreaLeft: e.activeLabel })}
+                        onMouseMove={(e) => this.state.refAreaLeft && this.setState({ refAreaRight: e.activeLabel })}
+                        onMouseUp={this.zoom.bind(this)}
                     >
-                        {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={data[index].stroke} />
-                        ))}
-                    </Bar>
-                    {refAreaLeft && refAreaRight ? (
-                        <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
-                    ) : null}
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
-    );
-};
+                        <XAxis allowDataOverflow
+                            dataKey="hue"
+                            domain={[left, right]}
+                            tick={<CustomHue />}
+                            tickCount={360}
+                            visibleTickCount={360}
+                            interval={0}
+                            offset={0}
+                            minTickGap={0}
+                            axisLine={{
+                                stroke: "#ddd",
+                                strokeWidth: 3,
+                                strokeLinecap: "round",
+                            }}
+                            tickLine={false}
+                            type="number" />
+                        <YAxis allowDataOverflow
+                            domain={[bottom, top]}
+                            style={{ marginTop: '10px' }}
+                            axisLine={{
+                                stroke: "#ddd",
+                                strokeWidth: 1,
+                                strokeLinecap: "round", // Set rounded line ends
+                            }}
+                            tickLine={{ strokeWidth: 3 }}
+                            label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
+                            type="number"
+                            yAxisId="1" />
+                        <Tooltip content={<HueTooltip plot={this.plot} />} />
+                        <Legend content={<HueLegend vizProps={this.vizProps} />} />
+                        {/* {console.log("Our data is: ")}
+                        {console.log(data)} */}
+                        <Bar
+                            yAxisId="1"
+                            type="monotone"
+                        //    data={data} // Pass the entire data list
+                            dataKey="value"
+                            animationDuration={300}
+                            style={{ strokeWidth: "2px" }}
+                        >
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={data[index].stroke} />
+                            ))}
+                        </Bar>
 
-export default ZoomChart;
+                        {/* <Bar yAxisId="1" type="monotone" dataKey="value" fill={data.stroke} animationDuration={300} style={{strokeWeight: "2px"}} activeBar={<Rectangle fill={hexToHue(data.stroke)} stroke={hexToHue(data.stroke)} />} /> */}
+                        {refAreaLeft && refAreaRight ? (
+                            <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
+                        ) : null}
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+        );
+    }
+}

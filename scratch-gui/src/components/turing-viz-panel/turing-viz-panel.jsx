@@ -627,15 +627,16 @@ const getHuePanel = (props) => {
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
             <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
-            {/* <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} /> */}
-            <BarChart
+            <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
+
+            {/* <BarChart
               width={900}
               height={400}
               data={plot.histogram}
               style={{ marginTop: "1em" }}
-            // onMouseDown={(e) => props.updateRefLeft(props.activeModel, e.activeLabel)}
-            // onMouseMove={(e) => props.updateRefRight(props.activeModel, e.activeLabel)}
-            // onMouseUp={() => props.zoom(props.activeModel)} // binding this?
+              onMouseDown={(e) => props.updateRefLeft(props.activeModel, e.activeLabel)}
+              onMouseMove={(e) => props.updateRefRight(props.activeModel, e.activeLabel)}
+              onMouseUp={() => props.zoom(props.activeModel)} // binding this?
             >
               <Bar type="monotone" dataKey="value" dot={false} barSize={20}>
                 {plot.histogram.map((entry, index) => (
@@ -648,13 +649,13 @@ const getHuePanel = (props) => {
               <XAxis
                 allowDataOverflow
                 dataKey="hue"
-                // domain={['dataMin', 'dataMax + 1']}
+                domain={[plot.view.left, plot.view.right]}
                 tickCount={360}
                 visibleTickCount={360}
                 interval={0}
                 tick={<CustomHue />}
-                // offset={0}
-                // minTickGap={0}
+                offset={0}
+                minTickGap={0}
                 axisLine={{
                   stroke: "#ddd",
                   strokeWidth: 3,
@@ -665,7 +666,7 @@ const getHuePanel = (props) => {
               </XAxis>
               <Brush dataKey="value" height={30} stroke="#8884d8" />
               <YAxis allowDataOverflow
-                // domain={['dataMin', 'dataMax + 1']}
+                domain={['dataMin', 'dataMax + 1']}
                 label={{ value: 'Observations', angle: -90, position: 'insideLeft', textAnchor: 'bottom' }}
                 style={{ marginTop: '10px' }}
                 dots={false}
@@ -682,10 +683,11 @@ const getHuePanel = (props) => {
               {console.log("INSIDE PANEL, THE PLOT VIEW IS:")}
               {console.log(plot.view)}
               {console.log("DRAWINGREF AREA?")}
+              <ReferenceArea yAxisId="1" x1={0} x2={101} strokeOpacity={0.5} />
               {plot.view.refAreaLeft != "" && plot.view.refAreaRight != "" ? (
                 <ReferenceArea yAxisId="1" x1={plot.view.refAreaLeft} x2={plot.view.refAreaRight} strokeOpacity={1} />
-              ) : ("nothjing here")}
-            </BarChart>
+              ) : (null)}
+            </BarChart> */}
           </ResponsiveContainer>
         </Box>
       </Box>
