@@ -85,7 +85,7 @@ const formatId = (modelName, label) => {
 }
 
 
-const GaussianTooltip = ({ active, payload, label, plot }) => {
+const GaussianTooltip = ({ active, payload, label, props, plot }) => {
 
   // console.log("plot?")
   // console.log(plot)
@@ -102,7 +102,7 @@ const GaussianTooltip = ({ active, payload, label, plot }) => {
         <div className={styles.gaussianTooltip}>
           🎲 Likelihood of <b>{label.toFixed(2)}</b> 🎲
           {payload.map((key, index) => (
-            <p key={payload[index]}> {/* Add unique key for each item */}
+            <p key={formatId(props.activeModel, payload[index])}> {/* Add unique key for each item */}
               <b
                 style={{
                   color: payload[index].dataKey.includes("ps")
@@ -305,7 +305,7 @@ const getGaussianPanel = (props) => {
                 ) : null}
                 {/* <ReferenceLine x={} /> */}
                 <Legend content={<GaussianLegend plot={plot} props={props} />} />
-                <Tooltip content={<GaussianTooltip plot={plot} />} />
+                <Tooltip content={<GaussianTooltip props = {props} plot={plot} />} />
               </LineChart>
             </ResponsiveContainer>
           </Box>
