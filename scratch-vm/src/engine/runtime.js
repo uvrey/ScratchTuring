@@ -513,6 +513,10 @@ class Runtime extends EventEmitter {
         return 'DELETE_MODEL';
     }
 
+    static get REMOVE_MODEL () {
+        return 'REMOVE_MODEL';
+    }
+
     static get CLEAR_SAMPLES () {
         return 'CLEAR_SAMPLES';
     }

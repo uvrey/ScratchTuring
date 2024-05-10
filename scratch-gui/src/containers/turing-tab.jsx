@@ -121,7 +121,7 @@ class TuringTab extends React.Component {
 
     handleDeleteModel(modelName) {
         console.log("RECEIVED SIGNAL TO DELETE MODEL: " + modelName)
-        this.props.vm.emit('DELETE_MODEL', { modelName: modelName })
+        this.props.vm.runtime.emit('REMOVE_MODEL', { modelName: modelName })
     }
 
     getModelSamples(modelName) {
