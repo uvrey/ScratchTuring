@@ -422,7 +422,7 @@ const getHuePanel = (props) => {
                     />
                     <Tooltip content={<HuePieTooltip props={props} />} />
                   </PieChart>
-                  <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
+                  <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-2em", zIndex: 10 }} />
                 </div>
                 <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
               </ResponsiveContainer>
@@ -431,10 +431,10 @@ const getHuePanel = (props) => {
         ) : (<div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4><p>No samples taken yet!</p></div>)}
       </Box>
       <Box className={styles.chartBox}>
-        <Box className={styles.hueChartBox}>
+        <Box className={styles.hueChartBox} style = {{paddingBottom: "3em"}}>
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
-            <p style={{ marginBottom: "1em", width: "100%" }}>What kind of hues are there, how often do they appear, and how are they spread out?</p>
+            <p style={{width: "100%", marginBottom: "0.5em"}}>What kind of hues are there & how often do they appear?</p>
             <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
           </ResponsiveContainer>
         </Box>

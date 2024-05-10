@@ -24,16 +24,13 @@ const CustomHue = (props) => {
     );
 };
 
-
 const getAxisYDomain = (data, from, to, ref, offset) => {
-    console.log("getting y axis domain..." + from + ", " + to)
     const refData = data.slice(from - 1, to);
     let [bottom, top] = [refData[0][ref], refData[0][ref]];
     refData.forEach((d) => {
         if (d[ref] > top) top = d[ref];
         if (d[ref] < bottom) bottom = d[ref];
     });
-
     return [(bottom | 0), (top | 0) + offset];
 };
 
@@ -54,6 +51,7 @@ const initialState = (data) => {
         top: 'dataMax+1',
         bottom: 'dataMin',
         animation: true,
+        zoomed: false,
     };
 }
 
@@ -79,18 +77,12 @@ const HueLegend = ({ vizProps }) => (
 
 const HueTooltip = ({ active, payload, label, plot }) => {
     const index = Number(label)
-
     if (active && payload && payload.length) { // Check if tooltip is active and has data
         const freq = payload[0].payload.value
-
-        // console.log("INSIDE HUETOOLTIP CHART-> HELPFUL TOOLTIP?")
-        // console.log(plot)
-        // console.log(plot.helpfulTooltip) // This is using the initial state and won't change for some reason?
-
         if (plot.helpfulTooltip) {
             return (
                 <div>
-                    <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+                    <div style={{ backgroundColor: "rgba(33,33,33,0.5)", padding: "0.3em", borderRadius: "0.3em" }}>
                         {plot.hues.hueFamilies[index].map((hex, index) => (
                             <div className={styles.hueSwatch} style={{ color: hex, backgroundColor: hex, stroke: "#eee", strokeWeight: "3px", marginBottom: "0.4em", borderRadius: "0.3em", padding: "0.5em" }}>{hex}</div>
                         ))}
@@ -104,8 +96,7 @@ const HueTooltip = ({ active, payload, label, plot }) => {
         } else {
             return (
                 <div>
-                    {/* <p>{`${label}: ${payload[0].value}`}</p> */}
-                    <div style={{ backgroundColor: "rgba(33,33,33,0.8)", padding: "0.3em", borderRadius: "0.3em" }}>
+                    <div style={{ backgroundColor: "rgba(33,33,33,0.5)", padding: "0.3em", borderRadius: "0.3em" }}>
                         <div className={styles.dataRow}>
                             <div className={styles.hueBox} style={{ backgroundColor: hueToHex(label), stroke: "#eee", strokeWeight: "3px", borderRadius: "0.3em", width: "1.5em", height: "1.5em", padding: "0.5em", marginRight: freq > 0 ? '3px' : '0px' }} />
                             {freq > 0 ? (<b style={{ color: "white" }}> x {freq}</b>) : (null)}
@@ -146,6 +137,7 @@ const ZoomChart = ({ data, plot, vizProps, stroke }) => {
             right: refAreaRight,
             bottom,
             top,
+            zoomed: true,
         });
     };
 
@@ -159,17 +151,32 @@ const ZoomChart = ({ data, plot, vizProps, stroke }) => {
             right: 'dataMax',
             top: 'dataMax+1',
             bottom: 'dataMin',
+            zoomed: false,
         });
     };
 
-    const { left, right, refAreaLeft, refAreaRight, top, bottom } = state;
+    const { left, right, refAreaLeft, refAreaRight, top, bottom, zoomed } = state;
 
     return (
-        <div className="highlight-bar-charts" style={{ userSelect: 'none', width: '100%' }}>
-            <button type="button" className="btn update" onClick={zoomOut}>
-                Zoom Out
-            </button>
+        <div className={styles.chartBox} style={{ userSelect: 'none', width: '100%', marginLeft: "-1em"}}>
             <ResponsiveContainer width="100%" height={400}>
+                {zoomed ? (
+                    <button
+                        type="button"
+                        className={styles.zoomButton}
+                        style={{ backgroundColor: "#9966FF", fontWeight: 600 }}
+                        onClick={zoomOut}>
+                        Zoom Out
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        className={styles.zoomButton}
+                        style={{ backgroundColor: "#ccc", fontWeight: 600 }}
+                        disabled>
+                        Zoom Out
+                    </button>
+                )}
                 <BarChart
                     width={800}
                     height={400}
@@ -208,7 +215,7 @@ const ZoomChart = ({ data, plot, vizProps, stroke }) => {
                         type="number"
                         yAxisId="1" />
                     <Tooltip content={<HueTooltip plot={plot} />} />
-                    <Legend content={<HueLegend vizProps={vizProps} />} />
+                    <Legend content={<HueLegend vizProps={vizProps} style={{marginTop: "-1em"}} />} />
                     <Bar
                         yAxisId="1"
                         type="monotone"
