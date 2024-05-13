@@ -75,6 +75,8 @@ class Scratch3Turing {
         this.lastSampleTime = {};
         this.timers = {};
         this.palette_idx = 0;
+        this.globalHues = []
+        this.globalHueActive = false
 
         sessionStorage.setItem("username", this.username);
 
@@ -243,7 +245,7 @@ class Scratch3Turing {
             {
                 name: formatMessage({
                     id: 'turing.distInfo.gaussian',
-                    default: 'GAUSSIAN',
+                    default: 'NORMAL',
                     description: 'Gaussian distribution.'
                 }),
             },
@@ -463,7 +465,6 @@ class Scratch3Turing {
             models: {
                 prior: {
                     params: {},
-                    // barValue: null,
                     data: null,
                     mean: null,
                     stdv: null,
@@ -471,7 +472,7 @@ class Scratch3Turing {
                     active: false
                 },
                 ps: {
-                    n: 2,
+                    n: 1,
                     active: false,
                     curves: []
                 },
@@ -485,7 +486,6 @@ class Scratch3Turing {
                 },
                 groundTruth: {
                     params: {},
-                    // barValue: null,
                     data: null,
                     mean: null,
                     stdv: null,
@@ -494,7 +494,6 @@ class Scratch3Turing {
                 },
                 custom: {
                     params: {},
-                    // barValue: null,
                     data: null,
                     mean: null,
                     stdv: null,
@@ -523,7 +522,7 @@ class Scratch3Turing {
                 hueProportions: Array(360).fill(0),
                 hueCount: 0,
                 hueFamilies: Array(360).fill().map(() => []),
-                view: this.getInitialState()
+                view: this.getInitialState(),
             },
             rhythmData: {
                 viewFactor: 0,
@@ -572,6 +571,14 @@ class Scratch3Turing {
             this.updateVisualisationData(user_model)
         }
         return "Success!"
+    }
+
+    addToGlobalHue (user_model) {
+        this.globalHues.push(user_model.modelName)
+    }
+
+    removeFromGlobalHue (user_model) {
+        this.globalHues.push(user_model.modelName)
     }
 
     parseResponse(response) {
@@ -737,6 +744,8 @@ class Scratch3Turing {
             plot: this.getPlotDataFromDist(user_model),
             samples: user_model.data,
             activeModels: this.getActiveDistributions(),
+            globalActive: (this.globalHues.length > 0 ? (true) : (false)),
+            globals: this.globalHues
         }
         this.visualisationData[user_model.modelName] = vis
         this._runtime.emit('TURING_DATA', this.visualisationData)
@@ -1147,11 +1156,8 @@ class Scratch3Turing {
     }
 
     _getHexForActiveHue(user_model, activeHue) {
-       // console.log("finding hex for active hue " + activeHue)
+        // console.log("finding hex for active hue " + activeHue)
         const foundHue = user_model.hueData.activeHues.find(hueDict => hueDict.hue === activeHue);
-
-        // console.log("Our active hue list is: ")
-        // console.log(user_model.hueData.activeHues)
 
         if (foundHue) {
             return foundHue.hex;
@@ -1169,36 +1175,6 @@ class Scratch3Turing {
     }
 
     mapToPieChartData(user_model) {
-        // Define color ranges for each category
-        // const colorRanges = {
-        //     'yellow': [45, 75],
-        //     "yellow-orange": [75, 90],
-        //     "yellow-green": [90, 120],
-        //     'green': [120, 180],
-        //     "blue-green": [180, 210],
-        //     'blue': [210, 270],
-        //     "blue-violet": [270, 300],
-        //     'violet': [300, 330],
-        //     "red-violet": [330, 345],
-        //     'red': [345, 15],
-        //     "red-orange": [15, 45],
-        // };
-
-        // const fills = {
-        //     "yellow": "#fff200",
-        //     "yellow-orange": "#ffc400",
-        //     "yellow-green": "#b1ff00",
-        //     "green": "#00ff7a",
-        //     "blue-green": "#00ffeb",
-        //     "blue": "#0081ff",
-        //     "blue-violet": "#0007ff",
-        //     "violet": "#9000ff",
-        //     "red-violet": "#ff00f7",
-        //     "red": "#ff0007",
-        //     "red-orange": "#ff5000",
-        //     "orange": "#ff9400",
-        // };
-
         // Initialize pie chart data
         const pieChartData = [];
         //  const colorRanges = this._getColorRanges();
@@ -1540,6 +1516,32 @@ class Scratch3Turing {
         // remove posterior curves
         user_model.models.ps.active = false
         user_model.models.ps.curves = []
+
+        user_model.dataSpecs = {
+            randomVars: [],
+            rvIndices: [],
+            units: [],
+            modes: []
+        }
+        user_model.hueData = {
+            hue: Array(360).fill(0),
+            activeHues: [],
+            hueProportions: Array(360).fill(0),
+            hueCount: 0,
+            hueFamilies: Array(360).fill().map(() => []),
+            view: this.getInitialState(),
+        }
+        user_model.rhythmData = {
+            viewFactor: 0,
+            rhythms: [],
+            timeStamps: [],
+            fills: {},
+            rhythmProportions: {},
+            rhythmCounts: {},
+            rhythmTotal: 0
+        }
+
+        this._onResetTimer()
 
         // update visualisation data
         this.updateVisualisationData(user_model)

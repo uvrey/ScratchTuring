@@ -431,10 +431,10 @@ const getHuePanel = (props) => {
         ) : (<div style={{ justifyContent: "center", alignItems: "center" }}><h4>Hue Proportions</h4><p>No samples taken yet!</p></div>)}
       </Box>
       <Box className={styles.chartBox}>
-        <Box className={styles.hueChartBox} style = {{paddingBottom: "3em"}}>
+        <Box className={styles.hueChartBox} style={{ paddingBottom: "3em" }}>
           <ResponsiveContainer width={'99%'} aspect={1.4}>
             <h4>Hue Distributions</h4>
-            <p style={{width: "100%", marginBottom: "0.5em"}}>What kind of hues are there & how often do they appear?</p>
+            <p style={{ width: "100%", marginBottom: "0.5em" }}>What kind of hues are there & how often do they appear?</p>
             <ZoomChart key={props.activeModel} data={plot.histogram} plot={plot} vizProps={props} stroke={plot.histogram.stroke} />
           </ResponsiveContainer>
         </Box>
@@ -454,7 +454,7 @@ const getRhythmPanel = (props) => {
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythms</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1.1} style={{ justifyContent: "center" }}>
+              <ResponsiveContainer width={'99%'} aspect={1.1} style={{ justifyContent: "center", alignItems: 'center'}}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
                   <PieChart width={400} height={400} style={{ marginRight: "-4em", stroke: "#ddd", strokeWidth: "2px" }}>
                     <Pie
@@ -469,11 +469,24 @@ const getRhythmPanel = (props) => {
                   </PieChart>
                   <img src={arrowLeftIcon} style={{ width: "8em", marginLeft: "-3em", zIndex: 10 }} />
                 </div>
-                <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+                <div className={styles.dataCol}>
+                  <div>
+                    <button id="spin-btn" className={styles.spinButton} onClick={() => randomRotate(".recharts-pie")}>Spin</button>
+                  </div>
+                  <div>
+                    <button
+                      className={styles.gaussianButton}
+                      style={{ backgroundColor: "#45BDE5" }} // Active button style
+                      onClick={() => props.onClearSamples(props.activeModel)}
+                    >
+                      <h4>Reset Rhythm</h4>
+                    </button>
+                  </div>
+                </div>
               </ResponsiveContainer>
             </Box>
           </div>
-        ) : (<div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythm Timeline</h4><p>No samples taken yet!</p></div>)}
+        ) : (<div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythms</h4><p>No samples taken yet!</p></div>)}
       </Box>
       <Box className={styles.chartBox}>
         <Box className={styles.hueChartBox}>
@@ -491,7 +504,6 @@ const getRhythmPanel = (props) => {
               </Bar>
               <Tooltip />
             </BarChart> */}
-
             <ScatterChart width={900} height={400} data={plot.timeline} style={{ marginTop: "2em" }}>
               <Scatter type="monotone" dataKey="x" stroke={plot.timeline.stroke} dot={false} />
               <XAxis
@@ -505,7 +517,7 @@ const getRhythmPanel = (props) => {
                 tickLine={true}
               />
               <YAxis
-                label=""
+                label={{ value: 'Time (seconds)', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
                 dots={false}
                 yAxis={-5}
                 axisLine={{
@@ -517,6 +529,8 @@ const getRhythmPanel = (props) => {
               />
               < Tooltip content={<RhythmTooltip props={props} />} />
             </ScatterChart>
+            
+            {props.data.samples.length > 0 ? (
             <input
               type="range"
               id={formatId(active, "viewFactorValue")}
@@ -530,6 +544,7 @@ const getRhythmPanel = (props) => {
                 props.updateChart(active, 'viewFactor')
               }}
             />
+            ) : (null)}
             <input
               type="text"
               style={{ display: 'none' }}
