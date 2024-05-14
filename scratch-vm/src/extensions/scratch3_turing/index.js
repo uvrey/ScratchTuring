@@ -1373,7 +1373,7 @@ class Scratch3Turing {
 
             return {
                 styles: {
-                    'prior': { stroke: "#FFAB1A", dots: false, strokeWidth: "3px", chartName: "Original Belief" },
+                    'prior': { stroke: "#E6A9F7", dots: false, strokeWidth: "2px", chartName: "Original Belief" },
                     'posterior': { stroke: "#00B295", dots: false, strokeWidth: "2px", chartName: "Updated Belief", strokeDasharray: "5 5" },
                     'groundTruth': { stroke: "#45BDE5", dots: false, strokeWidth: "3px", chartName: "Ground Truth" },
                     'ps-options': { stroke: "#00B295", dots: false, strokeWidth: "1px", chartName: "", strokeDasharray: "5 5" },

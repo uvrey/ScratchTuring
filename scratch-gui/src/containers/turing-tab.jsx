@@ -122,8 +122,8 @@ class TuringTab extends React.Component {
     handleGetStoredValue(value, defaultValue) {
         try {
             return localStorage.getItem(value);
-        }  catch (error) {
-            return defaultValue; 
+        } catch (error) {
+            return defaultValue;
         }
     }
 
@@ -180,23 +180,23 @@ class TuringTab extends React.Component {
         this.props.vm.runtime.emit('TOGGLE_VISIBILITY', data)
     }
 
-    handleRefUpdateLeft (modelName, newLeft) {
-        const send = {modelName: modelName, refAreaLeft: newLeft}
+    handleRefUpdateLeft(modelName, newLeft) {
+        const send = { modelName: modelName, refAreaLeft: newLeft }
         this.props.vm.runtime.emit('UPDATE_VIEW_REF_LEFT', send)
     }
 
-    handleRefUpdateRight (modelName, newRight) {
-        const send = {modelName: modelName, refAreaRight: newRight}
+    handleRefUpdateRight(modelName, newRight) {
+        const send = { modelName: modelName, refAreaRight: newRight }
         this.props.vm.runtime.emit('UPDATE_VIEW_REF_RIGHT', send)
     }
 
-    handleZoom (modelName) {
-        const send = {modelName: modelName}
+    handleZoom(modelName) {
+        const send = { modelName: modelName }
         this.props.vm.runtime.emit('UPDATE_VIEW_ZOOM', send)
     }
 
-    handleZoomOut (modelName) {
-        const send = {modelName: modelName}
+    handleZoomOut(modelName) {
+        const send = { modelName: modelName }
         this.props.vm.runtime.emit('UPDATE_VIEW_ZOOM_OUT', send)
     }
 
@@ -225,8 +225,10 @@ class TuringTab extends React.Component {
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
-                if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
-                    this.props.onParamError()
+                if (value === undefined || value !== value || value === "" ||
+                    isNaN(value) ||
+                    /[^\d\-.]/.test(value)) { // Check for multiple decimal points
+                    this.props.onParamError();
                     return;
                 }
                 values[inputName] = value;
@@ -244,10 +246,11 @@ class TuringTab extends React.Component {
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
-                if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
-                    this.props.onParamError()
-                    return;
-                }
+                if (value === undefined || value !== value || value === "" ||
+                isNaN(value) ||  /[^\d\-.]/.test(value)) { // Check for multiple decimal points
+                this.props.onParamError();
+                return;
+            }
                 values[inputName] = value;
             }
             var customData = { modelName: modelName, mean: values[modelName + "_groundTruthParamsValue_mu"], stdv: values[modelName + "_groundTruthParamsValue_stdv"] }
@@ -262,8 +265,9 @@ class TuringTab extends React.Component {
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
-                if (value === undefined || value !== value || value === "") { // Check for undefined, NaN, and empty string
-                    this.props.onParamError()
+                if (value === undefined || value !== value || value === "" ||
+                    isNaN(value) ||  /[^\d\-.]/.test(value)) { // Check for multiple decimal points
+                    this.props.onParamError();
                     return;
                 }
                 values[inputName] = value;
@@ -279,8 +283,10 @@ class TuringTab extends React.Component {
             for (const inputName of inputs) {
                 const input = document.getElementById(inputName);
                 const value = parseFloat(input.value);
-                if (value >= 11 || value < 0 || value == NaN || value == undefined) {
-                    this.props.onPosteriorError();
+                if (value >= 11 || value < 0 || value === undefined || value !== value || value === "" ||
+                    isNaN(value) ||
+                    /[^\d\-.]/.test(value)) { // Check for multiple decimal points
+                    this.props.onParamError();
                     return;
                 }
                 values[inputName] = parseFloat(input.value);
@@ -437,7 +443,7 @@ class TuringTab extends React.Component {
                         zoom={this.handleZoom}
                         zoomOut={this.handleZoomOut}
                         onClearSamples={this.handleClearSamples}
-                    />) : (<h1 style={{marginLeft: "4em", marginTop: "4em"}}>No models defined... yet!</h1>)}
+                    />) : (<h1 style={{ marginLeft: "4em", marginTop: "4em" }}>No models defined... yet!</h1>)}
             </TuringAssetPanel>
         );
     }

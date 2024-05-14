@@ -199,14 +199,11 @@ const getPosteriorNs = (props) => {
           type="text"
           id={formatId(active, "posteriorNValue")}
           style={{ color: "#00B295", marginLeft: "7.5em" }}
-          maxLength="4" // Restrict to 8 characters
+          maxLength="8" // Restrict to 8 characters
           defaultValue={props.getValue(props, 'n', '')} // Set initial value
           className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
           onChange={(event) => {
-            const newValue = parseFloat(event.target.value);
-            if (!isNaN(newValue) && newValue >= 0 && newValue <= 5) {
-              document.getElementById(formatId(active, "posteriorNValue")).value = Math.floor(newValue);
-            }
+              document.getElementById(formatId(active, "posteriorNValue")).value = Math.floor(event.target.value);
           }}
         />
       </Box>
@@ -258,15 +255,12 @@ const getParameterLabels = (props) => {
               <input
                 type="text"
                 id={formatId(active, "groundTruthParamsValue_mu")}
-                maxLength="4" // Restrict to 8 characters
+                maxLength="8" // Restrict to 8 characters
                 defaultValue={props.getValue(props, 'mean', 'groundTruth')}  // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 style={{ color: "#45BDE5" }}
                 onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue)) {
-                    document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value = newValue;
-                  }
+                    document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value =  event.target.value;
                 }}
               />
             </Box>
@@ -276,14 +270,11 @@ const getParameterLabels = (props) => {
                 type="text"
                 id={formatId(active, "groundTruthParamsValue_stdv")}
                 style={{ color: "#45BDE5" }}
-                maxLength="4" // Restrict to 8 characters
+                maxLength="8" // Restrict to 8 characters
                 defaultValue={props.getValue(props, 'stdv', 'groundTruth')}   // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0) {
-                    document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value = newValue;
-                  }
+                    document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value =  event.target.value;
                 }}
               />
             </Box>
@@ -310,14 +301,11 @@ const getParameterLabels = (props) => {
                 type="text"
                 id={formatId(active, "priorParamsValue_mu")}
                 defaultValue={props.getValue(props, 'mean', 'prior')}
-                style={{ color: "#FFAB1A" }}
-                maxLength="4" // Restrict to 8 characters
+                style={{ color: "#E6A9F7" }}
+                maxLength="8" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue != "undefined") {
-                    document.getElementById(formatId(active, "priorParamsValue_mu")).value = newValue;
-                  }
+                    document.getElementById(formatId(active, "priorParamsValue_mu")).value = event.target.value;
                 }}
               />
             </Box>
@@ -326,15 +314,12 @@ const getParameterLabels = (props) => {
               <input
                 type="text"
                 id={formatId(active, "priorParamsValue_stdv")}
-                style={{ color: "#FFAB1A" }}
+                style={{ color: "#E6A9F7" }}
                 defaultValue={props.getValue(props, 'stdv', 'prior')}
-                maxLength="4" // Restrict to 8 characters
+                maxLength="8" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
-                  const newValue = parseFloat(event.target.value);
-                  if (!isNaN(newValue) && newValue >= 0) {
-                    document.getElementById(formatId(active, "priorParamsValue_stdv")).value = newValue;
-                  }
+                    document.getElementById(formatId(active, "priorParamsValue_stdv")).value = event.target.value;
                 }}
               />
             </Box>
@@ -350,7 +335,7 @@ const getParameterLabels = (props) => {
               ) : (
                 <button
                   className={styles.gaussianButton}
-                  style={{ backgroundColor: "#FFAB1A" }}
+                  style={{ backgroundColor: "#E6A9F7" }}
                   onClick={() => props.updateChart(active, 'prior')}
                 >
                   <h4>Update</h4>
@@ -454,7 +439,7 @@ const getRhythmPanel = (props) => {
         {props.data.samples.length > 0 ? (
           <div style={{ justifyContent: "center", alignItems: "center" }}><h4>Rhythms</h4>
             <Box className={styles.hueChartBox}>
-              <ResponsiveContainer width={'99%'} aspect={1.1} style={{ justifyContent: "center", alignItems: 'center'}}>
+              <ResponsiveContainer width={'99%'} aspect={1.1} style={{ justifyContent: "center", alignItems: 'center' }}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
                   <PieChart width={400} height={400} style={{ marginRight: "-4em", stroke: "#ddd", strokeWidth: "2px" }}>
                     <Pie
@@ -529,21 +514,21 @@ const getRhythmPanel = (props) => {
               />
               < Tooltip content={<RhythmTooltip props={props} />} />
             </ScatterChart>
-            
+
             {props.data.samples.length > 0 ? (
-            <input
-              type="range"
-              id={formatId(active, "viewFactorValue")}
-              min="0"
-              max="200"
-              step="1"
-              defaultValue={0}
-              onChange={(event) => {
-                const newValue = parseFloat(event.target.value);
-                document.getElementById(formatId(active, "viewFactorValue")).value = newValue;
-                props.updateChart(active, 'viewFactor')
-              }}
-            />
+              <input
+                type="range"
+                id={formatId(active, "viewFactorValue")}
+                min="0"
+                max="200"
+                step="1"
+                defaultValue={0}
+                onChange={(event) => {
+                  const newValue = parseFloat(event.target.value);
+                  document.getElementById(formatId(active, "viewFactorValue")).value =  event.target.value;
+                  props.updateChart(active, 'viewFactor')
+                }}
+              />
             ) : (null)}
             <input
               type="text"
@@ -555,7 +540,7 @@ const getRhythmPanel = (props) => {
               onChange={(event) => {
                 const newValue = parseFloat(event.target.value);
                 if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                  document.getElementById(formatId(active, "viewFactor")).value = newValue;
+                  document.getElementById(formatId(active, "viewFactor")).value =  event.target.value;
                   props.updateChart(active, 'viewFactor')
                 }
               }}
@@ -658,13 +643,21 @@ const getKeyStats = (props) => {
         </div>) : (null)}
 
       <div>
-        <button
+        {/* <button
           className={styles.gaussianButton}
-          style={{ backgroundColor: "#ef4a5d" }} // Active button style
+          style={{ backgroundColor: "#45BDE5" }} // Active button style
           onClick={() => props.deleteModel(props.activeModel)}
+        > */}
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL"
+          className={styles.gaussianButton}
+          style={{ backgroundColor: "#45BDE5",  textDecoration: 'none', fontWeight: 600}}
+          target="_blank"
         >
-          <h4>Delete</h4>
-        </button>
+          <h4>Give Feedback</h4>
+        </a>
+
+        {/* </button> */}
       </div>
     </Box>
   );
