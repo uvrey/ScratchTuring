@@ -44,7 +44,7 @@ const GaussianTooltip = ({ active, payload, label, props, plot }) => {
     if (plot.helpfulTooltip) {
       return (
         <div className={styles.gaussianTooltip}>
-          🎲 Likelihood of <b>{label.toFixed(2)}</b> 🎲
+          🎲 Probability Density at <b>{label.toFixed(2)}</b> 🎲
           {payload.map((key, index) => (
             <p key={formatId(props.activeModel, payload[index])}> {/* Add unique key for each item */}
               <b
@@ -56,7 +56,7 @@ const GaussianTooltip = ({ active, payload, label, props, plot }) => {
                 className={styles.odds}
               >
                 ➡️ {
-                  `${(100 * payload[index].value).toFixed(3)}%` +
+                  `${(payload[index].value).toFixed(3)}` +
                   (plot.meanLines ? ` (Mean = ${plot.means[payload[index].dataKey]})` : '')
                 }
               </b>
@@ -91,7 +91,7 @@ const GaussianLegend = ({ payload, plot, props }) => (
           className={styles.chartCheckbox}
           onChange={() => props.updateChart(props.activeModel, 'tooltip')}
         />
-        Helpful tooltip
+        Helpful Tooltip
       </label>
       <label htmlFor={formatId(props.activeModel, "meanLines")} className={styles.checkboxLabel}>
         <input
@@ -100,7 +100,16 @@ const GaussianLegend = ({ payload, plot, props }) => (
           type="checkbox"
           onChange={() => props.updateChart(props.activeModel, 'meanLines')}
         />
-        Mean Lines
+        Show Means
+      </label>
+      <label htmlFor={formatId(props.activeModel, "meanLines")} className={styles.checkboxLabel}>
+        <input
+          id={formatId(props.activeModel, "stdvLines")}
+          className={styles.chartCheckbox}
+          type="checkbox"
+          onChange={() => props.updateChart(props.activeModel, 'stdvLines')}
+        />
+        Show Stdvs
       </label>
     </div>
 
@@ -136,10 +145,11 @@ const getGaussianPanel = (props) => {
                   dataKey="input"
                   type="number"
                 >
-                  <Label value="Mean" offset={0} position="insideBottom" />
+                  <Label value={`Mean (${props.data.modelName})`} offset={0} position="insideBottom" />
+
                 </XAxis>
                 <YAxis allowDecimals={true}
-                  label={{ value: 'Likelihood', angle: -90, position: 'insideLeft', textAnchor: 'middle' }}
+                  label={{ value: 'Probability Density', angle: -90, position: 'insideBottomLeft' }}
                 />
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                 {plot.activeDistributions.map((key) => (
@@ -173,6 +183,41 @@ const getGaussianPanel = (props) => {
                       stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
                       strokeWidth={key.includes("ps") ? plot.styles["ps-options"].strokeWidth : plot.styles[key].strokeWidth}
                     />
+                  ))
+                ) : null}
+
+                {plot.stdvLines ? (
+                  plot.activeDistributions.map((key) => (
+                    <>
+                      <ReferenceLine
+                        x={plot.means[key] - plot.stdvs[key]}
+                        key={plot.means[key] + "-" + plot.stdvs[key]}
+                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                        stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
+                        strokeWidth={0.5}
+                      />
+                      <ReferenceLine
+                        x={plot.means[key] + plot.stdvs[key]}
+                        key={plot.means[key] + "+" + plot.stdvs[key]}
+                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                        stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
+                        strokeWidth={0.5}
+                      />
+                      <ReferenceLine
+                        x={plot.means[key] - 2 * plot.stdvs[key]}
+                        key={plot.means[key] + "-2x" + plot.stdvs[key]}
+                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                        stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
+                        strokeWidth={0.5}
+                      />
+                      <ReferenceLine
+                        x={plot.means[key] + 2 * plot.stdvs[key]}
+                        key={plot.means[key] + "+2x" + plot.stdvs[key]}
+                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                        stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
+                        strokeWidth={0.5}
+                      />
+                    </>
                   ))
                 ) : null}
                 <Legend content={<GaussianLegend plot={plot} props={props} />} />

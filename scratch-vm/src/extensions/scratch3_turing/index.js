@@ -100,6 +100,8 @@ class Scratch3Turing {
 
         this._runtime.on('UPDATE_TOOLTIP', data => this._updateParams(data, 'helpfulTooltip'));
         this._runtime.on('UPDATE_MEAN_LINES', data => this._updateParams(data, 'meanLines'));
+        this._runtime.on('UPDATE_STDV_LINES', data => this._updateParams(data, 'stdvLines'));
+
 
         this._updateParams = this._updateParams.bind(this);
         this._runtime.on('UPDATE_PRIOR_PARAMS', data => this._updateParams(data, 'prior'));
@@ -506,6 +508,7 @@ class Scratch3Turing {
             fetching: false,
             helpfulTooltip: false,
             meanLines: false,
+            stdvLines: false,
             hasDistData: false,
             modelName: modelName,
             modelType: modelType, // distribution
@@ -993,6 +996,9 @@ class Scratch3Turing {
         if (mode == "meanLines") {
             this.user_models[data.modelName].meanLines = !this.user_models[data.modelName].meanLines
 
+        } else  if (mode == "stdvLines") {
+                this.user_models[data.modelName].stdvLines = !this.user_models[data.modelName].stdvLines
+    
         } else if (mode == "helpfulTooltip") {
             console.log("----------> toggling the tooltip of our data for " + data.modelName)
             this.user_models[data.modelName].helpfulTooltip = !this.user_models[data.modelName].helpfulTooltip
@@ -1387,6 +1393,7 @@ class Scratch3Turing {
                 fetching: user_model.fetching,
                 helpfulTooltip: user_model.helpfulTooltip,
                 meanLines: user_model.meanLines,
+                stdvLines: user_model.stdvLines,
                 nPosteriors: user_model.models.ps.n,
                 visible: this._getVisibleModels(),
                 gaussian: Distributions.generateProbabilityData(distAndParams.distLines),

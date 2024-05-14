@@ -211,6 +211,13 @@ class TuringTab extends React.Component {
             return
         }
 
+        if (mode == "stdvLines") {
+            var customData = { modelName: modelName }
+            this.handleUpdateStdvLines(customData)
+            return
+        }
+
+
         if (mode == "tooltip") {
             console.log("--------> updating tooltip")
             var customData = { modelName: modelName }
@@ -330,6 +337,10 @@ class TuringTab extends React.Component {
 
     handleUpdateMeanLines(data) {
         this.props.vm.runtime.emit('UPDATE_MEAN_LINES', data)
+    }
+
+    handleUpdateStdvLines(data) {
+        this.props.vm.runtime.emit('UPDATE_STDV_LINES', data)
     }
 
     getStoredValue(props, mode, dist) {

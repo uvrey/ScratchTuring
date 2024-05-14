@@ -504,6 +504,10 @@ class Runtime extends EventEmitter {
         return 'UPDATE_MEAN_LINES';
     }
 
+    static get UPDATE_STDV_LINES () {
+        return 'UPDATE_STDV_LINES';
+    }
+
 
     static get UPDATE_CUSTOM_PARAMS () {
         return 'UPDATE_CUSTOM_PARAMS';
