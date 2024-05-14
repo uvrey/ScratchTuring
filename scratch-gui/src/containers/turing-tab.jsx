@@ -337,14 +337,17 @@ class TuringTab extends React.Component {
         console.log(props)
 
         if (mode == 'n' && props != undefined) {
-            return props.data.plot.nPosteriors
+            console.log("returning " +  props.data.plot.nPosteriors)
+            return props.data.plot.nPosteriors  
         }
 
         if (mode == 'mean' && props != undefined) {
+            console.log("returning " +  props.data.plot.means[dist])
             return props.data.plot.means[dist]
         }
 
         if (mode == 'stdv' && props != undefined) {
+            console.log("returning " +  props.data.plot.stdvs[dist])
             return props.data.plot.stdvs[dist]
         }
     }

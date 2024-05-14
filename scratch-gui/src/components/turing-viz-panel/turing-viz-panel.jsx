@@ -203,7 +203,11 @@ const getPosteriorNs = (props) => {
           defaultValue={props.getValue(props, 'n', '')} // Set initial value
           className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
           onChange={(event) => {
-              document.getElementById(formatId(active, "posteriorNValue")).value = Math.floor(event.target.value);
+            const targetElement = document.getElementById(formatId(active, "posteriorNValue"));
+            const targetInput = event.currentTarget;
+            if (targetElement === targetInput) { // Check if the target is the input field itself
+              targetElement.value = Math.floor(event.target.value);
+            }
           }}
         />
       </Box>
@@ -260,7 +264,10 @@ const getParameterLabels = (props) => {
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 style={{ color: "#45BDE5" }}
                 onChange={(event) => {
-                    document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value =  event.target.value;
+                  const targetInput = event.currentTarget.id;
+                  if (targetInput === formatId(active, "groundTruthParamsValue_mu")) {
+                    document.getElementById(formatId(active, "groundTruthParamsValue_mu")).value = event.target.value;
+                  }
                 }}
               />
             </Box>
@@ -274,7 +281,7 @@ const getParameterLabels = (props) => {
                 defaultValue={props.getValue(props, 'stdv', 'groundTruth')}   // Set initial value
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
-                    document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value =  event.target.value;
+                  document.getElementById(formatId(active, "groundTruthParamsValue_stdv")).value = event.target.value;
                 }}
               />
             </Box>
@@ -305,7 +312,7 @@ const getParameterLabels = (props) => {
                 maxLength="8" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
-                    document.getElementById(formatId(active, "priorParamsValue_mu")).value = event.target.value;
+                  document.getElementById(formatId(active, "priorParamsValue_mu")).value = event.target.value;
                 }}
               />
             </Box>
@@ -319,7 +326,7 @@ const getParameterLabels = (props) => {
                 maxLength="8" // Restrict to 8 characters
                 className={classNames(styles.sliderValue, styles.sliderValueBackground, styles.zoomPitch)}
                 onChange={(event) => {
-                    document.getElementById(formatId(active, "priorParamsValue_stdv")).value = event.target.value;
+                  document.getElementById(formatId(active, "priorParamsValue_stdv")).value = event.target.value;
                 }}
               />
             </Box>
@@ -525,7 +532,7 @@ const getRhythmPanel = (props) => {
                 defaultValue={0}
                 onChange={(event) => {
                   const newValue = parseFloat(event.target.value);
-                  document.getElementById(formatId(active, "viewFactorValue")).value =  event.target.value;
+                  document.getElementById(formatId(active, "viewFactorValue")).value = event.target.value;
                   props.updateChart(active, 'viewFactor')
                 }}
               />
@@ -540,7 +547,7 @@ const getRhythmPanel = (props) => {
               onChange={(event) => {
                 const newValue = parseFloat(event.target.value);
                 if (!isNaN(newValue) && newValue >= 0 && newValue <= 22) {
-                  document.getElementById(formatId(active, "viewFactor")).value =  event.target.value;
+                  document.getElementById(formatId(active, "viewFactor")).value = event.target.value;
                   props.updateChart(active, 'viewFactor')
                 }
               }}
@@ -649,9 +656,9 @@ const getKeyStats = (props) => {
           onClick={() => props.deleteModel(props.activeModel)}
         > */}
         <a
-          href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL"
+          href="https://forms.gle/XDD8CQN5ck1SGtRw6"
           className={styles.gaussianButton}
-          style={{ backgroundColor: "#45BDE5",  textDecoration: 'none', fontWeight: 600}}
+          style={{ backgroundColor: "#45BDE5", textDecoration: 'none', fontWeight: 600 }}
           target="_blank"
         >
           <h4>Give Feedback</h4>

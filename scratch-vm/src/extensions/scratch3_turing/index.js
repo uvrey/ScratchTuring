@@ -544,6 +544,10 @@ class Scratch3Turing {
         var modelName = args.MODEL
         var distribution = DISTRIBUTIONS[args.DISTRIBUTION - 1]
 
+        if (modelName.length < 1) {
+            return "Model name must be at least 1 letter."
+        }
+
         this.lastSampleTime[modelName] = 0
         this.defineTargetModel(util, modelName)
         this._runtime.emit('PROJECT_CHANGED')
