@@ -455,7 +455,7 @@ const getHuePanel = (props) => {
                       outerRadius={180}
                       fill={plot.pie.fill}
                       stroke={"#ggg"}
-                      strokeWeight={"4px"}
+                      strokeWeight={"1px"}
                     />
                     <Tooltip content={<HuePieTooltip props={props} />} />
                   </PieChart>

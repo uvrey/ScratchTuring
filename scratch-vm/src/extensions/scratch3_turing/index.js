@@ -234,8 +234,8 @@ class Scratch3Turing {
             },
             {
                 name: formatMessage({
-                    id: 'turing.randomVarsMenu.number',
-                    default: 'COLOR',
+                    id: 'turing.randomVarsMenu.color',
+                    default: 'COLOUR',
                     description: 'color'
                 }),
             },
