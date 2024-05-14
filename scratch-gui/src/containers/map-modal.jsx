@@ -126,8 +126,20 @@ class MapModal extends React.Component {
         this.setState({ style: newStyle });
       };
 
-    handleCoordinates() {
+    handleCustomCoords = (lat, long, zoom = 15) => {      
+        try {
+            this.props.onCancel(); // close modal
+            this.handleFetchingMap(lat, long, zoom, 35)
 
+          } catch (error) {
+            console.log(error)
+            this.props.onShowMapError()
+            console.log("Please enter valid numbers for longitude and latitude.");
+            return; 
+          }
+    }
+
+    handleCoordinates() {
         console.log("handling coords, style is: ")
         console.log(this.state.style)
 
@@ -172,6 +184,7 @@ class MapModal extends React.Component {
                 name={"Map Generator"}
                 onSurprise={this.handleSurprise}
                 onCoords={this.handleCoordinates}
+                onCustomCoords={this.handleCustomCoords}
                 getValue={this.getStoredValue}
                 styleRef={this.dropdownRef}
                 onStyleChange={this.handleSelectionChange}
