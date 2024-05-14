@@ -53,6 +53,7 @@ const vmListenerHOC = function (WrappedComponent) {
             this.props.vm.on('TURING_ACTIVE', this.props.onTuringActive);
             this.props.vm.on('TURING_SHOW_LOAD', () => this.handleTuringLoad());
             this.props.vm.on('TURING_CLOSE_LOAD', () => this.handleTuringCloseLoad());
+            this.props.vm.on('TURING_ERROR', () => this.handleTuringError());
             console.log("inside listener HOC")
         }
         componentDidMount () {
@@ -92,6 +93,10 @@ const vmListenerHOC = function (WrappedComponent) {
         handleTuringCloseLoad() {
             console.log("RECEIVED SIGNAL TO CLOSE fetching from turing modal....") 
             this.props.onCloseTuringLoad()
+        }
+        handleTuringError() {
+            console.log("RECEIVED SIGNAL TO CLOSE fetching from turing modal....") 
+            this.props.onTuringError()
         }
         handleTuringData (data) {
             this.props.onSetTuringData(data)
@@ -223,6 +228,7 @@ const vmListenerHOC = function (WrappedComponent) {
         },
         onShowTuringLoad: () => dispatch(showStandardAlert('fetchingFromTuring')),
         onCloseTuringLoad: () => dispatch(closeAlertWithId('fetchingFromTuring')),
+        onTuringError: () => dispatch(showStandardAlert('turingError')),
         onSetTuringData: data => dispatch(setTuringData(data)),
         onSetTuringDataState: state => dispatch(setTuringDataState(state)),
         onTuringActive: () => dispatch(setTuringActive()),

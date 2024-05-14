@@ -254,6 +254,19 @@ const alerts = [
         level: AlertLevels.WARN
     },
     {
+        alertId: 'turingError',
+        clearList: [],
+        closeButton: true,
+        content: (
+            <FormattedMessage
+                defaultMessage="Something went wrong! The server might be down."
+                description="Message indicating that posterior value is not good & could not be loaded"
+                id="gui.alerts.turingError"
+            />
+        ),
+        level: AlertLevels.WARN
+    },
+    {
         alertId: 'paramError',
         clearList: [],
         closeButton: true,

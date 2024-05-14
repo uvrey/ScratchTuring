@@ -284,15 +284,15 @@ class Scratch3Turing {
                 //         description: 'turing.greet'
                 //     })
                 // },
-                {
-                    opcode: 'viewModel',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'turing.viewModel',
-                        default: 'model',
-                        description: 'turing.viewModel'
-                    })
-                },
+                // {
+                //     opcode: 'viewModel',
+                //     blockType: BlockType.REPORTER,
+                //     text: formatMessage({
+                //         id: 'turing.viewModel',
+                //         default: 'model',
+                //         description: 'turing.viewModel'
+                //     })
+                // },
                 {
                     opcode: 'defineModel',
                     blockType: BlockType.COMMAND,
@@ -564,6 +564,7 @@ class Scratch3Turing {
             this.updateVisualisationData(user_model)
             var message = this.buildQuery(modelName, "defineModel", 'POST', "prior", distribution, -1, [], {}).then(response =>
                 this.updateFromResponse(user_model, response, 'prior', true)); // unpacks the new data using the turing samples
+
             user_model.fetching = false
             return message
         } else {
@@ -573,11 +574,11 @@ class Scratch3Turing {
         return "Success!"
     }
 
-    addToGlobalHue (user_model) {
+    addToGlobalHue(user_model) {
         this.globalHues.push(user_model.modelName)
     }
 
-    removeFromGlobalHue (user_model) {
+    removeFromGlobalHue(user_model) {
         this.globalHues.push(user_model.modelName)
     }
 
@@ -706,31 +707,32 @@ class Scratch3Turing {
     updateFromResponse(user_model, response, modelType, init = false) {
         console.log("Server Response:")
         console.log(response)
+        if (response != -1) {
+            dict = this.parseResponse(response)
 
-        dict = this.parseResponse(response)
+            if (dict['data'] != undefined) {
+                user_model.models[modelType]['data'] = dict['data'][0]
+            }
 
-        if (dict['data'] != undefined) {
-            user_model.models[modelType]['data'] = dict['data'][0]
+            if (init) {
+                user_model.models[modelType]['params'] = dict['summary']["parameters"]
+                user_model.models[modelType]['mean'] = 0
+                user_model.models[modelType]['stdv'] = 1
+            } else {
+                user_model.models[modelType]['params'] = dict['summary']["parameters"]
+                user_model.models[modelType]['mean'] = dict['summary']["mean"][dict['summary']["mean"].length - 1] //TTODO this is a bit hardcoded... is data always the last param?
+                user_model.models[modelType]['stdv'] = dict['summary']["std"][dict['summary']["mean"].length - 1]
+            }
+
+            if (modelType != "posterior") {
+                user_model.models[modelType]['defined'] = true
+                user_model.models[modelType]['active'] = true
+            }
+            user_model['hasDistData'] = true
+            this._runtime.emit('TURING_CLOSE_LOAD')
+            user_model.fetching = false
+            this.updateVisualisationData(user_model)
         }
-
-        if (init) {
-            user_model.models[modelType]['params'] = dict['summary']["parameters"]
-            user_model.models[modelType]['mean'] = 0
-            user_model.models[modelType]['stdv'] = 1
-        } else {
-            user_model.models[modelType]['params'] = dict['summary']["parameters"]
-            user_model.models[modelType]['mean'] = dict['summary']["mean"][dict['summary']["mean"].length - 1] //TTODO this is a bit hardcoded... is data always the last param?
-            user_model.models[modelType]['stdv'] = dict['summary']["std"][dict['summary']["mean"].length - 1]
-        }
-
-        if (modelType != "posterior") {
-            user_model.models[modelType]['defined'] = true
-            user_model.models[modelType]['active'] = true
-        }
-        user_model['hasDistData'] = true
-        this._runtime.emit('TURING_CLOSE_LOAD')
-        user_model.fetching = false
-        this.updateVisualisationData(user_model)
     }
 
     updateVisualisationData(user_model) {
@@ -1429,8 +1431,23 @@ class Scratch3Turing {
             },
             body: JSON.stringify(dict)
         };
-        const message = await this._sendRequesttoServer(url, payload);
-        return message;
+        try {
+            const message = await this._sendRequesttoServer(url, payload);
+            return message;
+
+        } catch (error) {
+            if (error instanceof TypeError && error.name === 'NetworkError') {
+                console.error('Network error occurred:', error);
+                this._runtime.emit('TURING_CLOSE_LOAD')
+                this._runtime.emit('TURING_ERROR')
+                return -1; // Or a more user-friendly message
+            } else {
+                console.error('Unexpected error:', error);
+                this._runtime.emit('TURING_CLOSE_LOAD')
+                this._runtime.emit('TURING_ERROR')
+                return -1; // Or a more generic message
+            }
+        }
     }
 
     async greet() {
