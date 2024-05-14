@@ -694,12 +694,8 @@ const getKeyStats = (props) => {
           <p className={styles.stat}>{(samples.reduce((acc, v) => acc + v, 0) / samples.length).toFixed(2)}</p>
         </div>) : (null)}
 
+        <Box className={styles.dataCol}>
       <div>
-        {/* <button
-          className={styles.gaussianButton}
-          style={{ backgroundColor: "#45BDE5" }} // Active button style
-          onClick={() => props.deleteModel(props.activeModel)}
-        > */}
         <a
           href="https://forms.gle/XDD8CQN5ck1SGtRw6"
           className={styles.gaussianButton}
@@ -708,9 +704,18 @@ const getKeyStats = (props) => {
         >
           <h4>Give Feedback</h4>
         </a>
+        <a
+          href="https://drive.google.com/drive/folders/1g0BafBL82FvVCH6m_SsknYg-Kd_YOec1?usp=sharing"
+          className={styles.gaussianButton}
+          style={{ backgroundColor: "#g4g4g4", textDecoration: 'none', fontWeight: 600 }}
+          target="_blank"
+        >
+          <h4>Project Ideas</h4>
+        </a>
 
         {/* </button> */}
       </div>
+      </Box>
     </Box>
   );
 }
