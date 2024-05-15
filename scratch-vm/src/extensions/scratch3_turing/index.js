@@ -47,9 +47,9 @@ class Scratch3Turing {
         this._runtime = runtime;
 
         //   this.api_host = "http://165.232.101.180:443"
-       // this.api_host = "http://127.0.0.1:2222" // local server
+        // this.api_host = "http://127.0.0.1:2222" // local server
         // this.api_host = "https://46c3-131-111-184-91.ngrok-free.app"
-         this.api_host =  "https://2bd4-131-111-184-91.ngrok-free.app"
+        this.api_host = "https://63c9-131-111-184-91.ngrok-free.app"
 
         this._extensionId = 'turing'
 
@@ -996,9 +996,9 @@ class Scratch3Turing {
         if (mode == "meanLines") {
             this.user_models[data.modelName].meanLines = !this.user_models[data.modelName].meanLines
 
-        } else  if (mode == "stdvLines") {
-                this.user_models[data.modelName].stdvLines = !this.user_models[data.modelName].stdvLines
-    
+        } else if (mode == "stdvLines") {
+            this.user_models[data.modelName].stdvLines = !this.user_models[data.modelName].stdvLines
+
         } else if (mode == "helpfulTooltip") {
             console.log("----------> toggling the tooltip of our data for " + data.modelName)
             this.user_models[data.modelName].helpfulTooltip = !this.user_models[data.modelName].helpfulTooltip
