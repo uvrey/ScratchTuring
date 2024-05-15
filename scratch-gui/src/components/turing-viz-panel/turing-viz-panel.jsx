@@ -192,30 +192,30 @@ const getGaussianPanel = (props) => {
                       <ReferenceLine
                         x={plot.means[key] - plot.stdvs[key]}
                         key={plot.means[key] + "-" + plot.stdvs[key]}
-                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                       // strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
                         stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
-                        strokeWidth={0.5}
+                        strokeWidth={0.8}
                       />
                       <ReferenceLine
                         x={plot.means[key] + plot.stdvs[key]}
                         key={plot.means[key] + "+" + plot.stdvs[key]}
-                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                        // strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
                         stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
-                        strokeWidth={0.5}
+                        strokeWidth={0.8}
                       />
                       <ReferenceLine
                         x={plot.means[key] - 2 * plot.stdvs[key]}
                         key={plot.means[key] + "-2x" + plot.stdvs[key]}
-                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                      //  strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
                         stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
-                        strokeWidth={0.5}
+                        strokeWidth={0.8}
                       />
                       <ReferenceLine
                         x={plot.means[key] + 2 * plot.stdvs[key]}
                         key={plot.means[key] + "+2x" + plot.stdvs[key]}
-                        strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
+                       // strokeDasharray={key.includes("ps") ? plot.styles["ps-options"].strokeDasharray : null}
                         stroke={key.includes("ps") ? plot.styles["ps-options"].stroke : plot.styles[key].stroke}
-                        strokeWidth={0.5}
+                        strokeWidth={0.8}
                       />
                     </>
                   ))

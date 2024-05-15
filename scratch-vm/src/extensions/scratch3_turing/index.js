@@ -47,9 +47,9 @@ class Scratch3Turing {
         this._runtime = runtime;
 
         //   this.api_host = "http://165.232.101.180:443"
-        this.api_host = "http://127.0.0.1:2222" // local server
+       // this.api_host = "http://127.0.0.1:2222" // local server
         // this.api_host = "https://46c3-131-111-184-91.ngrok-free.app"
-        // this.api_host = "https://8c36-131-111-184-91.ngrok-free.app"
+         this.api_host =  "https://2bd4-131-111-184-91.ngrok-free.app"
 
         this._extensionId = 'turing'
 
@@ -636,7 +636,6 @@ class Scratch3Turing {
             if (random_var_idx != COLOR) {
                 return modelName + " is a HUE model, so you can only sample COLOR"
             }
-
             sample = this._getThenSendSample(util, user_model, random_var_idx)
         }
 
@@ -805,11 +804,12 @@ class Scratch3Turing {
         if (typeof util.target != undefined && typeof user_model != undefined) {
             user_model.data.push(observation);
             this.updateSampleSpecs(user_model, CUSTOM)
+            this.updateVisualisationData(user_model)
+
             this.updatePosteriorCurves(user_model)
 
             console.log("AFTER CONDITIONING ON PRIOR 1 time WE HAVE:")
             console.log(user_model.models['ps'])
-
 
             const units = user_model.dataSpecs.units;
             const lastUnit = units[units.length - 1]; // Efficiently access the last unit
