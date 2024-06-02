@@ -145,6 +145,7 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.PERIPHERAL_SCAN_TIMEOUT, () =>
             this.emit(Runtime.PERIPHERAL_SCAN_TIMEOUT)
         );
+        /** Start -- ScratchTuring */
         this.runtime.on(Runtime.TURING_SHOW_LOAD, () =>
             this.emit(Runtime.TURING_SHOW_LOAD)
         );
@@ -163,6 +164,7 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.TURING_ACTIVE, () =>
             this.emit(Runtime.TURING_ACTIVE)
         );
+        /** End -- ScratchTuring */
         this.runtime.on(Runtime.MIC_LISTENING, listening => {
             this.emit(Runtime.MIC_LISTENING, listening);
         });
@@ -186,6 +188,7 @@ class VirtualMachine extends EventEmitter {
         this.variableListener = this.variableListener.bind(this);
     }
 
+    /** Start -- ScratchTuring */
     sendTuringData(data) {
         this.emit(Runtime.TURING_DATA, data)
     }
@@ -193,6 +196,8 @@ class VirtualMachine extends EventEmitter {
     sendTuringDataState(data) {
         this.emit(Runtime.TURING_DATA_STATE, data)
     }
+    /** End -- ScratchTuring */
+
     /**
      * Start running the VM - do this before anything else.
      */
