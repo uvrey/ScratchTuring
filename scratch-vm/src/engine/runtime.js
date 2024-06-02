@@ -564,6 +564,55 @@ class Runtime extends EventEmitter {
     static get UPDATE_GROUND_TRUTH_PARAMS() {
         return 'UPDATE_GROUND_TRUTH_PARAMS';
     }
+
+    /**
+   * Event name to trasmit data to the ScratchTuring API
+   * @const {string}
+   */
+    static get TURING_DATA() {
+        return 'TURING_DATA';
+    }
+
+    /**
+    * Event name to show data loading ux
+    * @const {string}
+    */
+    static get TURING_SHOW_LOAD() {
+        return 'TURING_SHOW_LOAD';
+    }
+
+    /**
+    * Event name to close data loading ux
+    * @const {string}
+    */
+    static get TURING_CLOSE_LOAD() {
+        return 'TURING_CLOSE_LOAD';
+    }
+
+    /**
+    * Event name to show data loading error
+    * @const {string}
+    */
+    static get TURING_ERROR() {
+        return 'TURING_ERROR';
+    }
+
+    /**
+    * Event name to get ScratchTuring data state
+    * @const {string}
+    */
+    static get TURING_DATA_STATE() {
+        return 'TURING_DATA_STATE';
+    }
+
+    /**
+    * Event name to set ScratchTuring extension state as active
+    * @const {string}
+    */
+    static get TURING_ACTIVE() {
+        return 'TURING_ACTIVE';
+    }
+
     /** End --  ScratchTuring  **/
 
     /**
@@ -624,30 +673,6 @@ class Runtime extends EventEmitter {
      */
     static get PROJECT_CHANGED() {
         return 'PROJECT_CHANGED';
-    }
-
-    static get TURING_DATA() {
-        return 'TURING_DATA';
-    }
-
-    static get TURING_SHOW_LOAD() {
-        return 'TURING_SHOW_LOAD';
-    }
-
-    static get TURING_CLOSE_LOAD() {
-        return 'TURING_CLOSE_LOAD';
-    }
-
-    static get TURING_ERROR() {
-        return 'TURING_ERROR';
-    }
-
-    static get TURING_DATA_STATE() {
-        return 'TURING_DATA_STATE';
-    }
-
-    static get TURING_ACTIVE() {
-        return 'TURING_ACTIVE';
     }
 
     /**
@@ -1617,25 +1642,28 @@ class Runtime extends EventEmitter {
         this.peripheralExtensions[extensionId] = extension;
     }
 
+    /** Start -- ScratchTuring */
     registerTuringExtension(extensionId, extension) {
         this.turingExtensions[extensionId] = extension;
     }
+
+    addTuringModalCallBack(id, modalCallback) {
+        this.turingCallbacks[id] = modalCallback
+    }
+
+    /** End - ScratchTuring */
 
     /**
      * Tell the specified extension to scan for a peripheral.
      * @param {string} extensionId - the id of the extension.
      */
     scanForPeripheral(extensionId) {
-        console.log("initialising scan from peripheral (runtime)")
         if (this.peripheralExtensions[extensionId]) {
             this.peripheralExtensions[extensionId].scan();
         }
     }
 
-    addTuringModalCallBack(id, modalCallback) {
-        console.log("populating with callback")
-        this.turingCallbacks[id] = modalCallback
-    }
+
 
     updateSomething(extensionId) {
         if (this.turingExtensions[extensionId]) {

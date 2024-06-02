@@ -46,8 +46,8 @@ class Scratch3Turing {
          */
         this._runtime = runtime;
 
-         this.api_host = "http://127.0.0.1:8080" // backup server
-        // this.api_host = "https://63c9-131-111-184-91.ngrok-free.app"
+        this.api_host = "http://127.0.0.1:8080" // For a Locally-hosted ScratchTuring API
+        // this.api_host = "https://63c9-131-111-184-91.ngrok-free.app"  --> Replace this with a Ngrok URL for the API to be accessed remotely
 
         this._extensionId = 'turing'
 
@@ -66,7 +66,7 @@ class Scratch3Turing {
         this._runtime.emit('TURING_ACTIVE')
         this._runtime.registerTuringExtension(this._extensionId, this);
 
-        this.username = this._initAPI()
+        this.username = this._initUsername()
 
         this.observations = []
         this.truth_data = []
@@ -100,7 +100,6 @@ class Scratch3Turing {
         this._runtime.on('UPDATE_MEAN_LINES', data => this._updateParams(data, 'meanLines'));
         this._runtime.on('UPDATE_STDV_LINES', data => this._updateParams(data, 'stdvLines'));
 
-
         this._updateParams = this._updateParams.bind(this);
         this._runtime.on('UPDATE_PRIOR_PARAMS', data => this._updateParams(data, 'prior'));
 
@@ -112,45 +111,6 @@ class Scratch3Turing {
 
         this.toggleVisibility = this.toggleVisibility.bind(this);
         this._runtime.on('TOGGLE_VISIBILITY', data => this.toggleVisibility(data));
-
-        /* Updating views */
-        this.updateRefLeft = this.updateRefLeft.bind(this);
-        this._runtime.on('UPDATE_VIEW_REF_LEFT', data => this.updateRefLeft(data));
-
-        this.updateRefRight = this.updateRefRight.bind(this);
-        this._runtime.on('UPDATE_VIEW_REF_RIGHT', data => this.updateRefRight(data));
-
-        this.hueZoom = this.hueZoom.bind(this);
-        this._runtime.on('UPDATE_VIEW_ZOOM', data => this.hueZoom(data.modelName));
-
-        this.hueZoomOut = this.hueZoomOut.bind(this);
-        this._runtime.on('UPDATE_VIEW_ZOOM_OUT', data => this.hueZoomOut(data.modelName));
-
-    }
-
-    updateRefLeft(data) {
-        var user_model = this.user_models[data.modelName]
-        console.log("@!! Updating ref left")
-
-        var view = user_model.hueData.view
-        user_model.hueData.view.refAreaLeft = data.refAreaLeft
-        this.updateVisualisationData(user_model)
-    }
-
-    updateRefRight(data) {
-        var user_model = this.user_models[data.modelName]
-        console.log("@!! Updating ref right for " + data.modelName)
-
-        console.log(user_model.hueData.view)
-        var view = user_model.hueData.view
-
-        console.log("updating the view with new data?")
-        console.log("new ref area RIGHT ->? " + data.refAreaRight)
-
-        if (view.refAreaLeft != "") {
-            user_model.hueData.view.refAreaRight = data.refAreaRight
-            this.updateVisualisationData(user_model)
-        }
     }
 
     _getColorFromPalette() {
@@ -158,12 +118,15 @@ class Scratch3Turing {
         return palette[this.palette_idx]
     }
 
+    /**
+     * Generate a random username 
+     * Attribution: Modified from a response provided by Google Gemini with prompt "Write a Javascript function to generate random client usernames"
+     * @param {int} length 
+     * @returns 
+     */
     _generateRandomUserName(length) {
-        // Use crypto.getRandomValues for secure random generation
         const randomBytes = new Uint8Array(length);
         window.crypto.getRandomValues(randomBytes);
-
-        // Convert the bytes to a random string
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let result = "";
         for (let i = 0; i < length; i++) {
@@ -173,17 +136,15 @@ class Scratch3Turing {
         return result;
     }
 
-
-    _initAPI() {
-        const userName = this._generateRandomUserName(16);
-        console.log(userName); // Output: a random string of length 16
-
-        // if (sessionStorage.getItem("username")) {
-        //     // delete this data from the API TTODO get this username
-        //     alert('we had already stored a username for this person!');
-        // }
-        return userName
+    /**
+     * Initialise the extension with a new client username
+     * @returns username
+     */
+    _initUsername() {
+        const username = this._generateRandomUserName(16);
+        return username
     }
+
     /**
      * Create data for a menu in scratch-blocks format, consisting of an array of objects with text and
      * value properties. The text is a translated string, and the value is one-indexed.
@@ -200,6 +161,9 @@ class Scratch3Turing {
         });
     }
 
+    /** 
+     * Specify types of numeric properties that a sprite can collect
+     */
     get NUMERIC_MENU_INFO() {
         return [
             {
@@ -240,26 +204,29 @@ class Scratch3Turing {
         ]
     }
 
+    /**
+     * Types of dashboards and models
+     */
     get DISTRIBUTION_INFO() {
         return [
             {
                 name: formatMessage({
                     id: 'turing.distInfo.gaussian',
-                    default: 'NORMAL_DASHBOARD',
+                    default: 'NORMAL',
                     description: 'Gaussian distribution.'
                 }),
             },
             {
                 name: formatMessage({
                     id: 'turing.distInfo.hue',
-                    default: 'HUE_DASHBOARD',
+                    default: 'HUE',
                     description: 'hue'
                 }),
             },
             {
                 name: formatMessage({
                     id: 'turing.distInfo.rhythm',
-                    default: 'RHYTHM_DASHBOARD',
+                    default: 'RHYTHM',
                     description: 'rhythm'
                 }),
             }
@@ -267,6 +234,7 @@ class Scratch3Turing {
     }
 
     /**
+     * Defines ScratchTuring blocks and functions
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo() {
@@ -275,24 +243,6 @@ class Scratch3Turing {
             name: 'Turing',
 
             blocks: [
-                // {
-                //     opcode: 'greet',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.greet',
-                //         default: 'greet',
-                //         description: 'turing.greet'
-                //     })
-                // },
-                // {
-                //     opcode: 'viewModel',
-                //     blockType: BlockType.REPORTER,
-                //     text: formatMessage({
-                //         id: 'turing.viewModel',
-                //         default: 'model',
-                //         description: 'turing.viewModel'
-                //     })
-                // },
                 {
                     opcode: 'defineModel',
                     blockType: BlockType.COMMAND,
@@ -372,15 +322,6 @@ class Scratch3Turing {
                         },
                     }
                 }
-                // {
-                //     opcode: 'clearSamples',
-                //     blockType: BlockType.COMMAND,
-                //     text: formatMessage({
-                //         id: 'turing.clearSamples',
-                //         default:  'clear samples',
-                //         description: 'turing.clearSamples'
-                //     })
-                // },
             ],
             menus: {
                 NUMERIC_MENU: {
@@ -395,6 +336,8 @@ class Scratch3Turing {
         };
     }
 
+    /** Removes a model 
+    */
     removeModel(args, util) {
         var modelToRemove = args.MODEL
 
@@ -404,10 +347,12 @@ class Scratch3Turing {
             delete this.user_models[modelToRemove];
             return "Model of " + modelToRemove + " deleted"
         }
-        // TTODO remove the model in Turing also. 
     }
 
-
+    /**
+     * Debugging function to reveal internal properties of captured models
+     * @returns list of models
+     */
     buildModelStrings() {
         var modelList = []
         for (const m in this.user_models) {
@@ -426,10 +371,20 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Debugging function to view the model
+     * @param {*} Scratch block arguments
+     * @param {*} util context from Scratch runtime 
+     * @returns 
+     */
     viewModel(args, util) {
         return this.buildModelStrings()
     }
 
+    /**
+     * Returns a cleared model type
+     * @returns Dictionary
+     */
     getClearedModel() {
         return {
             params: {},
@@ -440,6 +395,10 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Returns a cleared list of samples
+     * @returns Dictionary
+     */
     getClearedSampleSpecs() {
         return {
             randomVar: [],
@@ -449,6 +408,11 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Update the sample specifications for the user model
+     * @param {dict} user_model dictionary 
+     * @param {int} rv 
+     */
     updateSampleSpecs(user_model, rv) {
         user_model.dataSpecs.randomVars.push(RANDOM_VAR_NAMES[rv])
         user_model.dataSpecs.rvIndices.push(rv)
@@ -456,11 +420,13 @@ class Scratch3Turing {
         user_model.dataSpecs.modes.push(MODES[rv])
     }
 
+    /**
+     * Define user_model data type
+     * @param {*} util 
+     * @param {String} modelName 
+     * @param {String} modelType 
+     */
     defineTargetModel(util, modelName, modelType) {
-        // this.state.type = RANDOM_VAR_NAMES[rv]
-        console.log("DEFINING TARGET MODEL?")
-        console.log(modelName)
-
         this.user_models[modelName] = {
             models: {
                 prior: {
@@ -541,6 +507,12 @@ class Scratch3Turing {
         };
     }
 
+    /**
+     * Define a ScratchTuring model and dashboard from Scratch block
+     * @param {*} args 
+     * @param {*} util 
+     * @returns Message to end user
+     */
     defineModel(args, util) {
         var modelName = args.MODEL
         var distribution = DISTRIBUTIONS[args.DISTRIBUTION - 1]
@@ -579,14 +551,11 @@ class Scratch3Turing {
         return "Success!"
     }
 
-    addToGlobalHue(user_model) {
-        this.globalHues.push(user_model.modelName)
-    }
-
-    removeFromGlobalHue(user_model) {
-        this.globalHues.push(user_model.modelName)
-    }
-
+    /**
+     * Parse response fromm the ScratchTuring API Server
+     * @param {String} Response from the server 
+     * @returns 
+     */
     parseResponse(response) {
         const responseJSON = JSON.parse(JSON.parse(response))
         summary = responseJSON["summary"]
@@ -598,6 +567,13 @@ class Scratch3Turing {
         return { 'data': data, 'chain': chain, 'summary': summary }
     }
 
+    /**
+     * Capture an observation from the sprite given by util.target and contribute to
+     * ScratchTuring model and dashboard
+     * @param {*} args 
+     * @param {*} util 
+     * @returns 
+     */
     takeSampleFromSprite(args, util) {
         var modelName = args.MODEL
         var random_var_idx = args.RANDOM_VAR - 1
@@ -606,9 +582,6 @@ class Scratch3Turing {
         if (user_model == undefined || user_model == null) {
             return "No model called " + modelName
         }
-
-        console.log("Taking sample from a sprite behaviour: " + this.user_models[modelName].distribution)
-
 
         if (user_model.distribution == "rhythm") {
             return "Use the other block to sample rhythm"
@@ -637,7 +610,6 @@ class Scratch3Turing {
             sample = this._getThenSendSample(util, user_model, random_var_idx)
         }
 
-        console.log('rvs:')
         if (user_model.data.length > 0) {
             const observation = user_model.data[user_model.data.length - 1] // gets most recent sample
             const units = user_model.dataSpecs.units; // gets units for samples
@@ -656,15 +628,17 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Update the posterior curves by conditioning prior on observations
+     * @param {*} user_model 
+     * @param {*} afterPrior 
+     */
     async updatePosteriorCurves(user_model, afterPrior = false) {
         if (user_model.data.length > 0) {
 
             if (!afterPrior) {
                 this._runtime.emit('TURING_SHOW_LOAD')
             }
-
-            console.log("inside updatePosteriorCurves: We have captured data, and will now update our curves.")
-
             const n = user_model.models['ps'].n
             user_model.models['ps'].curves = [] // empty list to get new set of posteriors
             user_model.models['ps'].active = true
@@ -673,8 +647,6 @@ class Scratch3Turing {
                 await this.conditionOnPrior(user_model)
                     .then(response => this.updatePosteriors(user_model, response))
             }
-
-            // NORMAL ONE
             this.conditionOnPrior(user_model)
                 .then(response => this.updateFromResponse(user_model, response, 'posterior'))
 
@@ -683,8 +655,12 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Update the posterior curves on client side
+     * @param {*} user_model 
+     * @param {*} afterPrior 
+     */
     updatePosteriors(user_model, response) {
-        console.log("UPDATING posteriors here...")
         var posteriorDetails = {}
         dict = this.parseResponse(response)
         if (dict['data'] != undefined) {
@@ -693,13 +669,14 @@ class Scratch3Turing {
         posteriorDetails['params'] = dict['summary']["parameters"]
         posteriorDetails['mean'] = dict['summary']["mean"][dict['summary']["mean"].length - 1] //TTODO this is a bit hardcoded... is data always the last param?
         posteriorDetails['stdv'] = dict['summary']["std"][dict['summary']["mean"].length - 1]
-
-        console.log("type of nposteriors --> " + typeof user_model.models['ps'])
-        console.log("-------------> Pushing this data to our distribution:")
-        console.log(posteriorDetails)
         user_model.models.ps.curves.push(posteriorDetails)
     }
 
+    /**
+     * Process chain from ScratchTuring API
+     * @param {*} message 
+     * @returns 
+     */
     _processChainMessage(message) {
         try {
             return JSON.parse(JSON.parse(message)); // parse twice, first to remove escapes and second time to read into a JSON
@@ -708,9 +685,14 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Update ScratchTuring internals based on ScratchTuring API response
+     * @param {*} user_model 
+     * @param {*} response 
+     * @param {*} modelType 
+     * @param {*} init 
+     */
     updateFromResponse(user_model, response, modelType, init = false) {
-        console.log("Server Response:")
-        console.log(response)
         if (response != -1) {
             dict = this.parseResponse(response)
 
@@ -739,9 +721,11 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Update Scratch GUI with model information
+     * @param {*} user_model 
+     */
     updateVisualisationData(user_model) {
-        console.log("Updating this user model's vis data: " + user_model.modelName)
-        console.log(user_model)
         const vis = {
             distribution: user_model.distribution,
             modelName: user_model.modelName,
@@ -759,10 +743,20 @@ class Scratch3Turing {
         this._runtime.emit('PROJECT_CHANGED')
     }
 
+    /**
+     * Format chart data
+     * @param {*} user_model 
+     * @returns 
+     */
     distributionData(user_model) {
         return this.formatChartData(['prior', 'posterior'], [user_model.models.prior.data, user_model.models.posterior.data])
     }
 
+    /**
+    * Format chart data
+    * @param {*} user_model 
+    * @returns 
+    */
     formatChartData(names, valuesLists) {
         if (names.length !== valuesLists.length) {
             throw new Error("Number of names must match the number of value lists");
@@ -776,7 +770,12 @@ class Scratch3Turing {
         return data;
     }
 
-    // TTODO expand to allow multiple models per user (sprite targets etc in JSON)
+    /**
+     * Accept a user-specified observation to the ScratchTuring model and dashboard
+     * @param {*} args 
+     * @param {*} util 
+     * @returns 
+     */
     takeSampleFromUser(args, util) {
         var modelName = args.MODEL
         var user_model = this.user_models[modelName]
@@ -806,9 +805,6 @@ class Scratch3Turing {
 
             this.updatePosteriorCurves(user_model)
 
-            console.log("AFTER CONDITIONING ON PRIOR 1 time WE HAVE:")
-            console.log(user_model.models['ps'])
-
             const units = user_model.dataSpecs.units;
             const lastUnit = units[units.length - 1]; // Efficiently access the last unit
             return `${observation} ${lastUnit}`
@@ -817,16 +813,30 @@ class Scratch3Turing {
         }
     }
 
+    /** 
+     * Convert hue to hex
+     * Attribution: Colors.js --> Pre-implemented Scratch code
+     */
     hueToHex = (hue) => {
         const hsv = { h: hue, s: 100, v: 100 }
         return Color.rgbToHex(Color.hsvToRgb(hsv))
     }
 
+    /** 
+    * Isolate hue value from hex code
+    * Attribution: Colors.js --> Pre-implemented Scratch code
+    */
     hexToHue = (hex) => {
         const hsv = Color.rgbToHsv(Color.hexToRgb(hex))
         return hueToHex(hsv.h)
     }
 
+    /** 
+    * Update hue list based on new observations, aggregating the S&B values 
+    * @param {string} hue 
+    * @param {string} hex 
+    * @param {dict} user_model 
+    */
     updateActiveHues(hue, hex, user_model) {
         // Convert hex to HSV (hue, saturation, value) for easier comparison
         const hsv = Color.rgbToHsv(Color.hexToRgb(hex));
@@ -854,8 +864,14 @@ class Scratch3Turing {
         user_model.hueData.activeHues.sort((hue1, hue2) => hue1.hue - hue2.hue); // sort the dictionaries in the list by their hue value
     }
 
+    /**
+     * Update hue data from observations
+     * @param {*} user_model 
+     * @param {*} hue 
+     * @param {*} hex 
+     */
+
     updateHueData(user_model, hue, hex) {
-        console.log("\n-------------------------------------------\n updating  hue")
         var hue = Math.floor(hue % 360)
 
         this.updateActiveHues(hue, hex, user_model)
@@ -871,8 +887,13 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Update rhythm data from observations
+     * @param {dict} user_model 
+     * @param {*} rhythm 
+     * @param {*} timeStamp 
+     */
     updateRhythmData(user_model, rhythm, timeStamp) {
-        console.log("\n-------------------------------------------\n updating  rhythm")
         user_model.rhythmData.rhythms.push(rhythm)
         user_model.rhythmData.timeStamps.push(timeStamp)
         if (user_model.rhythmData.rhythmCounts[rhythm] == undefined) {
@@ -885,8 +906,15 @@ class Scratch3Turing {
         user_model.rhythmData.rhythmProportions[rhythm] = user_model.rhythmData.rhythmCounts[rhythm] / user_model.rhythmData.rhythmTotal // TODO might not be needed
     }
 
-
-    extractSample = (util, user_model, rv, groundTruth) => {
+    /**
+     * Extract a sample from the sprite canvas
+     * @param {*} util 
+     * @param {*} user_model 
+     * @param {*} rv 
+     * @param {*} groundTruth 
+     * @returns 
+     */
+    extractSample = (util, user_model, rv) => {
         var sample = this.TARGET_PROPERTIES[rv](util, user_model);
 
         if ((rv == TIME || rv == RHYTHM) && (sample > 1000000)) {
@@ -910,19 +938,28 @@ class Scratch3Turing {
         return sample
     };
 
-    _getThenSendSample(util, user_model, rvIndex, groundTruth = false) {
-        var observation = this.extractSample(util, user_model, rvIndex, groundTruth)
-
-        console.log("after taking samples: ")
-        console.log(user_model.data)
-        // TTODO update line list visualisations... Can I get turing to do this for me?
+    /**
+     * Get sample from the stage and transmit to the ScratchTuring API
+     * @param {*} util 
+     * @param {*} user_model 
+     * @param {*} rvIndex 
+     * @returns 
+     */
+    _getThenSendSample(util, user_model, rvIndex) {
+        var observation = this.extractSample(util, user_model, rvIndex)
         this.updateVisualisationData(user_model) // keys define the list of data that's changed? 
         return observation
     }
 
+    /**
+    * Capture rhythm sample
+    * @param {*} util 
+    * @param {*} user_model 
+    * @param {*} rvIndex 
+    * @returns 
+    */
     _getRhythmSample(util, user_model, rhythm) {
-        console.log("RHYTHM SAMPLE---------->")
-        var timeStamp = this.extractSample(util, user_model, RHYTHM, groundTruth = false) // TTODO remove groundTruth
+        var timeStamp = this.extractSample(util, user_model, RHYTHM) // TTODO remove groundTruth
 
         console.log(timeStamp)
 
@@ -935,6 +972,13 @@ class Scratch3Turing {
         return rhythm + ": " + timeStamp
     }
 
+    /**
+    * Obtain distribution lines
+    * @param {*} util 
+    * @param {*} user_model 
+    * @param {*} rvIndex 
+    * @returns 
+    */
     _getDistLinesAndParams(user_model) {
         var distLines = []
         var means = {}
@@ -942,13 +986,7 @@ class Scratch3Turing {
 
         for (const model in user_model.models) {
             if (user_model.models[model].active) {
-                console.log("getting the dist lines here for: " + model)
                 if (model == 'ps') {
-                    console.log("Got ps! Data has length :" + (user_model.models.ps.curves).length + " and n = " + user_model.models['ps'].n)
-                    console.log("it looks like: ")
-                    console.log(user_model.models.ps.curves)
-                    console.log("type? " + typeof user_model.models.ps.curves)
-
                     var i = 0
                     for (const data of user_model.models.ps.curves) {
                         dss = {}
@@ -971,11 +1009,14 @@ class Scratch3Turing {
                 }
             }
         }
-        console.log(distLines)
-        console.log("DIST LINES ABOVE: ^^^^")
         return { distLines: distLines, means: means, stdvs: stdvs }
     }
 
+
+    /**
+     * Toggle chart usability
+     * @param {*} data 
+     */
     toggleVisibility(data) {
         console.log(this.user_models[data.modelName].models)
         if (this.user_models[data.modelName].models[data.mode] != undefined) {
@@ -983,14 +1024,22 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Toggle chart visibility given a particular state
+     * @param {string} modelName 
+     * @param {*} mode 
+     * @param {*} state 
+     */
     _toggleVisibilityByState(modelName, mode, state) {
         this.user_models[modelName].models[mode].active = state
     }
 
+    /**
+     * Update ScratchTuring state from changes to the GUI
+     * @param {*} data 
+     * @param {*} mode 
+     */
     async _updateParams(data, mode) {
-        console.log("RECEIVED SIGNAL TO UPDATE PARAMS from BUTTON PRESS...")
-        console.log(data)
-
         if (mode == "meanLines") {
             this.user_models[data.modelName].meanLines = !this.user_models[data.modelName].meanLines
 
@@ -998,7 +1047,6 @@ class Scratch3Turing {
             this.user_models[data.modelName].stdvLines = !this.user_models[data.modelName].stdvLines
 
         } else if (mode == "helpfulTooltip") {
-            console.log("----------> toggling the tooltip of our data for " + data.modelName)
             this.user_models[data.modelName].helpfulTooltip = !this.user_models[data.modelName].helpfulTooltip
 
         } else if (mode == 'groundTruth') {
@@ -1011,8 +1059,6 @@ class Scratch3Turing {
                 this.user_models[data.modelName].models[mode].mean = data.mean
                 this.user_models[data.modelName].models[mode].stdv = data.stdv
             }
-
-
         } else if (mode == 'prior') {
             var changed = (this.user_models[data.modelName].models[mode].mean != data.mean) || (this.user_models[data.modelName].models[mode].stdv != data.stdv)
             if (changed) {
@@ -1021,10 +1067,9 @@ class Scratch3Turing {
                 await this._updateTuringPrior(this.user_models[data.modelName]).then(this.updatePosteriorCurves(this.user_models[data.modelName], true))
 
             } else {
-                console.log("{Prior is unchanged}")
+                //  console.log("{Prior is unchanged}")
             }
         } else if (mode == 'ps') {
-            console.log("Updating posterior Ns?")
             this._runtime.emit('TURING_SHOW_LOAD')
             this.user_models[data.modelName].fetching = true
             this._updatePosteriorNs(data.modelName, data.n)
@@ -1037,15 +1082,16 @@ class Scratch3Turing {
         this.updateVisualisationData(this.user_models[data.modelName])
     }
 
+    /**
+     * Update prior in ScratchTuring API
+     * @param {*} user_model 
+     * @returns 
+     */
     async _updateTuringPrior(user_model) {
         params = {
             mean: user_model.models.prior.mean,
             stdv: user_model.models.prior.stdv,
         }
-
-        console.log("trying to update this model..")
-        console.log(user_model)
-
         this._runtime.emit('TURING_SHOW_LOAD')
         user_model.fetching = true
         this.updateVisualisationData(user_model)
@@ -1053,26 +1099,30 @@ class Scratch3Turing {
         return message
     }
 
+    /** Generate data for normal curves */
     _getDistributionData(distLines, truncate = false) {
         if (user_model.distribution != null) {
-            // console.log(this._getDistLinesAndMeans(user_model))
-            // distAndMeans = this._getDistLinesAndMeans(user_model)
             var distributionData = Distributions.generateProbabilityData(distLines)
-            if (truncate) {
-                console.log("should trim off values below zero")
-            }
-            console.log("GAUSSIANS TO PLOT: ")
-            console.log(distributionData)
             return distributionData
         }
     }
 
+    /**
+     * Update number of posterior curves generated
+     * @param {*} modelName 
+     * @param {*} n 
+     */
     _updatePosteriorNs(modelName, n) {
         this.user_models[modelName].models.ps.n = n
         this.user_models[modelName].fetching = true
         this.updatePosteriorCurves(this.user_models[modelName], false)
     }
 
+    /**
+     * Capture sample list
+     * @param {*} user_model 
+     * @returns 
+     */
     _getSampleSpace(user_model) {
         label = user_model.showRandomVariable // gets first character for the labels
         var sampleSpace = []
@@ -1084,18 +1134,24 @@ class Scratch3Turing {
         return sampleSpace
     }
 
+    /**
+     * Condition model on prior using ScratchTuring API
+     * @param {*} user_model 
+     * @returns 
+     */
     async conditionOnPrior(user_model) { // n defines the number of potential posteriors we would like to visualise...
-        console.log("conditionOnPrior")
-        console.log("obtaining posterior... since there is data!")
         const newData = user_model.data
         user_model.fetching = true
         message = this.buildQuery(user_model.modelName, "condition", 'POST', 'prior', user_model.distribution, 100, newData, {}) // logic to check number args
         user_model.fetching = false
-        console.log("Server responded:")
-        console.log(message)
         return message
     }
 
+    /**
+     * Get active distributions in the system
+     * @param {*} models 
+     * @returns 
+     */
     getActiveDistributions(models) {
         var active = []
         for (const model in models) {
@@ -1112,27 +1168,10 @@ class Scratch3Turing {
         return active
     }
 
-    getActiveModels() {
-        var active = []
-        for (const model of this.user_models) {
-            console.log("looking for active user models, got: " + model)
-            if (this.user_models[model].active) {
-                active.push(model)
-            }
-        }
-        return active
-    }
-
-    getDefinedDists(models) {
-        var defined = []
-        for (const model in models) {
-            if (models[model].defined) {
-                active.push(model)
-            }
-        }
-        return defined
-    }
-
+    /**
+     * Get active models
+     * @returns dictionary of active models
+     */
     getModelStatuses() {
         var active = {}
         for (const modelName in this.user_models) {
@@ -1144,7 +1183,7 @@ class Scratch3Turing {
         }
         return active
     }
-
+    
     _getSampleSpaceData(user_model) {
         var observations = user_model.data
         var data = []
@@ -1166,7 +1205,6 @@ class Scratch3Turing {
     }
 
     _getHexForActiveHue(user_model, activeHue) {
-        // console.log("finding hex for active hue " + activeHue)
         const foundHue = user_model.hueData.activeHues.find(hueDict => hueDict.hue === activeHue);
 
         if (foundHue) {
@@ -1187,14 +1225,9 @@ class Scratch3Turing {
     mapToPieChartData(user_model) {
         // Initialize pie chart data
         const pieChartData = [];
-        //  const colorRanges = this._getColorRanges();
-        console.log("WE want these samples...")
-        console.log(user_model.data)
 
         // Loop through color ranges
         for (const item of user_model.hueData.activeHues) {
-            console.log("looping through active hues (in order hopefully!")
-            console.log(item.hue)
             const freq = user_model.hueData.hue[item.hue];
             pieChartData.push({ name: String(item.hue), value: freq, fill: item.hex, h: item.hue, avg_s: item.avg_s, avg_v: item.avg_v });
         }
@@ -1205,25 +1238,6 @@ class Scratch3Turing {
         const hsv = { h: hue, s: 100, v: 100 }
         return Color.rgbToHex(Color.hsvToRgb(hsv))
     }
-
-    // mapToPieChartData(user_model) {
-    //     // Initialize pie chart data
-    //     const pieChartData = [];
-
-    //     // Loop through color ranges
-    //     console.log("HUES?? !!!!!!!!!!!!!!!!!")
-    //     console.log(user_model.hueData.hue)
-
-    //     for (var i; i < user_model.hueData.hue.length; i++) {
-    //         var freq = user_model.hueData.hue[i]
-    //         var color = this.hueToHex(i)
-    //         pieChartData.push({ name: i, freq: freq, fill: color});
-    //     }
-
-    //     console.log("Format of PIE CHART DATA!!!")
-    //     console.log(pieChartData)
-    //     return pieChartData;
-    // }
 
     _updateViewFactor(data) {
         var user_model = this.user_models[data.modelName]
@@ -1242,29 +1256,19 @@ class Scratch3Turing {
         return data
     }
 
-
     _getRhythmBars(user_model) {
         var data = []
         for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {
             data.push({ name: rhythm, value: user_model.rhythmData.rhythms[rhythm], fill: user_model.rhythmData.fills[rhythm] })
         }
-        console.log("Prepared this rhythm timeline data to plot...")
-        console.log(data)
         return data
     }
 
     _getRhythmProportionData(user_model) {
-        console.log("@@@@@@@@@@@ when getting rhythm props we have:")
-        console.log(user_model.rhythmData)
-
-        console.log("rhythm counts")
-        console.log(Object.keys(user_model.rhythmData.rhythmCounts))
         var data = []
         for (const rhythm of Object.keys(user_model.rhythmData.rhythmCounts)) {
             data.push({ name: rhythm, value: user_model.rhythmData.rhythmProportions[rhythm], fill: user_model.rhythmData.fills[rhythm] })
         }
-        console.log("RHYTHM PIE DATA? ")
-        console.log(data)
         return data
     }
 
@@ -1276,6 +1280,7 @@ class Scratch3Turing {
         return data
     }
 
+    /** Get visible models */
     _getVisibleModels(user_model) {
         var visible = []
         for (const model in user_model) {
@@ -1291,12 +1296,9 @@ class Scratch3Turing {
         }
     }
 
-
+    /** Old helper function - kept for reference */
     getView(user_model, data) {
         var view = user_model.hueData.view
-        console.log("BEFORE SENDING, OUR VIEW IS:")
-        console.log(view)
-
         toReturn = {
             ...view,
             data,
@@ -1306,6 +1308,7 @@ class Scratch3Turing {
         return toReturn
     }
 
+    /** Old helper function - kept for later reference */
     getInitialState() {
         return {
             data: {},
@@ -1319,63 +1322,11 @@ class Scratch3Turing {
         };
     }
 
-    updateHueState = (user_model, state) => {
-        user_model.hueData.view = state
-    }
-
-    getAxisYDomain = (data, from, to, ref, offset) => {
-        console.log("getting y axis domain..." + from + ", " + to)
-        const refData = data.slice(from - 1, to);
-        let [bottom, top] = [refData[0][ref], refData[0][ref]];
-        refData.forEach((d) => {
-            if (d[ref] > top) top = d[ref];
-            if (d[ref] < bottom) bottom = d[ref];
-        });
-
-        return [(bottom | 0), (top | 0) + offset];
-    };
-
-    hueZoom(modelName) {
-        var user_model = this.user_models[modelName]
-
-        let { refAreaLeft, refAreaRight } = user_model.hueData.view;
-        const { data } = user_model.hueData.view;
-
-        console.log('Zooming')
-
-        if (refAreaLeft === refAreaRight || refAreaRight === '') {
-            user_model.hueData.view.refAreaLeft = '';
-            user_model.hueData.view.refAreaRight = '';
-            this.updateVisualisationData(user_model)
-            return;
-        }
-
-        // // xAxis domain
-        if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
-
-        // // yAxis domain
-        const [bottom, top] = this.getAxisYDomain(data, refAreaLeft, refAreaRight, 'value', 1);
-        user_model.hueData.view.data = data.slice(); // Create a copy of data
-        user_model.hueData.view.left = refAreaLeft;
-        user_model.hueData.view.right = refAreaRight;
-        this.updateVisualisationData(user_model)
-    }
-
-    hueZoomOut(modelName) {
-        var user_model = this.user_models[modelName]
-        console.log('Zooming Out')
-        const { data } = user_model.hueData.view;
-
-        user_model.hueData.view.data = data.slice()
-        user_model.hueData.view.data.refAreaLeft = ''
-        user_model.hueData.view.data.refAreaRight = ''
-        user_model.hueData.view.data.left = 'dataMin'
-        user_model.hueData.view.data.right = 'dataMax'
-        user_model.hueData.view.data.top = 'dataMax+1'
-        user_model.hueData.view.data.bottom = 'dataMin'
-        this.updateVisualisationData(user_model)
-    }
-
+    /**
+     * Obtain visualisation data for the GUI to represent
+     * @param {*} user_model 
+     * @returns 
+     */
     getPlotDataFromDist(user_model) {
         if (user_model.distribution == "gaussian") {
             console.log(this._getDistLinesAndParams(user_model))
@@ -1419,8 +1370,18 @@ class Scratch3Turing {
         }
     }
 
-    /* Prepare a JSON of relevant data */
-
+   /**
+    * Build a query to send to the ScratchTuring API
+    * @param {string} modelName 
+    * @param {string} url_path 
+    * @param {string} method 
+    * @param {string} modelType 
+    * @param {string} distribution 
+    * @param {int} n 
+    * @param {list} data 
+    * @param {dict} params 
+    * @returns 
+    */
     async buildQuery(modelName, url_path, method, modelType, distribution, n, data = [], params = {}) {
         const url = this.api_host + "/api/turing/v1/" + url_path;
 
@@ -1459,51 +1420,9 @@ class Scratch3Turing {
         }
     }
 
-    async greet() {
-        const url = this.api_host + "/api/turing/v1/greet";
-        const payload = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        const message = await this._sendRequesttoServer(url, payload);
-        return message;
-    }
-
-    async turing_createUser() {
-        const url = this.api_host + "/api/turing/v1/createUser";
-        const dict = {
-            "username": this.username
-        }
-        const payload = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dict)
-        };
-        const message = await this._sendRequesttoServer(url, payload);
-        return message;
-    }
-
-    async turing_deleteUser() {
-        const url = this.api_host + "/api/turing/v1/deleteUser";
-        const dict = {
-            "username": this.username
-        }
-        const payload = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dict)
-        };
-        const message = await this._sendRequesttoServer(url, payload);
-        return message;
-    }
-
+    /** 
+     * Delete Turing model
+     */
     async turing_deleteModel(modelName) {
         const url = this.api_host + "/api/turing/v1/deleteModel";
         const dict = {
@@ -1521,19 +1440,29 @@ class Scratch3Turing {
         return message;
     }
 
+    /**
+     * Show current random variable
+     */
     showRandomVariable() {
         return RANDOM_VAR_NAMES[this.state.random_var]
     }
 
+    /**
+     * Init clear samples
+     * @param {*} args 
+     * @param {*} util 
+     * @returns 
+     */
     clearSamples(args, util) {
         this._onClearSamples(model)
         return "Samples cleared :)"
     }
 
+    /**
+     * Clear observations
+     * @param {*} modelName 
+     */
     _onClearSamples(modelName) {
-        console.log("RECEIVED INSTRUCTION TO CLEAR SAMPLES!")
-        console.log(modelName)
-
         var user_model = this.user_models[modelName]
 
         // clear samples from the list
@@ -1573,6 +1502,7 @@ class Scratch3Turing {
         this.updateVisualisationData(user_model)
     }
 
+    /** Delete model from ScratchBlock */
     deleteModel(args, util) {
         const model = args.MODEL
         if (this.user_models.hasOwnProperty(model)) {
@@ -1583,12 +1513,15 @@ class Scratch3Turing {
         }
     }
 
+    /**
+     * Delete a specified model and dashboard
+     * @param {*} modelName 
+     */
     _onDeleteModel(modelName) {
         // delete model from user_models dict
         this.user_models[modelName].visible = false
         this.user_models[modelName].active = false // remove from view
 
-        // this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
         this._runtime.emit('PROJECT_CHANGED')
 
         delete this.user_models[modelName] // delete model
@@ -1605,6 +1538,7 @@ class Scratch3Turing {
         this._runtime.emit('TURING_DATA_STATE', this.getModelStatuses())
         this.turing_deleteModel(modelName)
     }
+
     /**
      * Send a request to the Turing API of a particular type
      * @param {string} url - API destination
@@ -1632,10 +1566,14 @@ class Scratch3Turing {
         }
     }
 
+    /** Placeholder function to correct erroneous server text when needed */
     _fixJson(text) {
         return text
     }
 
+    /**
+     * Reset program timer for each user_model
+     */
     _onResetTimer() {
         this.globalTimer.start()
         this.globalTimer.timeElapsed()
@@ -1643,37 +1581,6 @@ class Scratch3Turing {
         for (const modelName in this.user_models) {
             this.user_models[modelName].timer.start()
         }
-    }
-
-    /* Helper Utilities */
-    _getAffirmation() {
-        const randomWords = ["Epic! ^_^", "Okay!", "Done!", "Noted :))", "Excellent!", "Got it :)", "Awesome! :D", "Okey dokey!", "Splendid!", "Looks good!"];
-        const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
-        return randomWord; // Output a random word or phrase
-    }
-
-    _getCaution() {
-        const cautionaryMessages = [
-            "Hmm... that doesn't look right!",
-            "Are you sure about that?",
-            "Something's fishy here...",
-            "Double check your input!",
-            "Something seems off...",
-            "Oops, that might be a mistake!",
-            "Hold on, that's not quite right...",
-            "Hmm... let's rethink this!",
-            "Check your inputs!",
-        ];
-
-        // Get a random cautionary message from the array
-        const randomCautionaryMessage = cautionaryMessages[Math.floor(Math.random() * cautionaryMessages.length)];
-        return randomCautionaryMessage; // Output a random cautionary message
-    }
-
-    _generateRandomHexCode() {
-        const randomColor = Math.floor(Math.random() * 16777215);
-        const hexCode = randomColor.toString(16).padStart(6, '0');
-        return `#${hexCode}`;
     }
 }
 module.exports = Scratch3Turing;

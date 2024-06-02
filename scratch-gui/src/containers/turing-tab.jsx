@@ -3,33 +3,13 @@ import React from 'react';
 import bindAll from 'lodash.bindall';
 import { defineMessages, intlShape, injectIntl } from 'react-intl';
 import VM from 'scratch-vm';
-
 import TuringAssetPanel from '../components/turing-asset-panel/turing-asset-panel.jsx';
 import TuringVizPanel from '../components/turing-viz-panel/turing-viz-panel.jsx';
 import soundIcon from '../components/asset-panel/icon--sound.svg';
 import soundIconRtl from '../components/asset-panel/icon--sound-rtl.svg';
-import fileUploadIcon from '../components/action-menu/icon--file-upload.svg';
-import surpriseIcon from '../components/action-menu/icon--surprise.svg';
-import searchIcon from '../components/action-menu/icon--search.svg';
-import controlIcon from '../components/action-menu/icon--control-tab.svg';
-
-import RecordModal from './record-modal.jsx';
-import SampleEditor from './sound-editor.jsx';
-import SampleLibrary from './sound-library.jsx';
-
-import soundLibraryContent from '../lib/libraries/sounds.json';
-import { handleFileUpload, soundUpload } from '../lib/file-uploader.js';
 import errorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import DragConstants from '../lib/drag-constants';
-import downloadBlob from '../lib/download-blob';
-
 import { connect } from 'react-redux';
-
-import {
-    closeSampleLibrary,
-    openSampleLibrary,
-    openSampleRecorder
-} from '../reducers/modals';
 
 import {
     activateTab,
@@ -38,7 +18,6 @@ import {
 
 import { setRestore } from '../reducers/restore-deletion';
 import { showStandardAlert, closeAlertWithId } from '../reducers/alerts';
-import TuringCheckbox from './turing-checkbox.jsx';
 
 class TuringTab extends React.Component {
     constructor(props) {
@@ -58,7 +37,6 @@ class TuringTab extends React.Component {
             'getActiveModelDataState',
             'handleToggleVisibility',
             'handleUpdateToChart',
-            //'handleUpdateCustom',
             'handleUpdatePrior',
             'handleUpdateViewFactor',
             'handleUpdatePosteriorN',
@@ -128,7 +106,6 @@ class TuringTab extends React.Component {
     }
 
     handleDeleteModel(modelName) {
-        console.log("RECEIVED SIGNAL TO DELETE MODEL: " + modelName)
         this.props.vm.runtime.emit('REMOVE_MODEL', { modelName: modelName })
     }
 
@@ -164,15 +141,11 @@ class TuringTab extends React.Component {
     }
 
     getActiveModelDataState() {
-        console.log("trying to get the active model state, we got: ")
         var n = this.getActiveModelName()
-        console.log(n)
         return this.getModelDataState(n)
     }
 
     handleToggleVisibility(data) {
-        console.log("Toggle vis: Sending...")
-        console.log(data)
         this.props.vm.runtime.emit('TOGGLE_VISIBILITY', data)
     }
 
@@ -288,12 +261,10 @@ class TuringTab extends React.Component {
 
     handleUpdatePrior(data) {
         this.props.vm.runtime.emit('UPDATE_PRIOR_PARAMS', data)
-        //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
     handleUpdateViewFactor(data) {
         this.props.vm.runtime.emit('UPDATE_VIEW_FACTOR', data)
-        //this.propsvm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
 
@@ -302,13 +273,11 @@ class TuringTab extends React.Component {
     }
 
     handleUpdateTooltip(data) {
-        console.log("UPDATING TOOLTIP!")
         this.props.vm.runtime.emit('UPDATE_TOOLTIP', data)
     }
 
     handleUpdateGroundTruth(data) {
         this.props.vm.runtime.emit('UPDATE_GROUND_TRUTH_PARAMS', data)
-        //  this.props.vm.runtime.emit('UPDATE_CUSTOM_PARAMS', data)
     }
 
     handleUpdateMeanLines(data) {
@@ -320,8 +289,6 @@ class TuringTab extends React.Component {
     }
 
     getStoredValue(props, mode, dist) {
-        console.log("@@trying to get the stored value for " + dist + ", " + mode)
-        console.log(props)
 
         if (mode == 'n' && props != undefined) {
             console.log("returning " +  props.data.plot.nPosteriors)

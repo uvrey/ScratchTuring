@@ -1,5 +1,5 @@
 import React from 'react';
-import {FormattedMessage} from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import keyMirror from 'keymirror';
 
 import successImage from '../assets/icon--success.svg';
@@ -213,6 +213,7 @@ const alerts = [
         iconSpinner: true,
         level: AlertLevels.SUCCESS
     },
+    /** Start -- ScratchTuring */
     {
         alertId: 'loadingMap',
         alertType: AlertTypes.STANDARD,
@@ -259,7 +260,7 @@ const alerts = [
         closeButton: true,
         content: (
             <FormattedMessage
-                defaultMessage="Something went wrong! The server might be down."
+                defaultMessage="Something went wrong! The ScratchTuring API might be switched off (since it is hosted on the author's machine)."
                 description="Message indicating that posterior value is not good & could not be loaded"
                 id="gui.alerts.turingError"
             />
@@ -293,7 +294,7 @@ const alerts = [
         iconSpinner: true,
         level: AlertLevels.SUCCESS
     },
-    
+    /** End -- ScratchTuring */
 ];
 
 export {
