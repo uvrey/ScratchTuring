@@ -1,5 +1,5 @@
 # ScratchTuring
-This extension equips a Scratch environment with Probabilistic Programming capabilities. It relies on the separate `TuringAPI`, which must be started before this code is run. 
+This extension equips a Scratch environment with Probabilistic Programming capabilities. It relies on the separate `ScratchTuringAPI`, which must be started before this code is run. 
 
 ## Set-up
 (*Optional*): To run the VM:
