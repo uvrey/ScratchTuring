@@ -46,10 +46,8 @@ class Scratch3Turing {
          */
         this._runtime = runtime;
 
-        //   this.api_host = "http://165.232.101.180:443"
-        // this.api_host = "http://127.0.0.1:2222" // local server
-        // this.api_host = "https://46c3-131-111-184-91.ngrok-free.app"
-        this.api_host = "https://63c9-131-111-184-91.ngrok-free.app"
+         this.api_host = "http://127.0.0.1:8080" // backup server
+        // this.api_host = "https://63c9-131-111-184-91.ngrok-free.app"
 
         this._extensionId = 'turing'
 
@@ -247,21 +245,21 @@ class Scratch3Turing {
             {
                 name: formatMessage({
                     id: 'turing.distInfo.gaussian',
-                    default: 'NORMAL',
+                    default: 'NORMAL_DASHBOARD',
                     description: 'Gaussian distribution.'
                 }),
             },
             {
                 name: formatMessage({
                     id: 'turing.distInfo.hue',
-                    default: 'HUE',
+                    default: 'HUE_DASHBOARD',
                     description: 'hue'
                 }),
             },
             {
                 name: formatMessage({
                     id: 'turing.distInfo.rhythm',
-                    default: 'RHYTHM',
+                    default: 'RHYTHM_DASHBOARD',
                     description: 'rhythm'
                 }),
             }
@@ -300,7 +298,7 @@ class Scratch3Turing {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'turing.defineCustomRandomVariable',
-                        default: 'model [MODEL] as [DISTRIBUTION]',
+                        default: 'model [MODEL] with [DISTRIBUTION]',
                         description: 'turing.defineCustomRandomVariable'
                     }),
                     arguments: {
