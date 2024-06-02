@@ -1,13 +1,5 @@
 # ScratchTuring
 
-## Abstract
-Bayesian probability underpins the form and function of many machine learning and artificial intelligence (ML/AI) systems. However, mathematical concepts around Bayesian
-reasoning are almost entirely omitted from school curricula globally. New pedagogies are required to facilitate student engagement with these ideas at an earlier age and be inclusive of global contexts. Contributing to this agenda, we present ScratchTuring: a browser- based tool to teach, learn and experiment with Bayesian reasoning that bridges the visual facilities of Scratch with Turing, a Julia- based framework for probabilistic programming.
-
-To better understand the application of tools-based future pedagogies in South Africa, we draw on the perspectives of South African educators, curriculum designers, NGO leaders
-and EdTech entrepreneurs to design ScratchTuring. Through two in-class evaluations of this tool in Cambridge and Cape Town, we highlight the interdisciplinary value of digital
-tools to introduce Bayesian ideas and ML/AI systems knowledge across diverse learning contexts.
-
 ## Setup
 This extension equips a Scratch environment with Probabilistic Programming capabilities. It relies on the separate `ScratchTuringAPI`, which must be started before this code is run. 
 
